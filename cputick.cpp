@@ -38,27 +38,27 @@ namespace CPU
 		SEG_ES,
 		SEG_SS
 	};
-	struct reg16
+	union reg16
 	{
-		union
+		struct
 		{
 			u8 lo,hi;
-		};
+		} parts;
 		u16 w;
 	} a,b,c,d;
 	#define ax a.w
-	#define al a.lo
-	#define ah a.hi
+	#define al a.parts.lo
+	#define ah a.parts.hi
 	#define bx b.w
-	#define bl b.lo
-	#define bh b.hi
+	#define bl b.parts.lo
+	#define bh b.parts.hi
 	#define cx c.w
-	#define cl c.lo
-	#define ch c.hi
+	#define cl c.parts.lo
+	#define ch c.parts.hi
 
 	#define dx d.w
-	#define dl d.lo
-	#define dh d.hi
+	#define dl d.parts.lo
+	#define dh d.parts.hi
 	
 	u16 ds,es,ss;
 	u16 sp,bp,si,di;
@@ -507,11 +507,31 @@ namespace CPU
 		u8 op = RAM::rb(cs,ip);
 		switch(op)
 		{
+			case 0x32:
+			{
+				u8 modrm = RAM::rb(cs,ip+1);
+				locs loc = decodemodrm(SEG_DEFAULT,modrm,false,false);
+				*loc.src8 ^= *loc.dst8;
+				u8 tmp = *loc.src8;
+				if(tmp == 0) flags |= 0x0040;
+				else flags &= 0xFFBF;
+				ip+=2;
+				printf("XOR Gb,Eb modrm=%02x\n",modrm);
+				break;
+			}
 			case 0x71:
 			{
 				u8 tmp = RAM::rb(cs,ip+1);
 				printf("JNO %02x\n",tmp);
 				if(!(flags&0x0800)) ip += (s8)tmp;
+				ip+=2;
+				break;
+			}
+			case 0x72:
+			{
+				u8 tmp = RAM::rb(cs,ip+1);
+				printf("JC %02x\n",tmp);
+				if((flags&0x0001)) ip += (s8)tmp;
 				ip+=2;
 				break;
 			}
@@ -523,6 +543,14 @@ namespace CPU
 				ip+=2;
 				break;
 			}
+			case 0x74:
+			{
+				u8 tmp = RAM::rb(cs,ip+1);
+				printf("JZ %02x\n",tmp);
+				if((flags&0x0040)) ip += (s8)tmp;
+				ip+=2;
+				break;
+			}
 			case 0x75:
 			{
 				u8 tmp = RAM::rb(cs,ip+1);
@@ -531,11 +559,27 @@ namespace CPU
 				ip+=2;
 				break;
 			}
+			case 0x78:
+			{
+				u8 tmp = RAM::rb(cs,ip+1);
+				printf("JS %02x\n",tmp);
+				if((flags&0x0080)) ip += (s8)tmp;
+				ip+=2;
+				break;
+			}
 			case 0x79:
 			{
 				u8 tmp = RAM::rb(cs,ip+1);
 				printf("JNS %02x\n",tmp);
 				if(!(flags&0x0080)) ip += (s8)tmp;
+				ip+=2;
+				break;
+			}
+			case 0x7A:
+			{
+				u8 tmp = RAM::rb(cs,ip+1);
+				printf("JP %02x\n",tmp);
+				if((flags&0x0004)) ip += (s8)tmp;
 				ip+=2;
 				break;
 			}
@@ -558,8 +602,7 @@ namespace CPU
 			case 0x9F:
 			{
 				printf("LAHF\n");
-				ah &= 0x2A;
-				ah |= flags & 0x00D5;
+				ah = (ah & 0x2A) | (flags & 0x00D5);
 				ip++;
 				break;
 			}
@@ -677,6 +720,20 @@ namespace CPU
 				break;
 			}
 		}
+		printf("ax=%04x\n",ax);
+		printf("bx=%04x\n",bx);
+		printf("cx=%04x\n",cx);
+		printf("dx=%04x\n",dx);
+		printf("cs=%04x\n",cs);
+		printf("ip=%04x\n",ip);
+		printf("ds=%04x\n",ds);
+		printf("es=%04x\n",es);
+		printf("ss=%04x\n",ss);
+		printf("si=%04x\n",si);
+		printf("di=%04x\n",di);
+		printf("sp=%04x\n",sp);
+		printf("bp=%04x\n",bp);
+		printf("flags=%04x\n",flags);
 	}
 };
 
@@ -688,7 +745,7 @@ int main()
 	fseek(bios,0,SEEK_SET);
 	fread(RAM::RAM + (0x100000 - size),1,size,bios);
 	fclose(bios);
-	for(int i = 0;i<20;i++)
+	for(int i = 0;i<40;i++)
 	{
 		CPU::tick();
 	} 
