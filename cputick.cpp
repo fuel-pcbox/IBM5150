@@ -653,6 +653,19 @@ namespace CPU
 										else flags &= 0xFFBF;
 										break;
 									}
+									case 0x04:
+									{
+										u8 tmp = ah;
+										printf("SHL AH,1\n");
+										ah <<= 1;
+										if(tmp&0x80) flags |= 0x0001;
+										else flags &= 0xFFFE;
+										if(ah&0x80) flags |= 0x0800;
+										else flags &= 0xF7FF;
+										if(ah==0) flags |= 0x0040;
+										else flags &= 0xFFBF;
+										break;
+									}
 								}
 								break;
 							}
