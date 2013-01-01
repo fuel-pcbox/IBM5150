@@ -519,6 +519,14 @@ namespace CPU
 				printf("XOR Gb,Eb modrm=%02x\n",modrm);
 				break;
 			}
+			case 0x70:
+			{
+				u8 tmp = RAM::rb(cs,ip+1);
+				printf("JO %02x\n",tmp);
+				if((flags&0x0800)) ip += (s8)tmp;
+				ip+=2;
+				break;
+			}
 			case 0x71:
 			{
 				u8 tmp = RAM::rb(cs,ip+1);
@@ -624,6 +632,13 @@ namespace CPU
 			{
 				ah = RAM::rb(cs,ip+1);
 				printf("MOV AH,%02x\n",ah);
+				ip+=2;
+				break;
+			}
+			case 0xB8:
+			{
+				ax = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+				printf("MOV AX,%02x\n",ax);
 				ip+=2;
 				break;
 			}
