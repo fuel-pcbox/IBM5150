@@ -53,656 +53,521 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
 {
     locs res;
     int tmp = word | (segarg<<1);
-    switch(modrm)
+    switch(modrm & 0xC7)
     {
-    case 0xC0:
-    {
-        switch(tmp)
+        case 0x00:
         {
-        case 0:
-        {
-            res.src8 = &al;
-            res.dst8 = &al;
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+si)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+si)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+si)];
+                    break;
+                }
+                case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+si)];
+                    break;
+                }
+            }
             break;
         }
-        case 1:
+        case 0x01:
         {
-            res.src16 = &ax;
-            res.dst16 = &ax;
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+di)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+di)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+di)];
+                    break;
+                }
+                case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+di)];
+                    break;
+                }
+            }
             break;
         }
-        //This case skip may look incorrect, but it's here because segment registers are 16-bits. How are you going to move 8-bits into 16-bits?
-        case 3:
+        case 0x02:
         {
-            res.src16 = &ax;
-            res.dst16 = &es;
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+si)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+si)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+si)];
+                    break;
+                }
+                case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+si)];
+                    break;
+                }
+            }
             break;
         }
+        case 0x03:
+        {
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+di)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+di)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+di)];
+                    break;
+                }
+                case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+di)];
+                    break;
+                }
+            }
+            break;
         }
-        break;
+        case 0x04:
+        {
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
+                    break;
+                }
+                case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x05:
+        {
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,di)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,di)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,di)];
+                    break;
+                }
+                case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,di)];
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x06:
+        {
+            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,tmp1)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,tmp1)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,tmp1)];
+                    break;
+                }
+                case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,tmp1)];
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x07:
+        {
+            switch(seg)
+            {
+                case SEG_DEFAULT: case SEG_DS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx)];
+                    break;
+                }
+                case SEG_CS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx)];
+                    break;
+                }
+                case SEG_ES:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx)];
+                    break;
+                }
+                case SEG_SS:
+                {
+                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx)];
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC0:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &al;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &ax;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC1:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &cl;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &cx;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC2:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &dl;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &dx;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC3:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &bl;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &bx;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC4:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &ah;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &sp;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC5:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &ch;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &bp;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC6:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &dh;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &si;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0xC7:
+        {
+            switch(tmp&1)
+            {
+                case 0:
+                {
+                    res.src8 = &bh;
+                    break;
+                }
+                case 1:
+                {
+                    res.src16 = &di;
+                    break;
+                }
+            }
+            break;
+        }
     }
-    case 0xC1:
+    switch(modrm & 0x38)
     {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &cl;
-            res.dst8 = &al;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &cx;
-            res.dst16 = &ax;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &cx;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC2:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &dl;
-            res.dst8 = &al;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &dx;
-            res.dst16 = &ax;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &dx;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC3:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &bl;
-            res.dst8 = &al;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &bx;
-            res.dst16 = &ax;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &bx;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC4:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &ah;
-            res.dst8 = &al;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &sp;
-            res.dst16 = &ax;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &sp;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC5:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &ch;
-            res.dst8 = &al;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &bp;
-            res.dst16 = &ax;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &bp;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC6:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &dh;
-            res.dst8 = &al;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &si;
-            res.dst16 = &ax;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &si;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC7:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &bh;
-            res.dst8 = &al;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &di;
-            res.dst16 = &ax;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &di;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC8:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &al;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &ax;
-            res.dst16 = &cx;
-            break;
-        }
-        //This case skip may look incorrect, but it's here because segment registers are 16-bits. How are you going to move 8-bits into 16-bits?
-        case 3:
-        {
-            res.src16 = &ax;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xC9:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &cl;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &cx;
-            res.dst16 = &cx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &cx;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xCA:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &dl;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &dx;
-            res.dst16 = &cx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &dx;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xCB:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &bl;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &bx;
-            res.dst16 = &cx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &bx;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xCC:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &ah;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &sp;
-            res.dst16 = &cx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &sp;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xCD:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &ch;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &bp;
-            res.dst16 = &cx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &bp;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xCE:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &dh;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &si;
-            res.dst16 = &cx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &si;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xCF:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &bh;
-            res.dst8 = &cl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &di;
-            res.dst16 = &cx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &di;
-            res.dst16 = &cs;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xD0:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &al;
-            res.dst8 = &dl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &ax;
-            res.dst16 = &dx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &ax;
-            res.dst16 = &ss;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xD1:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &cl;
-            res.dst8 = &dl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &cx;
-            res.dst16 = &dx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &cx;
-            res.dst16 = &ss;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xD2:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &dl;
-            res.dst8 = &dl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &dx;
-            res.dst16 = &dx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &dx;
-            res.dst16 = &ss;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xD8:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &al;
-            res.dst8 = &bl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &ax;
-            res.dst16 = &bx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &ax;
-            res.dst16 = &ds;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xDB:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &bl;
-            res.dst8 = &bl;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &bx;
-            res.dst16 = &bx;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &bx;
-            res.dst16 = &ds;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xE2:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &dh;
-            res.dst8 = &ah;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &dx;
-            res.dst16 = &sp;
-            break;
-        }
-        case 3:
-        {
-            //This combination is invalid on the 8086, 80186, 80286, but it is valid on the 386 and better.
-            break;
-        }
-        }
-        break;
-    }
-    case 0xE4:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &ah;
-            res.dst8 = &ah;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &sp;
-            res.dst16 = &sp;
-            break;
-        }
-        case 3:
-        {
-            res.src16 = &sp;
-            res.dst16 = &es;
-            break;
-        }
-        }
-        break;
-    }
-    case 0xEC:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &ah;
-            res.dst8 = &ch;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &sp;
-            res.dst16 = &bp;
-            break;
-        }
-        case 3:
-        {
-            //386 and higher
-            break;
-        }
-        }
-        break;
-    }
-    case 0xF5:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &ch;
-            res.dst8 = &dh;
+        case 0x00:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &al;
+                    break;
+                }
+                case 1:
+                {
+                    res.dst16 = &ax;
+                    break;
+                }
+                case 3:
+                {
+                    res.dst16 = &es;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x08:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &cl;
+                    break;
+                }
+                case 1:
+                {
+                    res.dst16 = &cx;
+                    break;
+                }
+                case 3:
+                {
+                    res.dst16 = &cs;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x10:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &dl;
+                    break;
+                }
+                case 1:
+                {
+                    res.dst16 = &dx;
+                    break;
+                }
+                case 3:
+                {
+                    res.dst16 = &ss;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x18:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &bl;
+                    break;
+                }
+                case 1:
+                {
+                 
+                    res.dst16 = &bx;
+                    break;
+                }
+                case 3:
+                {
+                    res.dst16 = &ds;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x20:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &ah;
+                    break;
+                }
+                case 1:
+                {
+                    res.dst16 = &sp;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x28:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &ch;
+                    break;
+                }
+                case 1:
+                {
+                    res.dst16 = &bp;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x30:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &dh;
+                    break;
+                }
+                case 1:
+                {
+                    res.dst16 = &si;
+                    break;
+                }
+            }
+            break;
+        }
+        case 0x38:
+        {
+            switch(tmp)
+            {
+                case 0:
+                {
+                    res.dst8 = &bh;
+                    break;
+                }
+                case 1:
+                {
+                    res.dst16 = &di;
+                    break;
+                }
+            }
             break;
-        }
-        case 1:
-        {
-            res.src16 = &bp;
-            res.dst16 = &si;
-            break;
-        }
-        case 3:
-        {
-            //Never supported
-            break;
-        }
-        }
-        break;
-    }
-    case 0xFE:
-    {
-        switch(tmp)
-        {
-        case 0:
-        {
-            res.src8 = &dh;
-            res.dst8 = &bh;
-            break;
-        }
-        case 1:
-        {
-            res.src16 = &si;
-            res.dst16 = &di;
-            break;
-        }
-        case 3:
-        {
-            //Never supported
-            break;
-        }
         }
-        break;
-    }
     }
     return res;
 }
@@ -910,6 +775,13 @@ void tick()
         ip+=3;
         break;
     }
+    case 0xB9:
+    {
+        cx = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+        printf("MOV CX,%04x\n",cx);
+        ip+=3;
+        break;
+    }
     case 0xBA:
     {
         dx = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
@@ -921,6 +793,13 @@ void tick()
     {
         bx = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
         printf("MOV BX,%04x\n",bx);
+        ip+=3;
+        break;
+    }
+    case 0xBC:
+    {
+        sp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+        printf("MOV SP,%04x\n",sp);
         ip+=3;
         break;
     }
@@ -1013,6 +892,14 @@ void tick()
         printf("OUT %02x,AL\n",tmp);
         IO_XT::wb((u16)tmp,al);
         ip+=2;
+        break;
+    }
+    case 0xE9:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        printf("JMP %04x\n",tmp);
+        ip += (s16)tmp;
+        ip+=3;
         break;
     }
     case 0xEA:

@@ -42,6 +42,10 @@ namespace RAM
         if(i != handlers.size())return handlers[i].rb(addr);
         else return RAM[((seg<<4)+off)&0xFFFFF];
     }
+    u32 getaddr(u16 seg, u16 off)
+    {
+        return ((seg<<4)+off)&0xFFFFF;
+    }
     void wb(u16 seg, u16 off, u8 value)
     {
         int i;
