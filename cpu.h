@@ -1025,6 +1025,74 @@ void tick()
     u8 op = RAM::rb(cs,ip);
     switch(op)
     {
+    case 0x00:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.src8 += *loc.dst8;
+        u8 tmp = *loc.src8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADD Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x01:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.src16 += *loc.dst16;
+        u16 tmp = *loc.src16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADD Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x02:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.dst8 += *loc.dst8;
+        u8 tmp = *loc.dst8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADD Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x03:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.dst16 += *loc.src16;
+        u16 tmp = *loc.dst16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADD Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x04:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        al += tmp;
+        if(al == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADD AL,%02x\n",al);
+        break;
+    }
+    case 0x05:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        ax += tmp;
+        if(ax == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADD AX,%04x\n",ax);
+        break;
+    }
     case 0x0B:
     {
         u8 modrm = RAM::rb(cs,ip+1);
@@ -1042,7 +1110,7 @@ void tick()
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,false,false);
         *loc.dst8 -= *loc.src8;
-        u8 tmp = *loc.src16;
+        u8 tmp = *loc.src8;
         if(tmp == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
         ip+=2;
