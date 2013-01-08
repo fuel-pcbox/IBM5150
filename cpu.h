@@ -1079,7 +1079,7 @@ void tick()
         al += tmp;
         if(al == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
-        ip+=2;
+        ip+=3;
         printf("ADD AL,%02x\n",al);
         break;
     }
