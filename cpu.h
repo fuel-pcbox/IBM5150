@@ -1027,7 +1027,7 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
     return res;
 }
 int seg = SEG_DEFAULT;
-void tick()
+void rtick()
 {
     u8 op = RAM::rb(cs,ip);
     switch(op)
@@ -1846,4 +1846,40 @@ void tick()
     printf("bp=%04x\n",bp);
     printf("flags=%04x\n",flags);
 }
+
+void tick()
+{
+    u8 op = RAM::rb(cs,ip+1);
+    
+    switch(op)
+    {
+        case 0x26:
+        {
+            ip++;
+            seg = SEG_ES;
+            break;
+        }
+        case 0x2E:
+        {
+            ip++;
+            seg = SEG_CS;
+            break;
+        }
+        case 0x36:
+        {
+            ip++;
+            seg = SEG_SS;
+            break;
+        }
+        case 0x3E:
+        {
+            ip++;
+            seg = SEG_DS;
+            break;
+        }
+        defaukt: seg = SEG_DEFAULT;
+    }
+    rtick();
+}
+
 };
