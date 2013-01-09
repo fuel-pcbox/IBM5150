@@ -1,5 +1,12 @@
 namespace CPU
 {
+enum cputype
+{
+    intel8086 = 0,
+    intel286,
+    intel386
+}
+
 struct locs
 {
     union
@@ -1093,16 +1100,347 @@ void tick()
         printf("ADD AX,%04x\n",ax);
         break;
     }
+    case 0x06:
+    {
+        printf("PUSH ES\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = es & 0xFF;
+        RAM::wb(ss,sp+1) = es >> 8;
+        ip++;
+        break;
+    }
+    case 0x07:
+    {
+        printf("POP ES\n");
+        es = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x08:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.src8 |= *loc.dst8;
+        u8 tmp = *loc.src8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("OR Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x09:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.src16 |= *loc.dst16;
+        u16 tmp = *loc.src16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("OR Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x0A:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.dst8 |= *loc.src8;
+        u8 tmp = *loc.dst8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("OR Gb,Eb modrm=%02x\n",modrm);
+        break;
+    }
     case 0x0B:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,true,false);
         *loc.dst16 |= *loc.src16;
-        u8 tmp = *loc.src16;
+        u16 tmp = *loc.dst16;
         if(tmp == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
         ip+=2;
         printf("OR Gv,Ev modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x0C:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        al |= tmp;
+        if(al == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=3;
+        printf("OR AL,%02x\n",al);
+        break;
+    }
+    case 0x0D:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        ax |= tmp;
+        if(ax == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("OR AX,%04x\n",ax);
+        break;
+    }
+    case 0x0E:
+    {
+        printf("PUSH CS\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = cs & 0xFF;
+        RAM::wb(ss,sp+1) = cs >> 8;
+        ip++;
+        break;
+    }
+    case 0x0F:
+    {
+        if(type == intel8086)
+        {
+            printf("POP CS\n");
+            cs = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+            sp+=2;
+            ip++;
+        }
+        break;
+    }
+    case 0x10:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.src8 += (*loc.dst8) + (flags & 1);
+        u8 tmp = *loc.src8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADC Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x11:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.src16 += (*loc.dst16) + (flags & 1);
+        u16 tmp = *loc.src16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADC Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x12:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.dst8 += (*loc.src8) + (flags & 1);
+        u8 tmp = *loc.dst8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADC Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x13:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.dst16 += (*loc.src16) + (flags & 1);
+        u16 tmp = *loc.dst16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADC Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x14:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        al += tmp + (flags & 1);
+        if(al == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=3;
+        printf("ADC AL,%02x\n",al);
+        break;
+    }
+    case 0x15:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        ax += tmp + (flags & 1);
+        if(ax == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("ADC AX,%04x\n",ax);
+        break;
+    }
+    case 0x16:
+    {
+        printf("PUSH SS\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = ss & 0xFF;
+        RAM::wb(ss,sp+1) = ss >> 8;
+        ip++;
+        break;
+    }
+    case 0x17:
+    {
+        printf("POP SS\n");
+        ss = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x18:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.src8 -= (*loc.dst8) + (flags & 1);
+        u8 tmp = *loc.src8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("SBB Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x19:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.src16 -= (*loc.dst16) + (flags & 1);
+        u16 tmp = *loc.src16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("SBB Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x1A:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.dst8 -= (*loc.src8) + (flags & 1);
+        u8 tmp = *loc.dst8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("SBB Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x1B:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.dst16 -= (*loc.src16) + (flags & 1);
+        u16 tmp = *loc.dst16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("SBB Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x1C:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        al -= tmp + (flags & 1);
+        if(al == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=3;
+        printf("SBB AL,%02x\n",al);
+        break;
+    }
+    case 0x1D:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        ax -= tmp + (flags & 1);
+        if(ax == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("SBB AX,%04x\n",ax);
+        break;
+    }
+    case 0x1E:
+    {
+        printf("PUSH DS\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = ds & 0xFF;
+        RAM::wb(ss,sp+1) = ds >> 8;
+        ip++;
+        break;
+    }
+    case 0x1F:
+    {
+        printf("POP DS\n");
+        ds = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x20:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.src8 &= *loc.dst8;
+        u8 tmp = *loc.src8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("AND Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x21:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.src16 &= *loc.dst16;
+        u16 tmp = *loc.src16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("AND Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x22:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.dst8 &= *loc.dst8;
+        u8 tmp = *loc.dst8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("AND Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x23:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.dst16 &= *loc.src16;
+        u16 tmp = *loc.dst16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("AND Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x24:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        al &= tmp;
+        if(al == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=3;
+        printf("AND AL,%02x\n",al);
+        break;
+    }
+    case 0x25:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        ax &= tmp;
+        if(ax == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("AND AX,%04x\n",ax);
         break;
     }
     case 0x2A:
