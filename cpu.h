@@ -1849,6 +1849,54 @@ void rtick()
 		ip++;
 		break;
 	}
+	case 0x50:
+    {
+        printf("PUSH AX\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = al;
+        RAM::wb(ss,sp+1) = ah;
+        ip++;
+        break;
+    }
+	case 0x51:
+    {
+        printf("PUSH CX\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = cl;
+        RAM::wb(ss,sp+1) = ch;
+        ip++;
+        break;
+    }
+	case 0x52:
+    {
+        printf("PUSH DX\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = dl;
+        RAM::wb(ss,sp+1) = dh;
+        ip++;
+        break;
+    }
+	case 0x53:
+    {
+        printf("PUSH BX\n");
+        sp -= 2;
+        RAM::wb(ss,sp) = bl;
+        RAM::wb(ss,sp+1) = bh;
+        ip++;
+        break;
+    }
+	case 0x54:
+    {
+        if(type == intel8086)
+		{
+			printf("PUSH SP\n");
+			sp -= 2;
+			RAM::wb(ss,sp) = al;
+			RAM::wb(ss,sp+1) = ah;
+			ip++;
+		}
+        break;
+    }
     case 0x70:
     {
         u8 tmp = RAM::rb(cs,ip+1);
