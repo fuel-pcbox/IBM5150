@@ -127,7 +127,7 @@ namespace PPI
             }
         }
     }
-    iohandler handler = {0x0060,0x0063,nullptr,wb};
+    iohandler handler = {0x0060,0x0063,NULL,wb};
 };
 
 namespace IO_XT
@@ -153,7 +153,7 @@ namespace IO_XT
                 if(addr>=handlers[i].start && addr<=handlers[i].end) break;
             }
             printf("Calling callback!\n");
-            if(handlers[i].wb != nullptr) handlers[i].wb(addr-handlers[i].start,value);
+            if(handlers[i].wb != NULL) handlers[i].wb(addr-handlers[i].start,value);
             else printf("Function uninitialized!\n");
         }
     }

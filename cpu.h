@@ -5,7 +5,7 @@ enum cputype
     intel8086 = 0,
     intel286,
     intel386
-}
+};
 
 struct locs
 {
@@ -55,6 +55,8 @@ u16 sp,bp,si,di;
 u16 cs = 0xF000;
 u16 ip = 0xFFF0;
 u16 flags = 0xF002;
+
+int type = intel8086;
 
 locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
 {
