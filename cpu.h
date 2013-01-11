@@ -1104,8 +1104,8 @@ void rtick()
     {
         printf("PUSH ES\n");
         sp -= 2;
-        RAM::wb(ss,sp) = es & 0xFF;
-        RAM::wb(ss,sp+1) = es >> 8;
+        RAM::wb(ss,sp,es & 0xFF);
+        RAM::wb(ss,sp+1,es >> 8);
         ip++;
         break;
     }
@@ -1189,8 +1189,8 @@ void rtick()
     {
         printf("PUSH CS\n");
         sp -= 2;
-        RAM::wb(ss,sp) = cs & 0xFF;
-        RAM::wb(ss,sp+1) = cs >> 8;
+        RAM::wb(ss,sp,cs & 0xFF);
+        RAM::wb(ss,sp+1,cs >> 8);
         ip++;
         break;
     }
@@ -1277,8 +1277,8 @@ void rtick()
     {
         printf("PUSH SS\n");
         sp -= 2;
-        RAM::wb(ss,sp) = ss & 0xFF;
-        RAM::wb(ss,sp+1) = ss >> 8;
+        RAM::wb(ss,sp,ss & 0xFF);
+        RAM::wb(ss,sp+1,ss >> 8);
         ip++;
         break;
     }
@@ -1362,8 +1362,8 @@ void rtick()
     {
         printf("PUSH DS\n");
         sp -= 2;
-        RAM::wb(ss,sp) = ds & 0xFF;
-        RAM::wb(ss,sp+1) = ds >> 8;
+        RAM::wb(ss,sp,ds & 0xFF);
+        RAM::wb(ss,sp+1,ds >> 8);
         ip++;
         break;
     }
@@ -1853,8 +1853,8 @@ void rtick()
     {
         printf("PUSH AX\n");
         sp -= 2;
-        RAM::wb(ss,sp) = al;
-        RAM::wb(ss,sp+1) = ah;
+        RAM::wb(ss,sp,al);
+        RAM::wb(ss,sp+1,ah);
         ip++;
         break;
     }
@@ -1862,8 +1862,8 @@ void rtick()
     {
         printf("PUSH CX\n");
         sp -= 2;
-        RAM::wb(ss,sp) = cl;
-        RAM::wb(ss,sp+1) = ch;
+        RAM::wb(ss,sp,cl);
+        RAM::wb(ss,sp+1,ch);
         ip++;
         break;
     }
@@ -1871,8 +1871,8 @@ void rtick()
     {
         printf("PUSH DX\n");
         sp -= 2;
-        RAM::wb(ss,sp) = dl;
-        RAM::wb(ss,sp+1) = dh;
+        RAM::wb(ss,sp,dl);
+        RAM::wb(ss,sp+1,dh);
         ip++;
         break;
     }
@@ -1880,8 +1880,8 @@ void rtick()
     {
         printf("PUSH BX\n");
         sp -= 2;
-        RAM::wb(ss,sp) = bl;
-        RAM::wb(ss,sp+1) = bh;
+        RAM::wb(ss,sp,bl);
+        RAM::wb(ss,sp+1,bh);
         ip++;
         break;
     }
@@ -1891,10 +1891,37 @@ void rtick()
 		{
 			printf("PUSH SP\n");
 			sp -= 2;
-			RAM::wb(ss,sp) = al;
-			RAM::wb(ss,sp+1) = ah;
+			RAM::wb(ss,sp,sp & 0xFF);
+			RAM::wb(ss,sp+1,sp >> 8);
 			ip++;
 		}
+        break;
+    }
+	case 0x55:
+    {
+        printf("PUSH BP\n");
+        sp -= 2;
+        RAM::wb(ss,sp,bp & 0xFF);
+        RAM::wb(ss,sp+1,bp >> 8);
+        ip++;
+        break;
+    }
+	case 0x56:
+    {
+        printf("PUSH SI\n");
+        sp -= 2;
+        RAM::wb(ss,sp,si & 0xFF);
+        RAM::wb(ss,sp+1,si >> 8);
+        ip++;
+        break;
+    }
+	case 0x57:
+    {
+        printf("PUSH DI\n");
+        sp -= 2;
+        RAM::wb(ss,sp,di & 0xFF);
+        RAM::wb(ss,sp+1,di >> 8);
+        ip++;
         break;
     }
     case 0x70:
@@ -2033,10 +2060,45 @@ void rtick()
         ip+=2;
         break;
     }
+	case 0xB2:
+    {
+        dl = RAM::rb(cs,ip+1);
+        printf("MOV DL,%02x\n",dl);
+        ip+=2;
+        break;
+    }
+	case 0xB3:
+    {
+        bl = RAM::rb(cs,ip+1);
+        printf("MOV BL,%02x\n",bl);
+        ip+=2;
+        break;
+    }
     case 0xB4:
     {
         ah = RAM::rb(cs,ip+1);
         printf("MOV AH,%02x\n",ah);
+        ip+=2;
+        break;
+    }
+	case 0xB5:
+    {
+        ch = RAM::rb(cs,ip+1);
+        printf("MOV CH,%02x\n",ch);
+        ip+=2;
+        break;
+    }
+	case 0xB6:
+    {
+        dh = RAM::rb(cs,ip+1);
+        printf("MOV DH,%02x\n",dh);
+        ip+=2;
+        break;
+    }
+	case 0xB7:
+    {
+        bh = RAM::rb(cs,ip+1);
+        printf("MOV BH,%02x\n",bh);
         ip+=2;
         break;
     }
@@ -2072,6 +2134,27 @@ void rtick()
     {
         sp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
         printf("MOV SP,%04x\n",sp);
+        ip+=3;
+        break;
+    }
+	case 0xBD:
+    {
+        bp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+        printf("MOV BP,%04x\n",bp);
+        ip+=3;
+        break;
+    }
+	case 0xBE:
+    {
+        si = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+        printf("MOV SI,%04x\n",si);
+        ip+=3;
+        break;
+    }
+	case 0xBF:
+    {
+        di = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+        printf("MOV DI,%04x\n",di);
         ip+=3;
         break;
     }
