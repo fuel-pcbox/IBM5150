@@ -64,967 +64,991 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
     int tmp = word | (segarg<<1);
     switch(modrm & 0xC7)
     {
-        case 0x00:
+    case 0x00:
+    {
+        switch(seg)
         {
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+si)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+si)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+si)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+si)];
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+si)];
             break;
         }
-        case 0x01:
+        case SEG_CS:
         {
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+di)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+si)];
             break;
         }
-        case 0x02:
+        case SEG_ES:
         {
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+si)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+si)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+si)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+si)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+si)];
             break;
         }
-        case 0x03:
+        case SEG_SS:
         {
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+di)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+si)];
             break;
         }
-        case 0x04:
+        }
+        break;
+    }
+    case 0x01:
+    {
+        switch(seg)
         {
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+di)];
             break;
         }
-        case 0x05:
+        case SEG_CS:
         {
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,di)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+di)];
             break;
         }
-        case 0x06:
+        case SEG_ES:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,tmp1)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,tmp1)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,tmp1)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,tmp1)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+di)];
             break;
         }
-        case 0x07:
+        case SEG_SS:
         {
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+di)];
             break;
         }
-        case 0x40:
+        }
+        break;
+    }
+    case 0x02:
+    {
+        switch(seg)
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+si+tmp1)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+si+tmp1)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+si+tmp1)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+si+tmp1)];
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+si)];
             break;
         }
-        case 0x41:
+        case SEG_CS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+di)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+si)];
             break;
         }
-        case 0x42:
+        case SEG_ES:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+si)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+si)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+si)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+si)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+si)];
             break;
         }
-        case 0x43:
+        case SEG_DS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+di)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+si)];
             break;
         }
-        case 0x44:
+        }
+        break;
+    }
+    case 0x03:
+    {
+        switch(seg)
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+di)];
             break;
         }
-        case 0x45:
+        case SEG_CS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,di)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+di)];
             break;
         }
-        case 0x46:
+        case SEG_ES:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+tmp1)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+tmp1)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+di)];
             break;
         }
-        case 0x47:
+        case SEG_DS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+tmp1)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+tmp1)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+tmp1)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+tmp1)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+di)];
             break;
         }
-        case 0x80:
+        }
+        break;
+    }
+    case 0x04:
+    {
+        switch(seg)
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+si+tmp1)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+si+tmp1)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+si+tmp1)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+si+tmp1)];
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
             break;
         }
-        case 0x81:
+        case SEG_CS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+di)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
             break;
         }
-        case 0x82:
+        case SEG_ES:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+si)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+si)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+si)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+si)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
             break;
         }
-        case 0x83:
+        case SEG_SS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+di)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
             break;
         }
-        case 0x84:
+        }
+        break;
+    }
+    case 0x05:
+    {
+        switch(seg)
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,di)];
             break;
         }
-        case 0x85:
+        case SEG_CS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,di)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,di)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,di)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,di)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,di)];
             break;
         }
-        case 0x86:
+        case SEG_ES:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+tmp1)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bp+tmp1)];
-                    break;
-                }
-                case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,di)];
             break;
         }
-        case 0x87:
+        case SEG_SS:
         {
-            u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            switch(seg)
-            {
-                case SEG_DEFAULT: case SEG_DS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+tmp1)];
-                    break;
-                }
-                case SEG_CS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+tmp1)];
-                    break;
-                }
-                case SEG_ES:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(es,bx+tmp1)];
-                    break;
-                }
-                case SEG_SS:
-                {
-                    res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+tmp1)];
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,di)];
             break;
         }
-        case 0xC0:
+        }
+        break;
+    }
+    case 0x06:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &al;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &ax;
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,tmp1)];
             break;
         }
-        case 0xC1:
+        case SEG_CS:
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &cl;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &cx;
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,tmp1)];
             break;
         }
-        case 0xC2:
+        case SEG_ES:
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &dl;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &dx;
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,tmp1)];
             break;
         }
-        case 0xC3:
+        case SEG_SS:
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &bl;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &bx;
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,tmp1)];
             break;
         }
-        case 0xC4:
+        }
+        break;
+    }
+    case 0x07:
+    {
+        switch(seg)
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &ah;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &sp;
-                    break;
-                }
-            }
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx)];
             break;
         }
-        case 0xC5:
+        case SEG_CS:
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &ch;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &bp;
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx)];
             break;
         }
-        case 0xC6:
+        case SEG_ES:
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &dh;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &si;
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx)];
             break;
         }
-        case 0xC7:
+        case SEG_SS:
         {
-            switch(tmp&1)
-            {
-                case 0:
-                {
-                    res.src8 = &bh;
-                    break;
-                }
-                case 1:
-                {
-                    res.src16 = &di;
-                    break;
-                }
-            }
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx)];
             break;
         }
+        }
+        break;
+    }
+    case 0x40:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+si+tmp1)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+si+tmp1)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+si+tmp1)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+si+tmp1)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x41:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+di)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+di)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+di)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+di)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x42:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+si)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+si)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+si)];
+            break;
+        }
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+si)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x43:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+di)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+di)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+di)];
+            break;
+        }
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+di)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x44:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x45:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,di)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,di)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,di)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,di)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x46:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+tmp1)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+tmp1)];
+            break;
+        }
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x47:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+tmp1)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+tmp1)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+tmp1)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+tmp1)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x80:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+si+tmp1)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+si+tmp1)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+si+tmp1)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+si+tmp1)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x81:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+di)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+di)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+di)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+di)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x82:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+si)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+si)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+si)];
+            break;
+        }
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+si)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x83:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+di)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+di)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+di)];
+            break;
+        }
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bp+di)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x84:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x85:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,di)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,di)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,di)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,di)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x86:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bp+tmp1)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bp+tmp1)];
+            break;
+        }
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bp+tmp1)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0x87:
+    {
+        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        switch(seg)
+        {
+        case SEG_DEFAULT:
+        case SEG_DS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,bx+tmp1)];
+            break;
+        }
+        case SEG_CS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,bx+tmp1)];
+            break;
+        }
+        case SEG_ES:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(es,bx+tmp1)];
+            break;
+        }
+        case SEG_SS:
+        {
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,bx+tmp1)];
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC0:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &al;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &ax;
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC1:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &cl;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &cx;
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC2:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &dl;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &dx;
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC3:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &bl;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &bx;
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC4:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &ah;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &sp;
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC5:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &ch;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &bp;
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC6:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &dh;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &si;
+            break;
+        }
+        }
+        break;
+    }
+    case 0xC7:
+    {
+        switch(tmp&1)
+        {
+        case 0:
+        {
+            res.src8 = &bh;
+            break;
+        }
+        case 1:
+        {
+            res.src16 = &di;
+            break;
+        }
+        }
+        break;
+    }
     }
     switch(modrm & 0x38)
     {
-        case 0x00:
+    case 0x00:
+    {
+        switch(tmp)
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &al;
-                    break;
-                }
-                case 1:
-                {
-                    res.dst16 = &ax;
-                    break;
-                }
-                case 3:
-                {
-                    res.dst16 = &es;
-                    break;
-                }
-            }
+        case 0:
+        {
+            res.dst8 = &al;
             break;
         }
-        case 0x08:
+        case 1:
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &cl;
-                    break;
-                }
-                case 1:
-                {
-                    res.dst16 = &cx;
-                    break;
-                }
-                case 3:
-                {
-                    res.dst16 = &cs;
-                    break;
-                }
-            }
+            res.dst16 = &ax;
             break;
         }
-        case 0x10:
+        case 3:
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &dl;
-                    break;
-                }
-                case 1:
-                {
-                    res.dst16 = &dx;
-                    break;
-                }
-                case 3:
-                {
-                    res.dst16 = &ss;
-                    break;
-                }
-            }
+            res.dst16 = &es;
             break;
         }
-        case 0x18:
+        }
+        break;
+    }
+    case 0x08:
+    {
+        switch(tmp)
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &bl;
-                    break;
-                }
-                case 1:
-                {
-                 
-                    res.dst16 = &bx;
-                    break;
-                }
-                case 3:
-                {
-                    res.dst16 = &ds;
-                    break;
-                }
-            }
+        case 0:
+        {
+            res.dst8 = &cl;
             break;
         }
-        case 0x20:
+        case 1:
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &ah;
-                    break;
-                }
-                case 1:
-                {
-                    res.dst16 = &sp;
-                    break;
-                }
-            }
+            res.dst16 = &cx;
             break;
         }
-        case 0x28:
+        case 3:
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &ch;
-                    break;
-                }
-                case 1:
-                {
-                    res.dst16 = &bp;
-                    break;
-                }
-            }
+            res.dst16 = &cs;
             break;
         }
-        case 0x30:
+        }
+        break;
+    }
+    case 0x10:
+    {
+        switch(tmp)
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &dh;
-                    break;
-                }
-                case 1:
-                {
-                    res.dst16 = &si;
-                    break;
-                }
-            }
+        case 0:
+        {
+            res.dst8 = &dl;
             break;
         }
-        case 0x38:
+        case 1:
         {
-            switch(tmp)
-            {
-                case 0:
-                {
-                    res.dst8 = &bh;
-                    break;
-                }
-                case 1:
-                {
-                    res.dst16 = &di;
-                    break;
-                }
-            }
+            res.dst16 = &dx;
             break;
         }
+        case 3:
+        {
+            res.dst16 = &ss;
+            break;
+        }
+        }
+        break;
+    }
+    case 0x18:
+    {
+        switch(tmp)
+        {
+        case 0:
+        {
+            res.dst8 = &bl;
+            break;
+        }
+        case 1:
+        {
+
+            res.dst16 = &bx;
+            break;
+        }
+        case 3:
+        {
+            res.dst16 = &ds;
+            break;
+        }
+        }
+        break;
+    }
+    case 0x20:
+    {
+        switch(tmp)
+        {
+        case 0:
+        {
+            res.dst8 = &ah;
+            break;
+        }
+        case 1:
+        {
+            res.dst16 = &sp;
+            break;
+        }
+        }
+        break;
+    }
+    case 0x28:
+    {
+        switch(tmp)
+        {
+        case 0:
+        {
+            res.dst8 = &ch;
+            break;
+        }
+        case 1:
+        {
+            res.dst16 = &bp;
+            break;
+        }
+        }
+        break;
+    }
+    case 0x30:
+    {
+        switch(tmp)
+        {
+        case 0:
+        {
+            res.dst8 = &dh;
+            break;
+        }
+        case 1:
+        {
+            res.dst16 = &si;
+            break;
+        }
+        }
+        break;
+    }
+    case 0x38:
+    {
+        switch(tmp)
+        {
+        case 0:
+        {
+            res.dst8 = &bh;
+            break;
+        }
+        case 1:
+        {
+            res.dst16 = &di;
+            break;
+        }
+        }
+        break;
+    }
     }
     return res;
 }
@@ -1445,25 +1469,25 @@ void rtick()
         printf("AND AX,%04x\n",ax);
         break;
     }
-	case 0x27:
-	{
-		if(((al & 0x0F) > 9) || (flags & 0x0010))
-		{
-			al += 6;
-			flags |= 0x0010;
-		}
-		else flags &= 0xFFEF;
-		if((al > 0x9F) || (flags & 0x0001))
-		{
-				al += 0x60;
-				flags |= 0x0001;
-		}
-		else flags &= 0xFFFE;
-		printf("DAA\n");
-		ip++;
-		break;
-	}
-	case 0x28:
+    case 0x27:
+    {
+        if(((al & 0x0F) > 9) || (flags & 0x0010))
+        {
+            al += 6;
+            flags |= 0x0010;
+        }
+        else flags &= 0xFFEF;
+        if((al > 0x9F) || (flags & 0x0001))
+        {
+            al += 0x60;
+            flags |= 0x0001;
+        }
+        else flags &= 0xFFFE;
+        printf("DAA\n");
+        ip++;
+        break;
+    }
+    case 0x28:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,false,false);
@@ -1475,7 +1499,7 @@ void rtick()
         printf("SUB Eb,Gb modrm=%02x\n",modrm);
         break;
     }
-	case 0x29:
+    case 0x29:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,true,false);
@@ -1499,7 +1523,7 @@ void rtick()
         printf("SUB Gb,Eb modrm=%02x\n",modrm);
         break;
     }
-	case 0x2B:
+    case 0x2B:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,true,false);
@@ -1511,7 +1535,7 @@ void rtick()
         printf("SUB Gv,Ev modrm=%02x\n",modrm);
         break;
     }
-	case 0x2C:
+    case 0x2C:
     {
         u8 tmp = RAM::rb(cs,ip+1);
         al -= tmp;
@@ -1531,25 +1555,25 @@ void rtick()
         printf("SUB AX,%04x\n",ax);
         break;
     }
-	case 0x2F:
-	{
-		if(((al & 0x0F) > 9) || (flags & 0x0010))
-		{
-			al -= 6;
-			flags |= 0x0010;
-		}
-		else flags &= 0xFFEF;
-		if((al > 0x9F) || (flags & 0x0001))
-		{
-				al -= 0x60;
-				flags |= 0x0001;
-		}
-		else flags &= 0xFFFE;
-		printf("DAS\n");
-		ip++;
-		break;
-	}
-	case 0x30:
+    case 0x2F:
+    {
+        if(((al & 0x0F) > 9) || (flags & 0x0010))
+        {
+            al -= 6;
+            flags |= 0x0010;
+        }
+        else flags &= 0xFFEF;
+        if((al > 0x9F) || (flags & 0x0001))
+        {
+            al -= 0x60;
+            flags |= 0x0001;
+        }
+        else flags &= 0xFFFE;
+        printf("DAS\n");
+        ip++;
+        break;
+    }
+    case 0x30:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,false,false);
@@ -1597,7 +1621,7 @@ void rtick()
         printf("XOR Gv,Ev modrm=%02x\n",modrm);
         break;
     }
-	case 0x34:
+    case 0x34:
     {
         u8 tmp = RAM::rb(cs,ip+1);
         al ^= tmp;
@@ -1617,20 +1641,20 @@ void rtick()
         printf("XOR AX,%04x\n",ax);
         break;
     }
-	case 0x37:
-	{
-		if(((al & 0x0F) > 9) || (flags & 0x0010))
-		{
-			al = (al + 6) & 0x0F;
-			ah++;
-			flags |= 0x0011;
-		}
-		else flags &= 0xFFEE;
-		printf("AAA\n");
-		ip++;
-		break;
-	}
-	case 0x38:
+    case 0x37:
+    {
+        if(((al & 0x0F) > 9) || (flags & 0x0010))
+        {
+            al = (al + 6) & 0x0F;
+            ah++;
+            flags |= 0x0011;
+        }
+        else flags &= 0xFFEE;
+        printf("AAA\n");
+        ip++;
+        break;
+    }
+    case 0x38:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,false,false);
@@ -1641,7 +1665,7 @@ void rtick()
         printf("CMP Eb,Gb modrm=%02x\n",modrm);
         break;
     }
-	case 0x39:
+    case 0x39:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,true,false);
@@ -1663,7 +1687,7 @@ void rtick()
         printf("CMP Gb,Eb modrm=%02x\n",modrm);
         break;
     }
-	case 0x3B:
+    case 0x3B:
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,true,false);
@@ -1674,7 +1698,7 @@ void rtick()
         printf("CMP Gv,Ev modrm=%02x\n",modrm);
         break;
     }
-	case 0x3C:
+    case 0x3C:
     {
         u8 tmp = RAM::rb(cs,ip+1);
         u8 tmp1 = al - tmp;
@@ -1694,164 +1718,164 @@ void rtick()
         printf("CMP AX,%04x\n",tmp);
         break;
     }
-	case 0x3F:
-	{
-		if(((al & 0x0F) > 9) || (flags & 0x0010))
-		{
-			al = (al - 6) & 0x0F;
-			ah--;
-			flags |= 0x0011;
-		}
-		else flags &= 0xFFEE;
-		printf("AAS\n");
-		ip++;
-		break;
-	}
-	case 0x40:
-	{
-		printf("INC AX\n");
-		ax++;
-		if(ax == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x41:
-	{
-		printf("INC CX\n");
-		cx++;
-		if(cx == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x42:
-	{
-		printf("INC DX\n");
-		dx++;
-		if(dx == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x43:
-	{
-		printf("INC CX\n");
-		cx++;
-		if(cx == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x44:
-	{
-		printf("INC SP\n");
-		sp++;
-		if(sp == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x45:
-	{
-		printf("INC BP\n");
-		bp++;
-		if(bp == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x46:
-	{
-		printf("INC SI\n");
-		si++;
-		if(si == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x47:
-	{
-		printf("INC DI\n");
-		di++;
-		if(di == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x48:
-	{
-		printf("DEC AX\n");
-		ax--;
-		if(ax == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x49:
-	{
-		printf("DEC CX\n");
-		cx--;
-		if(cx == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x4A:
-	{
-		printf("DEC DX\n");
-		dx--;
-		if(dx == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x4B:
-	{
-		printf("DEC CX\n");
-		cx--;
-		if(cx == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x4C:
-	{
-		printf("DEC SP\n");
-		sp--;
-		if(sp == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x4D:
-	{
-		printf("DEC BP\n");
-		bp--;
-		if(bp == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x4E:
-	{
-		printf("DEC SI\n");
-		si--;
-		if(si == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x4F:
-	{
-		printf("DEC DI\n");
-		di--;
-		if(di == 0) flags |= 0x0040;
-		else flags &= 0xFFBF;
-		ip++;
-		break;
-	}
-	case 0x50:
+    case 0x3F:
+    {
+        if(((al & 0x0F) > 9) || (flags & 0x0010))
+        {
+            al = (al - 6) & 0x0F;
+            ah--;
+            flags |= 0x0011;
+        }
+        else flags &= 0xFFEE;
+        printf("AAS\n");
+        ip++;
+        break;
+    }
+    case 0x40:
+    {
+        printf("INC AX\n");
+        ax++;
+        if(ax == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x41:
+    {
+        printf("INC CX\n");
+        cx++;
+        if(cx == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x42:
+    {
+        printf("INC DX\n");
+        dx++;
+        if(dx == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x43:
+    {
+        printf("INC CX\n");
+        cx++;
+        if(cx == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x44:
+    {
+        printf("INC SP\n");
+        sp++;
+        if(sp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x45:
+    {
+        printf("INC BP\n");
+        bp++;
+        if(bp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x46:
+    {
+        printf("INC SI\n");
+        si++;
+        if(si == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x47:
+    {
+        printf("INC DI\n");
+        di++;
+        if(di == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x48:
+    {
+        printf("DEC AX\n");
+        ax--;
+        if(ax == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x49:
+    {
+        printf("DEC CX\n");
+        cx--;
+        if(cx == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x4A:
+    {
+        printf("DEC DX\n");
+        dx--;
+        if(dx == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x4B:
+    {
+        printf("DEC CX\n");
+        cx--;
+        if(cx == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x4C:
+    {
+        printf("DEC SP\n");
+        sp--;
+        if(sp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x4D:
+    {
+        printf("DEC BP\n");
+        bp--;
+        if(bp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x4E:
+    {
+        printf("DEC SI\n");
+        si--;
+        if(si == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x4F:
+    {
+        printf("DEC DI\n");
+        di--;
+        if(di == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        break;
+    }
+    case 0x50:
     {
         printf("PUSH AX\n");
         sp -= 2;
@@ -1860,7 +1884,7 @@ void rtick()
         ip++;
         break;
     }
-	case 0x51:
+    case 0x51:
     {
         printf("PUSH CX\n");
         sp -= 2;
@@ -1869,7 +1893,7 @@ void rtick()
         ip++;
         break;
     }
-	case 0x52:
+    case 0x52:
     {
         printf("PUSH DX\n");
         sp -= 2;
@@ -1878,7 +1902,7 @@ void rtick()
         ip++;
         break;
     }
-	case 0x53:
+    case 0x53:
     {
         printf("PUSH BX\n");
         sp -= 2;
@@ -1887,19 +1911,19 @@ void rtick()
         ip++;
         break;
     }
-	case 0x54:
+    case 0x54:
     {
         if(type == intel8086)
-		{
-			printf("PUSH SP\n");
-			sp -= 2;
-			RAM::wb(ss,sp,sp & 0xFF);
-			RAM::wb(ss,sp+1,sp >> 8);
-			ip++;
-		}
+        {
+            printf("PUSH SP\n");
+            sp -= 2;
+            RAM::wb(ss,sp,sp & 0xFF);
+            RAM::wb(ss,sp+1,sp >> 8);
+            ip++;
+        }
         break;
     }
-	case 0x55:
+    case 0x55:
     {
         printf("PUSH BP\n");
         sp -= 2;
@@ -1908,7 +1932,7 @@ void rtick()
         ip++;
         break;
     }
-	case 0x56:
+    case 0x56:
     {
         printf("PUSH SI\n");
         sp -= 2;
@@ -1917,12 +1941,76 @@ void rtick()
         ip++;
         break;
     }
-	case 0x57:
+    case 0x57:
     {
         printf("PUSH DI\n");
         sp -= 2;
         RAM::wb(ss,sp,di & 0xFF);
         RAM::wb(ss,sp+1,di >> 8);
+        ip++;
+        break;
+    }
+    case 0x58:
+    {
+        printf("POP AX\n");
+        ax = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x59:
+    {
+        printf("POP CX\n");
+        cx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x5A:
+    {
+        printf("POP DX\n");
+        dx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x5B:
+    {
+        printf("POP BX\n");
+        bx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x5C:
+    {
+        printf("POP SP\n");
+        sp = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x5D:
+    {
+        printf("POP BP\n");
+        bp = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x5E:
+    {
+        printf("POP SI\n");
+        si = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        ip++;
+        break;
+    }
+    case 0x5F:
+    {
+        printf("POP DI\n");
+        di = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
         ip++;
         break;
     }
@@ -1974,6 +2062,22 @@ void rtick()
         ip+=2;
         break;
     }
+    case 0x76:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JBE %02x\n",tmp);
+        if((flags&0x0040) || (flags&0x0001)) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0x77:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JA %02x\n",tmp);
+        if(!(flags&0x0040) && !(flags&0x0001)) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
     case 0x78:
     {
         u8 tmp = RAM::rb(cs,ip+1);
@@ -2006,6 +2110,117 @@ void rtick()
         ip+=2;
         break;
     }
+    case 0x7C:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JL %02x\n",tmp);
+        if(tmp1 != tmp2) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0x7D:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JGE %02x\n",tmp);
+        if(tmp1 == tmp2) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0x7E:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JLE %02x\n",tmp);
+        if((tmp1 != tmp2) || (flags & 0x0040)) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0x7F:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JG %02x\n",tmp);
+        if((tmp1 == tmp2) && !(flags & 0x0040)) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0x84:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        u8 tmp = *loc.src8 & *loc.dst8;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("TEST Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x85:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        u16 tmp = *loc.src16 & *loc.dst16;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip+=2;
+        printf("TEST Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x86:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        u8 tmp = *loc.src8;
+        *loc.src8 = *loc.dst8;
+        *loc.dst8 = tmp;
+        ip+=2;
+        printf("XCHG Gb,Eb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x87:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        u16 tmp = *loc.src16;
+        *loc.src16 = *loc.dst16;
+        *loc.dst16 = tmp;
+        ip+=2;
+        printf("XCHG Gv,Ev modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x88:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.dst8 = *loc.src8;
+        ip+=2;
+        printf("MOV Eb,Gb modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x89:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        *loc.dst16 = *loc.src16;
+        ip+=2;
+        printf("MOV Ev,Gv modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x8A:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        *loc.src8 = *loc.dst8;
+        ip+=2;
+        printf("MOV Gb,Eb modrm=%02x\n",modrm);
+        break;
+    }
     case 0x8B:
     {
         u8 modrm = RAM::rb(cs,ip+1);
@@ -2024,6 +2239,39 @@ void rtick()
         printf("MOV Ew,Sw modrm=%02x\n",modrm);
         break;
     }
+    case 0x8D:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        u16 tmp = (u16)(loc.dst16 - (u16*)&RAM::RAM[0]);
+        switch(seg)
+        {
+            case SEG_DEFAULT: case SEG_DS:
+            {
+                tmp -= (ds<<4);
+                break;
+            }
+            case SEG_CS:
+            {
+                tmp -= (cs<<4);
+                break;
+            }
+            case SEG_ES:
+            {
+                tmp -= (es<<4);
+                break;
+            }
+            case SEG_SS:
+            {
+                tmp -= (ss<<4);
+                break;
+            }
+        }
+        *loc.src16 = tmp;
+        ip+=2;
+        printf("LEA Gv,M modrm=%02x\n",modrm);
+        break;
+    }
     case 0x8E:
     {
         u8 modrm = RAM::rb(cs,ip+1);
@@ -2031,6 +2279,130 @@ void rtick()
         *loc.dst16 = *loc.src16;
         ip+=2;
         printf("MOV Sw,Ew modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x8F:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,true);
+        *loc.src16 = RAM::rb(ss,sp+1)|(RAM::rb(ss,sp+2)<<8);
+        sp+=2;
+        ip+=2;
+        printf("POP Ev modrm=%02x\n",modrm);
+        break;
+    }
+    case 0x90:
+    {
+        ip++;
+        printf("NOP\n");
+        break;
+    }
+    case 0x91:
+    {
+        ip++;
+        u16 tmp = cx;
+        cx = ax;
+        ax = tmp;
+        printf("XCHG CX,AX\n");
+        break;
+    }
+    case 0x92:
+    {
+        ip++;
+        u16 tmp = dx;
+        dx = ax;
+        ax = tmp;
+        printf("XCHG DX,AX\n");
+        break;
+    }
+    case 0x93:
+    {
+        ip++;
+        u16 tmp = bx;
+        bx = ax;
+        ax = tmp;
+        printf("XCHG BX,AX\n");
+        break;
+    }
+    case 0x94:
+    {
+        ip++;
+        u16 tmp = sp;
+        sp = ax;
+        ax = tmp;
+        printf("XCHG SP,AX\n");
+        break;
+    }
+    case 0x95:
+    {
+        ip++;
+        u16 tmp = bp;
+        bp = ax;
+        ax = tmp;
+        printf("XCHG BP,AX\n");
+        break;
+    }
+    case 0x96:
+    {
+        ip++;
+        u16 tmp = si;
+        si = ax;
+        ax = tmp;
+        printf("XCHG SI,AX\n");
+        break;
+    }
+    case 0x97:
+    {
+        ip++;
+        u16 tmp = di;
+        di = ax;
+        ax = tmp;
+        printf("XCHG DI,AX\n");
+        break;
+    }
+    case 0x98:
+    {
+        if(al & 0x80) ah = 0xFF;
+        else ah = 0;
+        ip++;
+        printf("CBW");
+        break;
+    }
+    case 0x99:
+    {
+        if(ax & 0x8000) dx = 0xFFFF;
+        else dx = 0;
+        ip++;
+        printf("CWD");
+        break;
+    }
+    case 0x9A:
+    {
+        u16 tmp = cs;
+        u16 tmp1 = ip;
+        sp-=2;
+        RAM::wb(ss,sp,(ip+5)&0xFF);
+        RAM::wb(ss,sp+1,(ip+5)>>8);
+        cs = (RAM::rb(tmp,tmp1+4)<<8)|RAM::rb(tmp,tmp1+3);
+        ip = (RAM::rb(tmp,tmp1+2)<<8)|RAM::rb(tmp,tmp1+1);
+        printf("CALL %04x:%04x\n",cs,ip);
+        break;
+    }
+    case 0x9C:
+    {
+        sp-=2;
+        RAM::wb(ss,sp,flags&0xFF);
+        RAM::wb(ss,sp+1,flags>>8);
+        ip++;
+        printf("PUSHF\n");
+        break;
+    }
+    case 0x9D:
+    {
+        flags = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp-=2;
+        ip++;
+        printf("POPF\n");
         break;
     }
     case 0x9E:
@@ -2048,6 +2420,191 @@ void rtick()
         ip++;
         break;
     }
+    case 0xA0:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        al = RAM::rb(ds,tmp);
+        ip+=3;
+        printf("MOV AL, BYTE PTR DS:%04x\n",tmp);
+        break;
+    }
+    case 0xA1:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        ax = RAM::rb(ds,tmp)|(RAM::rb(ds,tmp+1)<<8);
+        ip+=3;
+        printf("MOV AX, WORD PTR DS:%04x\n",tmp);
+        break;
+    }
+    case 0xA2:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        RAM::wb(ds,tmp,al);
+        ip+=3;
+        printf("MOV BYTE PTR DS:%04x\n, AL",tmp);
+        break;
+    }
+    case 0xA3:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        RAM::wb(ds,tmp,al);
+        RAM::wb(ds,tmp+1,ah);
+        ip+=3;
+        printf("MOV WORD PTR DS:%04x\n, AX",tmp);
+        break;
+    }
+    case 0xA4:
+    {
+        RAM::wb(es,di,RAM::rb(ds,si));
+        if(!(flags & 0x0400))
+        {
+            di++;
+            si++;
+        }
+        else
+        {
+            di--;
+            si--;
+        }
+        ip++;
+        printf("MOVSB\n");
+        break;
+    }
+    case 0xA5:
+    {
+        RAM::wb(es,di,RAM::rb(ds,si));
+        RAM::wb(es,di+1,RAM::rb(ds,si+1));
+        if(!(flags & 0x0400))
+        {
+            di+=2;
+            si+=2;
+        }
+        else
+        {
+            di-=2;
+            si-=2;
+        }
+        ip++;
+        printf("MOVSW\n");
+        break;
+    }
+    case 0xA6:
+    {
+        u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
+        if(!(flags & 0x0400))
+        {
+            di++;
+            si++;
+        }
+        else
+        {
+            di--;
+            si--;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        printf("CMPSB\n");
+        break;
+    }
+    case 0xA7:
+    {
+        u16 tmp = (RAM::rb(ds,si)|(RAM::rb(ds,si+1)<<8)) - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
+        if(!(flags & 0x0400))
+        {
+            di+=2;
+            si+=2;
+        }
+        else
+        {
+            di-=2;
+            si-=2;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        printf("CMPSW\n");
+        break;
+    }
+    case 0xA8:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        u8 tmp1 = al & tmp;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF; 
+        printf("TEST AL, %02x\n",tmp);
+        ip+=2;
+        break;
+    }
+    case 0xA9:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        u16 tmp1 = ax & tmp;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF; 
+        printf("TEST AX, %04x\n",tmp);
+        ip+=3;
+        break;
+    }
+    case 0xAA:
+    {
+        RAM::wb(es,di,al);
+        if(!(flags&0x0400)) di++;
+        else di--;
+        ip++;
+        printf("STOSB\n");
+        break;
+    }
+    case 0xAB:
+    {
+        RAM::wb(es,di,al);
+        RAM::wb(es,di+1,ah);
+        if(!(flags&0x0400)) di+=2;
+        else di-=2;
+        ip++;
+        printf("STOSW\n");
+        break;
+    }
+    case 0xAC:
+    {
+        al = RAM::rb(es,di);
+        if(!(flags&0x0400)) di++;
+        else di--;
+        ip++;
+        printf("LODSB\n");
+        break;
+    }
+    case 0xAD:
+    {
+        ax = RAM::rb(es,di)|(RAM::rb(es,di+1)<<8);
+        if(!(flags&0x0400)) di+=2;
+        else di-=2;
+        ip++;
+        printf("LODSW\n");
+        break;
+    }
+    case 0xAE:
+    {
+        u8 tmp = al - RAM::rb(es,di);
+        if(!(flags&0x0400)) di++;
+        else di--;
+        if(tmp==0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        printf("SCASB\n");
+        break;
+    }
+    case 0xAF:
+    {
+        u16 tmp = ax - RAM::rb(es,di)|(RAM::rb(es,di+1)<<8);
+        if(!(flags&0x0400)) di+=2;
+        else di-=2;
+        if(tmp==0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+        ip++;
+        printf("SCASW\n");
+        break;
+    }
     case 0xB0:
     {
         al = RAM::rb(cs,ip+1);
@@ -2062,14 +2619,14 @@ void rtick()
         ip+=2;
         break;
     }
-	case 0xB2:
+    case 0xB2:
     {
         dl = RAM::rb(cs,ip+1);
         printf("MOV DL,%02x\n",dl);
         ip+=2;
         break;
     }
-	case 0xB3:
+    case 0xB3:
     {
         bl = RAM::rb(cs,ip+1);
         printf("MOV BL,%02x\n",bl);
@@ -2083,21 +2640,21 @@ void rtick()
         ip+=2;
         break;
     }
-	case 0xB5:
+    case 0xB5:
     {
         ch = RAM::rb(cs,ip+1);
         printf("MOV CH,%02x\n",ch);
         ip+=2;
         break;
     }
-	case 0xB6:
+    case 0xB6:
     {
         dh = RAM::rb(cs,ip+1);
         printf("MOV DH,%02x\n",dh);
         ip+=2;
         break;
     }
-	case 0xB7:
+    case 0xB7:
     {
         bh = RAM::rb(cs,ip+1);
         printf("MOV BH,%02x\n",bh);
@@ -2139,25 +2696,166 @@ void rtick()
         ip+=3;
         break;
     }
-	case 0xBD:
+    case 0xBD:
     {
         bp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
         printf("MOV BP,%04x\n",bp);
         ip+=3;
         break;
     }
-	case 0xBE:
+    case 0xBE:
     {
         si = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
         printf("MOV SI,%04x\n",si);
         ip+=3;
         break;
     }
-	case 0xBF:
+    case 0xBF:
     {
         di = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
         printf("MOV DI,%04x\n",di);
         ip+=3;
+        break;
+    }
+    case 0xC2:
+    {
+        u16 tmp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+        ip = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=tmp+2;
+        printf("RET %04x\n",tmp);
+        break;
+    }
+    case 0xC3:
+    {
+        ip = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        printf("RET\n");
+        break;
+    }
+    case 0xC4:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+        u16 tmp1 = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
+        *loc.dst16 = tmp;
+        es = tmp1;
+        ip+=6;
+        printf("LES Gv,Mp modrm=%02x\n",modrm);
+        break;
+    }
+    case 0xC5:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+        u16 tmp1 = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
+        *loc.dst16 = tmp;
+        ds = tmp1;
+        ip+=6;
+        printf("LDS Gv,Mp modrm=%02x\n",modrm);
+        break;
+    }
+    case 0xC6:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,false,false);
+        u8 tmp = RAM::rb(cs,ip+2);
+        *loc.src8 = tmp;
+        ip+=3;
+        printf("MOV Eb, %02x modrm=%02x\n",tmp,modrm);
+        break;
+    }
+    case 0xC7:
+    {
+        u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+        u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+        *loc.src16 = tmp;
+        ip+=4;
+        printf("MOV Ev, %04x modrm=%02x\n",tmp,modrm);
+        break;
+    }
+    case 0xCA:
+    {
+        u16 tmp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
+        ip = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        cs = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=tmp+2;
+        printf("RETF %04x\n",tmp);
+        break;
+    }
+    case 0xCB:
+    {
+        ip = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        cs = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        printf("RETF\n");
+        break;
+    }
+    case 0xCC:
+    {
+        sp-=2;
+        RAM::wb(ss,sp) = flags & 0xFF;
+        RAM::wb(ss,sp+1) = flags >> 8;
+        flags &= 0xFCFF;
+        sp-=2;
+        RAM::wb(ss,sp) = cs & 0xFF;
+        RAM::wb(ss,sp+1) = cs >> 8;
+        sp-=2;
+        RAM::wb(ss,sp) = (ip+1) & 0xFF;
+        RAM::wb(ss,sp+1) = (ip+1) >> 8;
+        cs = RAM::rb(0,15)|(RAM::rb(0,14)<<8);
+        ip = RAM::rb(0,12)|(RAM::rb(0,13)<<8);
+        printf("INT 3\n");
+        break;
+    }
+    case 0xCD:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        sp-=2;
+        RAM::wb(ss,sp) = flags & 0xFF;
+        RAM::wb(ss,sp+1) = flags >> 8;
+        flags &= 0xFCFF;
+        sp-=2;
+        RAM::wb(ss,sp) = cs & 0xFF;
+        RAM::wb(ss,sp+1) = cs >> 8;
+        sp-=2;
+        RAM::wb(ss,sp) = (ip+2) & 0xFF;
+        RAM::wb(ss,sp+1) = (ip+2) >> 8;
+        cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
+        ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
+        printf("INT %02x\n",tmp);
+        break;
+    }
+    case 0xCE:
+    {
+        sp-=2;
+        RAM::wb(ss,sp) = flags & 0xFF;
+        RAM::wb(ss,sp+1) = flags >> 8;
+        flags &= 0xFCFF;
+        sp-=2;
+        RAM::wb(ss,sp) = cs & 0xFF;
+        RAM::wb(ss,sp+1) = cs >> 8;
+        sp-=2;
+        RAM::wb(ss,sp) = (ip+1) & 0xFF;
+        RAM::wb(ss,sp+1) = (ip+1) >> 8;
+        cs = RAM::rb(0,19)|(RAM::rb(0,18)<<8);
+        ip = RAM::rb(0,16)|(RAM::rb(0,17)<<8);
+        printf("INTO\n");
+        break;
+    }
+    case 0xCF:
+    {
+        ip = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        cs = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        flags = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+        printf("IRET\n");
         break;
     }
     case 0xD0:
@@ -2243,11 +2941,63 @@ void rtick()
         ip+=2;
         break;
     }
+    case 0xD4:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        u8 tmp1 = al / tmp;
+        ah = tmp1;
+        u8 tmp2 = al - (tmp1 * tmp);
+        al = tmp2;
+        ip+=2;
+        printf("AAM %02x\n",tmp);
+        break;
+    }
+    case 0xD5:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        al = (ah * 10) + al;
+        ah = 0;
+        ip+=2;
+        printf("AAD %02x\n",tmp);
+        break;
+    }
+    case 0xD7:
+    {
+        al = RAM::rb(ds,bx+al);
+        ip++;
+        printf("XLAT\n");
+        break;
+    }
+    case 0xE4:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("IN AL,%02x\n",tmp);
+        al = IO_XT::rb((u16)tmp);
+        ip+=2;
+        break;
+    }
+    case 0xE5:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("IN AX,%02x\n",tmp);
+        ax = IO_XT::rb((u16)tmp)|(IO_XT::rb((u16)(tmp+1))<<8);
+        ip+=2;
+        break;
+    }
     case 0xE6:
     {
         u8 tmp = RAM::rb(cs,ip+1);
         printf("OUT %02x,AL\n",tmp);
         IO_XT::wb((u16)tmp,al);
+        ip+=2;
+        break;
+    }
+    case 0xE7:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("OUT %02x,AX\n",tmp);
+        IO_XT::wb((u16)tmp,al);
+        IO_XT::wb((u16)(tmp+1),ah);
         ip+=2;
         break;
     }
@@ -2353,34 +3103,35 @@ void rtick()
 void tick()
 {
     u8 op = RAM::rb(cs,ip+1);
-    
+
     switch(op)
     {
-        case 0x26:
-        {
-            ip++;
-            seg = SEG_ES;
-            break;
-        }
-        case 0x2E:
-        {
-            ip++;
-            seg = SEG_CS;
-            break;
-        }
-        case 0x36:
-        {
-            ip++;
-            seg = SEG_SS;
-            break;
-        }
-        case 0x3E:
-        {
-            ip++;
-            seg = SEG_DS;
-            break;
-        }
-        defaukt: seg = SEG_DEFAULT;
+    case 0x26:
+    {
+        ip++;
+        seg = SEG_ES;
+        break;
+    }
+    case 0x2E:
+    {
+        ip++;
+        seg = SEG_CS;
+        break;
+    }
+    case 0x36:
+    {
+        ip++;
+        seg = SEG_SS;
+        break;
+    }
+    case 0x3E:
+    {
+        ip++;
+        seg = SEG_DS;
+        break;
+    }
+defaukt:
+    seg = SEG_DEFAULT;
     }
     rtick();
 }
