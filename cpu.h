@@ -1050,6 +1050,11 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
         break;
     }
     }
+    if(modrm < 0xC0)
+    {
+        if(modrm >= 0x40 && modrm < 0x80) ip++;
+        else if(modrm >= 0x80) ip+=2;
+    }
     return res;
 }
 int seg = SEG_DEFAULT;
@@ -1066,6 +1071,13 @@ void rtick()
         u8 tmp = *loc.src8;
         if(tmp == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
+        u8 v = 0;
+        for(int i = 0;i<8;i++)
+        {
+            if(tmp & (1 << i)) v ^= 1;
+        }
+        if(!v) flags |= 0x0004;
+        else flags &= 0xFFFB;
         ip+=2;
         printf("ADD Eb,Gb modrm=%02x\n",modrm);
         break;
@@ -1617,6 +1629,13 @@ void rtick()
         u16 tmp = *loc.dst16;
         if(tmp == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
+        u16 v = 0;
+        for(int i = 0;i<16;i++)
+        {
+            if(tmp & (1 << i)) v ^= 1;
+        }
+        if(!v) flags |= 0x0004;
+        else flags &= 0xFFFB;
         ip+=2;
         printf("XOR Gv,Ev modrm=%02x\n",modrm);
         break;
@@ -1733,10 +1752,13 @@ void rtick()
     }
     case 0x40:
     {
+        u16 tmp = ax;
         printf("INC AX\n");
         ax++;
         if(ax == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
+        if(ax >= 0x8000) flags |= 0x0800;
+        else flags &= 0xF7FF;
         ip++;
         break;
     }
@@ -1760,9 +1782,9 @@ void rtick()
     }
     case 0x43:
     {
-        printf("INC CX\n");
-        cx++;
-        if(cx == 0) flags |= 0x0040;
+        printf("INC BX\n");
+        bx++;
+        if(bx == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
         ip++;
         break;
@@ -2198,7 +2220,7 @@ void rtick()
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,false,false);
-        *loc.dst8 = *loc.src8;
+        *loc.src8 = *loc.dst8;
         ip+=2;
         printf("MOV Eb,Gb modrm=%02x\n",modrm);
         break;
@@ -2207,7 +2229,7 @@ void rtick()
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,true,false);
-        *loc.dst16 = *loc.src16;
+        *loc.src16 = *loc.dst16;
         ip+=2;
         printf("MOV Ev,Gv modrm=%02x\n",modrm);
         break;
@@ -2216,7 +2238,7 @@ void rtick()
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,false,false);
-        *loc.src8 = *loc.dst8;
+        *loc.dst8 = *loc.src8;
         ip+=2;
         printf("MOV Gb,Eb modrm=%02x\n",modrm);
         break;
@@ -2225,7 +2247,7 @@ void rtick()
     {
         u8 modrm = RAM::rb(cs,ip+1);
         locs loc = decodemodrm(seg,modrm,true,false);
-        *loc.src16 = *loc.dst16;
+        *loc.dst16 = *loc.src16;
         ip+=2;
         printf("MOV Gv,Ev modrm=%02x\n",modrm);
         break;
@@ -2596,7 +2618,7 @@ void rtick()
     }
     case 0xAF:
     {
-        u16 tmp = ax - RAM::rb(es,di)|(RAM::rb(es,di+1)<<8);
+        u16 tmp = ax - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
         if(!(flags&0x0400)) di+=2;
         else di-=2;
         if(tmp==0) flags |= 0x0040;
@@ -2798,15 +2820,15 @@ void rtick()
     case 0xCC:
     {
         sp-=2;
-        RAM::wb(ss,sp) = flags & 0xFF;
-        RAM::wb(ss,sp+1) = flags >> 8;
+        RAM::wb(ss,sp,flags & 0xFF);
+        RAM::wb(ss,sp+1,flags >> 8);
         flags &= 0xFCFF;
         sp-=2;
-        RAM::wb(ss,sp) = cs & 0xFF;
-        RAM::wb(ss,sp+1) = cs >> 8;
+        RAM::wb(ss,sp,cs & 0xFF);
+        RAM::wb(ss,sp+1,cs >> 8);
         sp-=2;
-        RAM::wb(ss,sp) = (ip+1) & 0xFF;
-        RAM::wb(ss,sp+1) = (ip+1) >> 8;
+        RAM::wb(ss,sp,(ip+1) & 0xFF);
+        RAM::wb(ss,sp+1,(ip+1) >> 8);
         cs = RAM::rb(0,15)|(RAM::rb(0,14)<<8);
         ip = RAM::rb(0,12)|(RAM::rb(0,13)<<8);
         printf("INT 3\n");
@@ -2816,15 +2838,15 @@ void rtick()
     {
         u8 tmp = RAM::rb(cs,ip+1);
         sp-=2;
-        RAM::wb(ss,sp) = flags & 0xFF;
-        RAM::wb(ss,sp+1) = flags >> 8;
+        RAM::wb(ss,sp,flags & 0xFF);
+        RAM::wb(ss,sp+1,flags >> 8);
         flags &= 0xFCFF;
         sp-=2;
-        RAM::wb(ss,sp) = cs & 0xFF;
-        RAM::wb(ss,sp+1) = cs >> 8;
+        RAM::wb(ss,sp,cs & 0xFF);
+        RAM::wb(ss,sp+1,cs >> 8);
         sp-=2;
-        RAM::wb(ss,sp) = (ip+2) & 0xFF;
-        RAM::wb(ss,sp+1) = (ip+2) >> 8;
+        RAM::wb(ss,sp,(ip+2) & 0xFF);
+        RAM::wb(ss,sp+1,(ip+2) >> 8);
         cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
         ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
         printf("INT %02x\n",tmp);
@@ -2833,15 +2855,15 @@ void rtick()
     case 0xCE:
     {
         sp-=2;
-        RAM::wb(ss,sp) = flags & 0xFF;
-        RAM::wb(ss,sp+1) = flags >> 8;
+        RAM::wb(ss,sp,flags & 0xFF);
+        RAM::wb(ss,sp+1,flags >> 8);
         flags &= 0xFCFF;
         sp-=2;
-        RAM::wb(ss,sp) = cs & 0xFF;
-        RAM::wb(ss,sp+1) = cs >> 8;
+        RAM::wb(ss,sp,cs & 0xFF);
+        RAM::wb(ss,sp+1,cs >> 8);
         sp-=2;
-        RAM::wb(ss,sp) = (ip+1) & 0xFF;
-        RAM::wb(ss,sp+1) = (ip+1) >> 8;
+        RAM::wb(ss,sp,(ip+1) & 0xFF);
+        RAM::wb(ss,sp+1,(ip+1) >> 8);
         cs = RAM::rb(0,19)|(RAM::rb(0,18)<<8);
         ip = RAM::rb(0,16)|(RAM::rb(0,17)<<8);
         printf("INTO\n");
@@ -2861,48 +2883,131 @@ void rtick()
     case 0xD0:
     {
         u8 op2 = RAM::rb(cs,ip+1);
-        switch(op2&0xC0)
+        locs loc = decodemodrm(seg,op2,false,false);
+        switch(op2&0x38)
         {
-        case 0xC0:
-        {
-            switch(op2&0x38)
+            case 0x00:
             {
-            case 0x20:
-            {
-                switch(op2&0x07)
-                {
-                case 0x00:
-                {
-                    u8 tmp = al;
-                    printf("SHL AL,1\n");
-                    al <<= 1;
-                    if(tmp&0x80) flags |= 0x0001;
-                    else flags &= 0xFFFE;
-                    if(al&0x80) flags |= 0x0800;
-                    else flags &= 0xF7FF;
-                    if(al==0) flags |= 0x0040;
-                    else flags &= 0xFFBF;
-                    break;
-                }
-                case 0x04:
-                {
-                    u8 tmp = ah;
-                    printf("SHL AH,1\n");
-                    ah <<= 1;
-                    if(tmp&0x80) flags |= 0x0001;
-                    else flags &= 0xFFFE;
-                    if(ah&0x80) flags |= 0x0800;
-                    else flags &= 0xF7FF;
-                    if(ah==0) flags |= 0x0040;
-                    else flags &= 0xFFBF;
-                    break;
-                }
-                }
+                printf("ROL Eb,1 modrm=%02x\n",op2);
+                *loc.src8 = (*loc.src8 << 1) | (*loc.src8 >> 7);
                 break;
             }
+            case 0x08:
+            {
+                printf("ROR Eb,1 modrm=%02x\n",op2);
+                *loc.src8 = (*loc.src8 >> 1) | (*loc.src8 << 7);
+                break;
             }
-            break;
+            case 0x10:
+            {
+                printf("RCL Eb,1 modrm=%02x\n",op2);
+                u8 tmp = *loc.src8;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src8 = (*loc.src8 << 1) | tmp1;
+                flags = (flags & 0xFFFE) | (tmp >> 7);
+                break;
+            }
+            case 0x18:
+            {
+                printf("RCR Eb,1 modrm=%02x\n",op2);
+                u8 tmp = *loc.src8 & 1;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src8 = (*loc.src8 >> 1) | tmp1 << 7;
+                flags = (flags & 0xFFFE) | tmp;
+                break;
+            }
+            case 0x20:
+            {
+                printf("SHL Eb,1 modrm=%02x\n",op2);
+                *loc.src8 <<= 1;
+                break;
+            }
+            case 0x28:
+            {
+                printf("SHR Eb,1 modrm=%02x\n",op2);
+                *loc.src8 >>= 1;
+                break;
+            }
+            case 0x30:
+            {
+                printf("SAL Eb,1 modrm=%02x\n",op2);
+                *loc.src8 <<= 1;
+                break;
+            }
+            case 0x38:
+            {
+                printf("SAR Eb,1 modrm=%02x\n",op2);
+                *loc.src8 = (*loc.src8 & 0x80) | (*loc.src8 >> 1);
+                break;
+            }
         }
+        ip+=2;
+        break;
+    }
+    case 0xD1:
+    {
+        u8 op2 = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,op2,true,false);
+        switch(op2&0x38)
+        {
+            case 0x00:
+            {
+                printf("ROL Ev,1 modrm=%02x\n",op2);
+                *loc.src16 = (*loc.src16 << 1) | (*loc.src16 >> 15);
+                break;
+            }
+            case 0x08:
+            {
+                printf("ROR Ev,1 modrm=%02x\n",op2);
+                *loc.src16 = (*loc.src16 >> 1) | (*loc.src16 << 15);
+                break;
+            }
+            case 0x10:
+            {
+                printf("RCL Ev,1 modrm=%02x\n",op2);
+                u8 tmp = *loc.src16;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src16 = (*loc.src16 << 1) | tmp1;
+                flags = (flags & 0xFFFE) | (tmp >> 15);
+                break;
+            }
+            case 0x18:
+            {
+                printf("RCR Ev,1 modrm=%02x\n",op2);
+                u8 tmp = *loc.src16 & 1;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src16 = (*loc.src16 >> 1) | tmp1 << 15;
+                flags = (flags & 0xFFFE) | tmp;
+                break;
+            }
+            case 0x20:
+            {
+                printf("SHL Ev,1 modrm=%02x\n",op2);
+                u16 tmp = *loc.src16 >> 15;
+                *loc.src16 <<= 1;
+                flags = (flags & 0xFFFE) | tmp;
+                if(*loc.src16 == 0) flags |= 0x0040;
+                else flags &= 0xFFBF;
+                break;
+            }
+            case 0x28:
+            {
+                printf("SHR Ev,1 modrm=%02x\n",op2);
+                *loc.src16 >>= 1;
+                break;
+            }
+            case 0x30:
+            {
+                printf("SAL Ev,1 modrm=%02x\n",op2);
+                *loc.src16 <<= 1;
+                break;
+            }
+            case 0x38:
+            {
+                printf("SAR Ev,1 modrm=%02x\n",op2);
+                *loc.src16 = (*loc.src16 & 0x8000) | (*loc.src16 >> 1);
+                break;
+            }
         }
         ip+=2;
         break;
@@ -2910,33 +3015,127 @@ void rtick()
     case 0xD2:
     {
         u8 op2 = RAM::rb(cs,ip+1);
-        switch(op2&0xC0)
+        locs loc = decodemodrm(seg,op2,false,false);
+        switch(op2&0x38)
         {
-        case 0xC0:
-        {
-            switch(op2&0x38)
+            case 0x00:
             {
-            case 0x28:
-            {
-                switch(op2&0x07)
-                {
-                case 0x04:
-                {
-                    u8 tmp = ah;
-                    printf("SHR AH,CL\n");
-                    ah >>= cl;
-                    if(tmp&1) flags |= 0x0001;
-                    else flags &= 0xFFFE;
-                    if(ah==0) flags |= 0x0040;
-                    else flags &= 0xFFBF;
-                    break;
-                }
-                }
+                printf("ROL Eb,CL modrm=%02x\n",op2);
+                *loc.src8 = (*loc.src8 << cl) | (*loc.src8 >> (8-cl));
                 break;
             }
+            case 0x08:
+            {
+                printf("ROR Eb,CL modrm=%02x\n",op2);
+                *loc.src8 = (*loc.src8 >> cl) | (*loc.src8 << (8-cl));
+                break;
             }
-            break;
+            case 0x10:
+            {
+                printf("RCL Eb,CL modrm=%02x\n",op2);
+                u8 tmp = *loc.src8;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src8 = (*loc.src8 << cl) | tmp1;
+                flags = (flags & 0xFFFE) | (tmp >> (8-cl));
+                break;
+            }
+            case 0x18:
+            {
+                printf("RCR Eb,CL modrm=%02x\n",op2);
+                u8 tmp = *loc.src8 & 1;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src8 = (*loc.src8 >> cl) | tmp1 << (8-cl);
+                flags = (flags & 0xFFFE) | tmp;
+                break;
+            }
+            case 0x20:
+            {
+                printf("SHL Eb,CL modrm=%02x\n",op2);
+                *loc.src8 <<= cl;
+                break;
+            }
+            case 0x28:
+            {
+                printf("SHR Eb,CL modrm=%02x\n",op2);
+                *loc.src8 >>= cl;
+                break;
+            }
+            case 0x30:
+            {
+                printf("SAL Eb,CL modrm=%02x\n",op2);
+                *loc.src8 <<= cl;
+                break;
+            }
+            case 0x38:
+            {
+                printf("SAR Eb,CL modrm=%02x\n",op2);
+                *loc.src8 = (*loc.src8 & 0x80) | (*loc.src8 >> cl);
+                break;
+            }
         }
+        ip+=2;
+        break;
+    }
+    case 0xD3:
+    {
+        u8 op2 = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,op2,true,false);
+        switch(op2&0x38)
+        {
+            case 0x00:
+            {
+                printf("ROL Ev,CL modrm=%02x\n",op2);
+                *loc.src16 = (*loc.src16 << cl) | (*loc.src16 >> (16-cl));
+                break;
+            }
+            case 0x08:
+            {
+                printf("ROR Ev,CL modrm=%02x\n",op2);
+                *loc.src16 = (*loc.src16 >> cl) | (*loc.src16 << (16-cl));
+                break;
+            }
+            case 0x10:
+            {
+                printf("RCL Ev,CL modrm=%02x\n",op2);
+                u8 tmp = *loc.src16;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src16 = (*loc.src16 << cl) | tmp1;
+                flags = (flags & 0xFFFE) | (tmp >> (16-cl));
+                break;
+            }
+            case 0x18:
+            {
+                printf("RCR Ev,CL modrm=%02x\n",op2);
+                u8 tmp = *loc.src16 & 1;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src16 = (*loc.src16 >> cl) | tmp1 << (16-cl);
+                flags = (flags & 0xFFFE) | tmp;
+                break;
+            }
+            case 0x20:
+            {
+                printf("SHL Ev,CL modrm=%02x\n",op2);
+                *loc.src16 <<= cl;
+                break;
+            }
+            case 0x28:
+            {
+                printf("SHR Ev,CL modrm=%02x\n",op2);
+                *loc.src16 >>= cl;
+                break;
+            }
+            case 0x30:
+            {
+                printf("SAL Ev,CL modrm=%02x\n",op2);
+                *loc.src16 <<= cl;
+                break;
+            }
+            case 0x38:
+            {
+                printf("SAR Ev,CL modrm=%02x\n",op2);
+                *loc.src16 = (*loc.src16 & 0x8000) | (*loc.src16 >> cl);
+                break;
+            }
         }
         ip+=2;
         break;
@@ -2966,6 +3165,41 @@ void rtick()
         al = RAM::rb(ds,bx+al);
         ip++;
         printf("XLAT\n");
+        break;
+    }
+    case 0xE0:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("LOOPNZ %02x\n",tmp);
+        cx--;
+        if((cx!=0) && (!(flags & 0x0040))) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0xE1:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("LOOPZ %02x\n",tmp);
+        cx--;
+        if((cx!=0) && ((flags & 0x0040))) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0xE2:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("LOOP %02x\n",tmp);
+        cx--;
+        if(cx!=0) ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0xE3:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JCXZ %02x\n",tmp);
+        if(cx==0) ip += (s8)tmp;
+        ip+=2;
         break;
     }
     case 0xE4:
@@ -3046,6 +3280,27 @@ void rtick()
         ip++;
         break;
     }
+    case 0xFB:
+    {
+        printf("STI\n");
+        flags |= 0x0200;
+        ip++;
+        break;
+    }
+    case 0xFC:
+    {
+        printf("CLD\n");
+        flags &= 0xFBFF;
+        ip++;
+        break;
+    }
+    case 0xFD:
+    {
+        printf("STD\n");
+        flags |= 0x0400;
+        ip++;
+        break;
+    }
     case 0xFE:
     {
         u8 op2 = RAM::rb(cs,ip+1);
@@ -3102,7 +3357,7 @@ void rtick()
 
 void tick()
 {
-    u8 op = RAM::rb(cs,ip+1);
+    u8 op = RAM::rb(cs,ip);
 
     switch(op)
     {
@@ -3130,7 +3385,7 @@ void tick()
         seg = SEG_DS;
         break;
     }
-defaukt:
+    default:
     seg = SEG_DEFAULT;
     }
     rtick();

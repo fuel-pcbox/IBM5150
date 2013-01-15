@@ -140,7 +140,8 @@ u8 rb(u16 addr)
     {
         if(addr>=handlers[i].start && addr<=handlers[i].end) break;
     }
-    return handlers[i].rb(addr-handlers[i].start);
+    if(handlers[i].wb != NULL) return handlers[i].rb(addr-handlers[i].start);
+    else return 0;
 }
 void wb(u16 addr, u8 value)
 {
@@ -161,9 +162,10 @@ void wb(u16 addr, u8 value)
 
 #include "cpu.h"
 
-int main()
+int main(int ac, char** av)
 {
-    FILE* bios = fopen("pcxt.rom","rb");
+    if(ac < 2) return 1;
+    FILE* bios = fopen(av[1],"rb");
     fseek(bios,0,SEEK_END);
     long size = ftell(bios);
     fseek(bios,0,SEEK_SET);
@@ -174,8 +176,9 @@ int main()
     IO_XT::handlers.push_back(DMA_XT::handler);
     IO_XT::handlers.push_back(PPI::handler);
 
-    for(int i = 0; i<128; i++)
+    for(int i = 0; i<65536; i++)
     {
         CPU::tick();
     }
+    return 0;
 }
