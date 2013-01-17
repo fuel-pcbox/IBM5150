@@ -4233,6 +4233,13 @@ void tick()
 	rep = 0;
         break;
     }
+    case 0xF0:
+    {
+	ip++;
+	seg = SEG_DEFAULT;
+	rep = 0;
+	break;
+    }
     case 0xF2:
     {
 	ip++;
