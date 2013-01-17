@@ -1058,6 +1058,7 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
     return res;
 }
 int seg = SEG_DEFAULT;
+int rep = 0; //0 is no rep. 1 is repe. 2 is repne.
 void rtick()
 {
     u8 op = RAM::rb(cs,ip);
@@ -2036,6 +2037,191 @@ void rtick()
         ip++;
         break;
     }
+    //Opcodes 0x60-0x6F are just aliases of 0x70-0x7F on the 8086. Confirmed by hardware tests.
+    case 0x60:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JO %02x\n",tmp);
+        if((flags&0x0800)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x61:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JNO %02x\n",tmp);
+        if(!(flags&0x0800)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x62:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JC %02x\n",tmp);
+        if((flags&0x0001)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x63:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JNC %02x\n",tmp);
+        if(!(flags&0x0001)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x64:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JZ %02x\n",tmp);
+        if((flags&0x0040)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x65:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JNZ %02x\n",tmp);
+        if(!(flags&0x0040)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x66:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JBE %02x\n",tmp);
+        if((flags&0x0040) || (flags&0x0001)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x67:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JA %02x\n",tmp);
+        if(!(flags&0x0040) && !(flags&0x0001)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x68:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JS %02x\n",tmp);
+        if((flags&0x0080)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x69:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JNS %02x\n",tmp);
+        if(!(flags&0x0080)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x6A:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JP %02x\n",tmp);
+        if((flags&0x0004)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x6B:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JNP %02x\n",tmp);
+        if(!(flags&0x0004)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x6C:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JL %02x\n",tmp);
+        if(tmp1 != tmp2) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x6D:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JGE %02x\n",tmp);
+        if(tmp1 == tmp2) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x6E:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JLE %02x\n",tmp);
+        if((tmp1 != tmp2) || (flags & 0x0040)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
+    case 0x6F:
+    {
+	if(type==intel8086)
+	{
+        u8 tmp = RAM::rb(cs,ip+1);
+        bool tmp1 = (flags >> 7) & 1;
+        bool tmp2 = (flags >> 11) & 1;
+        printf("JG %02x\n",tmp);
+        if((tmp1 == tmp2) && !(flags & 0x0040)) ip += (s8)tmp;
+        ip+=2;
+	}
+        break;
+    }
     case 0x70:
     {
         u8 tmp = RAM::rb(cs,ip+1);
@@ -2171,6 +2357,189 @@ void rtick()
         if((tmp1 == tmp2) && !(flags & 0x0040)) ip += (s8)tmp;
         ip+=2;
         break;
+    }
+    case 0x80: case 0x82:
+    {
+	u8 op2 = RAM::rb(cs,ip+1);
+	u8 op3 = RAM::rb(cs,ip+2);
+        locs loc = decodemodrm(seg,op2,false,false);
+	switch(op2&0x38)
+	{
+	    case 0x00:
+	    {
+		printf("ADD Eb,%02x\n",op3);
+		*loc.src8 += op3;
+		break;
+	    }
+	    case 0x08:
+	    {
+		printf("OR Eb,%02x\n",op3);
+		*loc.src8 |= op3;
+		break;
+	    }
+	    case 0x10:
+	    {
+		printf("ADC Eb,%02x\n",op3);
+		*loc.src8 += op3 + (flags & 0x0001);
+		break;
+	    }
+	    case 0x18:
+	    {
+		printf("SBB Eb,%02x\n",op3);
+		*loc.src8 -= op3 + (flags & 0x0001);
+		break;
+	    }
+	    case 0x20:
+	    {
+		printf("AND Eb,%02x\n",op3);
+		*loc.src8 &= op3;
+		break;
+	    }
+	    case 0x28:
+	    {
+		printf("SUB Eb,%02x\n",op3);
+		*loc.src8 -= op3;
+		break;
+	    }
+	    case 0x30:
+	    {
+		printf("XOR Eb,%02x\n",op3);
+		*loc.src8 &= op3;
+		break;
+	    }
+	    case 0x38:
+	    {
+		printf("CMP Eb,%02x\n",op3);
+		u8 tmp = *loc.src8 - op3;
+		if(tmp==0) flags |= 0x0040;
+		else flags &= 0xFFBF;
+		break;
+	    }   
+	}
+	ip+=3;
+	break;
+    }
+    case 0x81:
+    {
+	u8 op2 = RAM::rb(cs,ip+1);
+	u8 op3 = RAM::rb(cs,ip+2) | (RAM::rb(cs,ip+3)<<8);
+        locs loc = decodemodrm(seg,op2,true,false);
+	switch(op2&0x38)
+	{
+	    case 0x00:
+	    {
+		printf("ADD Ev,%04x\n",op3);
+		*loc.src16 += op3;
+		break;
+	    }
+	    case 0x08:
+	    {
+		printf("OR Ev,%04x\n",op3);
+		*loc.src16 |= op3;
+		break;
+	    }
+	    case 0x10:
+	    {
+		printf("ADC Ev,%04x\n",op3);
+		*loc.src16 += op3 + (flags & 0x0001);
+		break;
+	    }
+	    case 0x18:
+	    {
+		printf("SBB Ev,%04x\n",op3);
+		*loc.src16 -= op3 + (flags & 0x0001);
+		break;
+	    }
+	    case 0x20:
+	    {
+		printf("AND Ev,%04x\n",op3);
+		*loc.src16 &= op3;
+		break;
+	    }
+	    case 0x28:
+	    {
+		printf("SUB Eb,%04x\n",op3);
+		*loc.src16 -= op3;
+		break;
+	    }
+	    case 0x30:
+	    {
+		printf("XOR Ev,%04x\n",op3);
+		*loc.src16 &= op3;
+		break;
+	    }
+	    case 0x38:
+	    {
+		printf("CMP Ev,%04x\n",op3);
+		u16 tmp = *loc.src16 - op3;
+		if(tmp==0) flags |= 0x0040;
+		else flags &= 0xFFBF;
+		break;
+	    }   
+	}
+	ip+=3;
+	break;
+    }
+    case 0x83:
+    {
+	u8 op2 = RAM::rb(cs,ip+1);
+	u8 op3 = RAM::rb(cs,ip+2);
+        locs loc = decodemodrm(seg,op2,true,false);
+	switch(op2&0x38)
+	{
+	    case 0x00:
+	    {
+		printf("ADD Ev,%02x\n",op3);
+		*loc.src16 += op3;
+		break;
+	    }
+	    case 0x08:
+	    {
+		printf("OR Ev,%02x\n",op3);
+		*loc.src16 |= op3;
+		break;
+	    }
+	    case 0x10:
+	    {
+		printf("ADC Ev,%02x\n",op3);
+		*loc.src16 += op3 + (flags & 0x0001);
+		break;
+	    }
+	    case 0x18:
+	    {
+		printf("SBB Ev,%02x\n",op3);
+		*loc.src16 -= op3 + (flags & 0x0001);
+		break;
+	    }
+	    case 0x20:
+	    {
+		printf("AND Ev,%02x\n",op3);
+		*loc.src16 &= op3;
+		break;
+	    }
+	    case 0x28:
+	    {
+		printf("SUB Eb,%02x\n",op3);
+		*loc.src16 -= op3;
+		break;
+	    }
+	    case 0x30:
+	    {
+		printf("XOR Ev,%02x\n",op3);
+		*loc.src16 &= op3;
+		break;
+	    }
+	    case 0x38:
+	    {
+		printf("CMP Ev,%02x\n",op3);
+		u16 tmp = *loc.src16 - op3;
+		if(tmp==0) flags |= 0x0040;
+		else flags &= 0xFFBF;
+		break;
+	    }   
+	}
+	ip+=3;
+	break;
     }
     case 0x84:
     {
@@ -2477,6 +2846,9 @@ void rtick()
     }
     case 0xA4:
     {
+	switch(rep)
+	{
+	case 0:
         RAM::wb(es,di,RAM::rb(ds,si));
         if(!(flags & 0x0400))
         {
@@ -2484,16 +2856,39 @@ void rtick()
             si++;
         }
         else
-        {
-            di--;
-            si--;
+       	{
+       	    di--;
+       	    si--;
         }
         ip++;
         printf("MOVSB\n");
+	break;
+	case 1: case 2:
+	for(;cx!=0;cx--)
+	{
+        RAM::wb(es,di,RAM::rb(ds,si));
+       	if(!(flags & 0x0400))
+        {
+            di++;
+            si++;
+        }
+        else
+       	{
+       	    di--;
+       	    si--;
+        }
+	}
+        ip++;
+        printf("REP MOVSB\n");
+	break;
+	}
         break;
     }
     case 0xA5:
     {
+	switch(rep)
+	{
+	case 0:
         RAM::wb(es,di,RAM::rb(ds,si));
         RAM::wb(es,di+1,RAM::rb(ds,si+1));
         if(!(flags & 0x0400))
@@ -2508,10 +2903,34 @@ void rtick()
         }
         ip++;
         printf("MOVSW\n");
+	break;
+	case 1: case 2:
+	for(;cx!=0;cx--)
+	{
+        RAM::wb(es,di,RAM::rb(ds,si));
+        RAM::wb(es,di+1,RAM::rb(ds,si+1));
+        if(!(flags & 0x0400))
+        {
+            di+=2;
+            si+=2;
+        }
+        else
+        {
+            di-=2;
+            si-=2;
+        }
+	}
+        ip++;
+        printf("REP MOVSW\n");
+	break;
+	}
         break;
     }
     case 0xA6:
     {
+	switch(rep)
+	{
+	case 0:
         u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
         if(!(flags & 0x0400))
         {
@@ -2527,10 +2946,57 @@ void rtick()
         if(tmp == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
         printf("CMPSB\n");
+	break;
+	case 1:
+	for(;cx!=0;cx--)
+	{
+        u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
+        if(!(flags & 0x0400))
+        {
+            di++;
+            si++;
+        }
+        else
+        {
+            di--;
+            si--;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if(!(flags & 0x0040)) break;
+	}
+        printf("REPE CMPSB\n");
+	break;
+	case 2:
+	for(;cx!=0;cx--)
+	{
+        u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
+        if(!(flags & 0x0400))
+        {
+            di++;
+            si++;
+        }
+        else
+        {
+            di--;
+            si--;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if((flags & 0x0040)) break;
+	}
+        printf("REPNE CMPSB\n");
+	break;
+	}
         break;
     }
     case 0xA7:
     {
+	switch(rep)
+	{
+	case 0:
         u16 tmp = (RAM::rb(ds,si)|(RAM::rb(ds,si+1)<<8)) - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
         if(!(flags & 0x0400))
         {
@@ -2546,6 +3012,50 @@ void rtick()
         if(tmp == 0) flags |= 0x0040;
         else flags &= 0xFFBF;
         printf("CMPSW\n");
+	break;
+	case 1:
+	for(;cx!=0;cx--)
+	{
+        u16 tmp = (RAM::rb(ds,si)|(RAM::rb(ds,si+1)<<8)) - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
+        if(!(flags & 0x0400))
+        {
+            di+=2;
+            si+=2;
+        }
+        else
+        {
+            di-=2;
+            si-=2;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if(!(flags&0x0040)) break;
+	}
+        printf("REPE CMPSW\n");
+	break;
+	case 2:
+	for(;cx!=0;cx--)
+	{
+        u16 tmp = (RAM::rb(ds,si)|(RAM::rb(ds,si+1)<<8)) - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
+        if(!(flags & 0x0400))
+        {
+            di+=2;
+            si+=2;
+        }
+        else
+        {
+            di-=2;
+            si-=2;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if((flags&0x0040)) break;
+	}
+        printf("REPNE CMPSW\n");
+	break;
+	}
         break;
     }
     case 0xA8:
@@ -2570,21 +3080,52 @@ void rtick()
     }
     case 0xAA:
     {
+	switch(rep)
+	{
+	case 0:
         RAM::wb(es,di,al);
         if(!(flags&0x0400)) di++;
         else di--;
         ip++;
         printf("STOSB\n");
+	break;
+	case 1: case 2:
+	for(;cx!=0;cx--)
+	{
+        RAM::wb(es,di,al);
+        if(!(flags&0x0400)) di++;
+        else di--;
+	}
+        ip++;
+        printf("REP STOSB\n");
+	break;
+	}
         break;
     }
     case 0xAB:
     {
+	switch(rep)
+	{
+	case 0:
         RAM::wb(es,di,al);
         RAM::wb(es,di+1,ah);
         if(!(flags&0x0400)) di+=2;
         else di-=2;
         ip++;
         printf("STOSW\n");
+	break;
+	case 1: case 2:
+	for(;cx!=0;cx--)
+	{
+        RAM::wb(es,di,al);
+        RAM::wb(es,di+1,ah);
+        if(!(flags&0x0400)) di+=2;
+        else di-=2;
+	}
+        ip++;
+        printf("STOSW\n");
+	break;
+	}
         break;
     }
     case 0xAC:
@@ -2607,6 +3148,9 @@ void rtick()
     }
     case 0xAE:
     {
+	switch(rep)
+	{
+	case 0:
         u8 tmp = al - RAM::rb(es,di);
         if(!(flags&0x0400)) di++;
         else di--;
@@ -2614,10 +3158,41 @@ void rtick()
         else flags &= 0xFFBF;
         ip++;
         printf("SCASB\n");
+	break;
+	case 1:
+	for(;cx!=0;cx--)
+	{
+        u8 tmp = al - RAM::rb(es,di);
+        if(!(flags&0x0400)) di++;
+        else di--;
+        if(tmp==0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if(!(flags&0x0040)) break;
+	}
+        ip++;
+        printf("REPE SCASB\n");
+	break;
+	case 2:
+	for(;cx!=0;cx--)
+	{
+        u8 tmp = al - RAM::rb(es,di);
+        if(!(flags&0x0400)) di++;
+        else di--;
+        if(tmp==0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if((flags&0x0040)) break;
+	}
+        ip++;
+        printf("REPNE SCASB\n");
+	break;
+	}
         break;
     }
     case 0xAF:
     {
+	switch(rep)
+	{
+	case 0:
         u16 tmp = ax - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
         if(!(flags&0x0400)) di+=2;
         else di-=2;
@@ -2625,6 +3200,34 @@ void rtick()
         else flags &= 0xFFBF;
         ip++;
         printf("SCASW\n");
+	break;
+	case 1:
+	for(;cx!=0;cx--)
+	{
+        u16 tmp = ax - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
+        if(!(flags&0x0400)) di+=2;
+        else di-=2;
+        if(tmp==0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if(!(flags&0x0040)) break;
+	}
+        ip++;
+        printf("REPE SCASW\n");
+	break;
+	case 2:
+	for(;cx!=0;cx--)
+	{
+        u16 tmp = ax - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
+        if(!(flags&0x0400)) di+=2;
+        else di-=2;
+        if(tmp==0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if((flags&0x0040)) break;
+	}
+        ip++;
+        printf("REPNE SCASW\n");
+	break;
+	}
         break;
     }
     case 0xB0:
@@ -3235,6 +3838,17 @@ void rtick()
         ip+=2;
         break;
     }
+    case 0xE8:
+    {
+        u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        printf("CALL %04x\n",tmp);
+	sp-=2;
+	RAM::wb(ss,sp,(ip+3)&0xFF);
+	RAM::wb(ss,sp+1,(ip+3)>>8);
+        ip += (s16)tmp;
+        ip+=3;
+        break;
+    }
     case 0xE9:
     {
         u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
@@ -3252,11 +3866,177 @@ void rtick()
         printf("JMP %04x:%04x\n",cs,ip);
         break;
     }
+    case 0xEB:
+    {
+        u8 tmp = RAM::rb(cs,ip+1);
+        printf("JMP %02x\n",tmp);
+        ip += (s8)tmp;
+        ip+=2;
+        break;
+    }
+    case 0xEC:
+    {
+        printf("IN AL,DX\n");
+        al = IO_XT::rb(dx);
+        ip++;
+        break;
+    }
+    case 0xED:
+    {
+        printf("IN AX,DX\n");
+        al = IO_XT::rb(dx);
+	ah = IO_XT::rb(dx+1);
+        ip++;
+        break;
+    }
     case 0xEE:
     {
         printf("OUT DX,AL\n");
         IO_XT::wb(dx,al);
         ip++;
+        break;
+    }
+    case 0xEF:
+    {
+        printf("OUT DX,AX\n");
+        IO_XT::wb(dx,al);
+	IO_XT::wb(dx+1,ah);
+        ip++;
+        break;
+    }
+    case 0xF5:
+    {
+        printf("CMC\n");
+        flags ^= 0x0001;
+        ip++;
+        break;
+    }
+    case 0xF6:
+    {
+        u8 op2 = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,op2,false,false);
+        switch(op2&0x38)
+        {
+            case 0x00:
+	    {
+		u8 op3 = RAM::rb(cs,ip+2);
+		u8 tmp = *loc.src8 & op3;
+		if(tmp == 0) flags |= 0x0040;
+		else flags &= 0xFFBF;
+		ip++;
+		printf("TEST Eb,%02x\n",op3);
+		break;
+	    }
+	    case 0x10:
+	    {
+		*loc.src8 = ~*loc.src8;
+		printf("NOT Eb\n");
+		break;
+	    }
+	    case 0x18:
+	    {
+		*loc.src8 = (~*loc.src8) + 1;
+		printf("NEG Eb\n");
+		break;
+	    }
+	    case 0x20:
+	    {
+		ax = *loc.src8 * al;
+		printf("MUL Eb\n");
+		break;
+	    }
+	    case 0x28:
+	    {
+		ax = (s16)(*loc.src8 * al);
+		printf("IMUL Eb\n");
+		break;
+	    }
+	    case 0x30:
+	    {
+		u8 tmp = ax / *loc.src8;
+		u8 tmp1 = ax - (tmp * (*loc.src8));
+		al = tmp;
+		ah = tmp1;
+		printf("DIV Eb\n");
+		break;
+	    }
+	    case 0x38:
+	    {
+		u8 tmp = ax / *loc.src8;
+		u8 tmp1 = ax - (tmp * (*loc.src8));
+		al = tmp;
+		ah = tmp1;
+		printf("IDIV Eb\n");
+		break;
+	    }
+        }
+        ip+=2;
+        break;
+    }
+    case 0xF7:
+    {
+        u8 op2 = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,op2,true,false);
+        switch(op2&0x38)
+        {
+            case 0x00:
+	    {
+		u16 op3 = RAM::rb(cs,ip+2) | (RAM::rb(cs,ip+3)<<8);
+		u16 tmp = *loc.src16 & op3;
+		if(tmp == 0) flags |= 0x0040;
+		else flags &= 0xFFBF;
+		ip+=2;
+		printf("TEST Ev,%04x\n",op3);
+		break;
+	    }
+	    case 0x10:
+	    {
+		*loc.src16 = ~*loc.src16;
+		printf("NOT Ev\n");
+		break;
+	    }
+	    case 0x18:
+	    {
+		*loc.src16 = (~*loc.src16) + 1;
+		printf("NEG Ev\n");
+		break;
+	    }
+	    case 0x20:
+	    {
+		u32 tmp = *loc.src16 * ax;
+		ax = tmp & 0xFFFF;
+		dx = tmp >> 16;
+		printf("MUL Ev\n");
+		break;
+	    }
+	    case 0x28:
+	    {
+		s32 tmp = *loc.src16 * ax;
+		ax = (u32)tmp & 0xFFFF;
+		dx = (u32)tmp >> 16;
+		printf("IMUL Ev\n");
+		break;
+	    }
+	    case 0x30:
+	    {
+		u16 tmp = (ax|(dx<<16)) / *loc.src8;
+		u16 tmp1 = (ax|(dx<<16)) - (tmp * (*loc.src16));
+		ax = tmp;
+		dx = tmp1;
+		printf("DIV Ev\n");
+		break;
+	    }
+	    case 0x38:
+	    {
+		u16 tmp = (ax|(dx<<16)) / *loc.src8;
+		u16 tmp1 = (ax|(dx<<16)) - (tmp * (*loc.src16));
+		ax = tmp;
+		dx = tmp1;
+		printf("IDIV Ev\n");
+		break;
+	    }
+        }
+        ip+=2;
         break;
     }
     case 0xF8:
@@ -3304,31 +4084,91 @@ void rtick()
     case 0xFE:
     {
         u8 op2 = RAM::rb(cs,ip+1);
-        switch(op2&0xC0)
+	locs loc = decodemodrm(seg,op2,false,false);
+        switch(op2&0x38)
         {
-        case 0xC0:
+	    case 0x00:
+	    {
+		printf("INC Eb\n");
+		*loc.src8++;
+		break;
+	    }
+	    case 0x08:
+	    {
+		printf("DEC Eb\n");
+		*loc.src8--;
+		break;
+	    }
+	}
+        ip+=2;
+        break;
+    }
+    case 0xFF:
+    {
+        u8 op2 = RAM::rb(cs,ip+1);
+	locs loc = decodemodrm(seg,op2,true,false);
+        switch(op2&0x38)
         {
-            switch(op2&0x38)
-            {
-            case 0x00:
-            {
-                switch(op2&0x07)
-                {
-                case 0x00:
-                {
-                    printf("INC AL\n");
-                    al++;
-                    if(al==0) flags |= 0x0040;
-                    else flags &= 0xFFBF;
-                    break;
-                }
-                }
-                break;
-            }
-            }
-            break;
-        }
-        }
+	    case 0x00:
+	    {
+		printf("INC Ev\n");
+		*loc.src16++;
+		break;
+	    }
+	    case 0x08:
+	    {
+		printf("DEC Ev\n");
+		*loc.src16--;
+		break;
+	    }
+	    case 0x10:
+	    {
+		printf("CALL Ev\n");
+		sp-=2;
+		RAM::wb(ss,sp,(ip+2)&0xFF);
+		RAM::wb(ss,sp+1,(ip+2)>>8);
+		ip = *loc.src16;
+		break;
+	    }
+	    case 0x18:
+	    {
+		u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+		u16 tmp1 = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
+		printf("CALL %04x:%04x\n",tmp1,tmp);
+		sp-=2;
+		RAM::wb(ss,sp,(ip+2)&0xFF);
+		RAM::wb(ss,sp+1,(ip+2)>>8);
+		sp-=2;
+		RAM::wb(ss,sp,cs&0xFF);
+		RAM::wb(ss,sp+1,cs>>8);
+		ip = tmp;
+		cs = tmp1;
+		break;
+	    }
+	    case 0x20:
+	    {
+		printf("JMP Ev\n");
+		ip = *loc.src16;
+		break;
+	    }
+	    case 0x28:
+	    {
+		u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+		u16 tmp1 = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
+		printf("JMP %04x:%04x\n",tmp1,tmp);
+		ip = tmp;
+		cs = tmp1;
+		break;
+	    }
+	    case 0x30:
+	    {
+		printf("PUSH Ev\n");
+		sp-=2;
+		RAM::wb(ss,sp,*loc.src16 & 0xFF);
+		RAM::wb(ss,sp+1,*loc.src16 >> 8);
+		break;
+	    }
+	}
         ip+=2;
         break;
     }
@@ -3355,8 +4195,12 @@ void rtick()
     printf("flags=%04x\n",flags);
 }
 
+bool halted = false;
+
 void tick()
 {
+    if(!halted)
+    {
     u8 op = RAM::rb(cs,ip);
 
     switch(op)
@@ -3365,30 +4209,55 @@ void tick()
     {
         ip++;
         seg = SEG_ES;
+	rep = 0;
         break;
     }
     case 0x2E:
     {
         ip++;
         seg = SEG_CS;
+	rep = 0;
         break;
     }
     case 0x36:
     {
         ip++;
         seg = SEG_SS;
+	rep = 0;
         break;
     }
     case 0x3E:
     {
         ip++;
         seg = SEG_DS;
+	rep = 0;
         break;
+    }
+    case 0xF2:
+    {
+	ip++;
+	seg = SEG_DEFAULT;
+	rep = 2;
+	break;
+    }
+    case 0xF3:
+    {
+	ip++;
+	seg = SEG_DEFAULT;
+	rep = 1;
+	break;
+    }
+    case 0xF4:
+    {
+	ip++;
+	halted=true;
     }
     default:
     seg = SEG_DEFAULT;
+    rep = 0;
     }
     rtick();
+    }
 }
 
 };
