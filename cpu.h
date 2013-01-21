@@ -3763,6 +3763,14 @@ void rtick()
         printf("AAD %02x\n",tmp);
         break;
     }
+    case 0xD6:
+    {
+	if(flags&0x0001) al = 0xFF;
+	else al = 0;
+	ip++;
+	printf("SALC\n");
+	break;
+    }
     case 0xD7:
     {
         al = RAM::rb(ds,bx+al);
