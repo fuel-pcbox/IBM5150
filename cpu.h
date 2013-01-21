@@ -3,6 +3,7 @@ namespace CPU
 enum cputype
 {
     intel8086 = 0,
+    necv20,
     intel286,
     intel386
 };
@@ -35,20 +36,34 @@ union reg16
         u8 lo,hi;
     } parts;
     u16 w;
-} a,b,c,d;
-#define ax a.w
-#define al a.parts.lo
-#define ah a.parts.hi
-#define bx b.w
-#define bl b.parts.lo
-#define bh b.parts.hi
-#define cx c.w
-#define cl c.parts.lo
-#define ch c.parts.hi
+} aw,bw,cw,dw;
+reg16 afw, bcw, dew, hlw; //NEC V20 registers
+#define ax aw.w
+#define al aw.parts.lo
+#define ah aw.parts.hi
+#define bx bw.w
+#define bl bw.parts.lo
+#define bh bw.parts.hi
+#define cx cw.w
+#define cl cw.parts.lo
+#define ch cw.parts.hi
 
-#define dx d.w
-#define dl d.parts.lo
-#define dh d.parts.hi
+#define dx dw.w
+#define dl dw.parts.lo
+#define dh dw.parts.hi
+
+#define af afw.w
+#define f afw.parts.lo
+#define a afw.parts.hi
+#define bc afw.w
+#define c afw.parts.lo
+#define b afw.parts.hi
+#define de afw.w
+#define e afw.parts.lo
+#define d afw.parts.hi
+#define hl afw.w
+#define l afw.parts.lo
+#define h afw.parts.hi
 
 u16 ds,es,ss;
 u16 sp,bp,si,di;
@@ -1059,9 +1074,12 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
 }
 int seg = SEG_DEFAULT;
 int rep = 0; //0 is no rep. 1 is repe. 2 is repne.
+bool i8080 = false; //This is for the NEC V20.
 void rtick()
 {
     u8 op = RAM::rb(cs,ip);
+    if(!i8080)
+    {
     switch(op)
     {
     case 0x00:
@@ -1242,6 +1260,67 @@ void rtick()
             sp+=2;
             ip++;
         }
+	else if(type == necv20)
+	{
+	    u8 op2 = RAM::rb(cs,ip+1);
+	    switch(op2)
+	    {
+		case 0x31:
+		{
+		u8 modrm = RAM::rb(cs,ip+3);
+        	locs loc = decodemodrm(seg,modrm,false,false);	
+		u8 tmp1 = *loc.src8 & 0x0F;
+		u8 tmp2 = 0;
+		for(int i = 0;i<tmp1;i++)
+		{
+		tmp2 |= (1<<i);
+		}
+		u8 tmp3 = tmp2 >> (*loc.dst8 & 0x0F);
+		u8 tmp4 = tmp2 << (8 - (*loc.dst8 & 0x0F));
+		RAM::wb(es,di,ax&tmp3);
+		if(tmp4 != 0)
+		{
+		RAM::wb(es,di+1,ax&tmp4);
+		di++;
+		}
+		di++;
+		ip+=3;
+		printf("INS Gb,Eb\n");
+		break;
+		}
+		case 0x39:
+		{
+		u8 modrm = RAM::rb(cs,ip+3);
+        	locs loc = decodemodrm(seg,modrm,false,false);
+		u8 tmp = RAM::rb(cs,ip+2);	
+		u8 tmp1 = tmp & 0x0F;
+		u8 tmp2 = 0;
+		for(int i = 0;i<tmp1;i++)
+		{
+		tmp2 |= (1<<i);
+		}
+		u8 tmp3 = tmp2 >> (*loc.dst8 & 0x0F);
+		u8 tmp4 = tmp2 << (8 - (*loc.dst8 & 0x0F));
+		RAM::wb(es,di,ax&tmp3);
+		if(tmp4 != 0)
+		{
+		RAM::wb(es,di+1,ax&tmp4);
+		di++;
+		}
+		di++;
+		ip+=3;
+		printf("INS Gb,%02x\n",tmp);
+		break;
+		}
+		case 0xFF:
+		{
+		i8080 = true;
+		ip+=3;
+		printf("BRKEM\n");
+		break;
+		}
+	    }
+	}
         break;
     }
     case 0x10:
@@ -2047,6 +2126,36 @@ void rtick()
         if((flags&0x0800)) ip += (s8)tmp;
         ip+=2;
 	}
+	else
+	{
+	sp -= 2;
+        RAM::wb(ss,sp,al);
+        RAM::wb(ss,sp+1,ah);
+	sp -= 2;
+        RAM::wb(ss,sp,cl);
+        RAM::wb(ss,sp+1,ch);
+	sp -= 2;
+        RAM::wb(ss,sp,dl);
+        RAM::wb(ss,sp+1,dh);
+	sp -= 2;
+        RAM::wb(ss,sp,bl);
+        RAM::wb(ss,sp+1,bh);
+	u16 tmp = sp;
+	sp -= 2;
+        RAM::wb(ss,sp,tmp & 0xFF);
+        RAM::wb(ss,sp+1,tmp >> 8);
+	sp -= 2;
+        RAM::wb(ss,sp,bp & 0xFF);
+        RAM::wb(ss,sp+1,bp >> 8);
+	sp -= 2;
+        RAM::wb(ss,sp,si & 0xFF);
+        RAM::wb(ss,sp+1,si >> 8);
+	sp -= 2;
+        RAM::wb(ss,sp,di & 0xFF);
+        RAM::wb(ss,sp+1,di >> 8);
+	printf("PUSHA\n");
+	ip++;
+	}
         break;
     }
     case 0x61:
@@ -2058,6 +2167,25 @@ void rtick()
         if(!(flags&0x0800)) ip += (s8)tmp;
         ip+=2;
 	}
+	else
+	{
+	di = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+	si = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+	bp = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=4;
+	bx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+	dx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+	cx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+	ax = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
+        sp+=2;
+	printf("POPA\n");
+	ip++;
+	}
         break;
     }
     case 0x62:
@@ -2068,6 +2196,28 @@ void rtick()
         printf("JC %02x\n",tmp);
         if((flags&0x0001)) ip += (s8)tmp;
         ip+=2;
+	}
+	else
+	{
+	u8 modrm = RAM::rb(cs,ip+1);
+	u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+	u16 tmp1 = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
+	locs loc = decodemodrm(seg,modrm,true,false);
+	if((*loc.dst16) < (*loc.src16) || (*loc.dst16) > (*(loc.src16 + 2)))
+	{
+	sp-=2;
+        RAM::wb(ss,sp,flags & 0xFF);
+        RAM::wb(ss,sp+1,flags >> 8);
+        flags &= 0xFCFF;
+        sp-=2;
+        RAM::wb(ss,sp,cs & 0xFF);
+        RAM::wb(ss,sp+1,cs >> 8);
+        sp-=2;
+        RAM::wb(ss,sp,(ip+1) & 0xFF);
+        RAM::wb(ss,sp+1,(ip+1) >> 8);
+        cs = RAM::rb(0,23)|(RAM::rb(0,22)<<8);
+        ip = RAM::rb(0,20)|(RAM::rb(0,21)<<8);
+	}
 	}
         break;
     }
@@ -2181,6 +2331,34 @@ void rtick()
         if(tmp1 != tmp2) ip += (s8)tmp;
         ip+=2;
 	}
+	else
+	{
+	switch(rep)
+	{
+	case 0:
+	{
+	RAM::wb(es,di,IO_XT::rb(dx));
+	if(!(flags & 0x0400)) di++;
+	else di--;
+	printf("INSB\n");
+	break;
+	}
+	default:
+	{
+	for(;cx!=0;cx--)
+	{
+	RAM::wb(es,di,IO_XT::rb(dx));
+	if(!(flags & 0x0400)) di++;
+	else di--;
+	}
+	printf("REP INSB\n");
+	break;
+	}
+	break;
+	}
+	}
+	ip++;
+	}
         break;
     }
     case 0x6D:
@@ -2193,6 +2371,36 @@ void rtick()
         printf("JGE %02x\n",tmp);
         if(tmp1 == tmp2) ip += (s8)tmp;
         ip+=2;
+	}
+	else
+	{
+	switch(rep)
+	{
+	case 0:
+	{
+	RAM::wb(es,di,IO_XT::rb(dx));
+	RAM::wb(es,di+1,IO_XT::rb(dx));
+	if(!(flags & 0x0400)) di+=2;
+	else di-=2;
+	printf("INSW\n");
+	break;
+	}
+	default:
+	{
+	for(;cx!=0;cx--)
+	{
+	RAM::wb(es,di,IO_XT::rb(dx));
+	RAM::wb(es,di+1,IO_XT::rb(dx));
+	if(!(flags & 0x0400)) di+=2;
+	else di-=2;
+	}
+	printf("REP INSW\n");
+	break;
+	}
+	break;
+	}
+	}
+	ip++;
 	}
         break;
     }
@@ -2207,6 +2415,34 @@ void rtick()
         if((tmp1 != tmp2) || (flags & 0x0040)) ip += (s8)tmp;
         ip+=2;
 	}
+	else
+	{
+	switch(rep)
+	{
+	case 0:
+	{
+	IO_XT::wb(dx,RAM::rb(ds,si));
+	if(!(flags & 0x0400)) si++;
+	else si--;
+	printf("OUTSB\n");
+	break;
+	}
+	default:
+	{
+	for(;cx!=0;cx--)
+	{
+	IO_XT::wb(dx,RAM::rb(ds,si));
+	if(!(flags & 0x0400)) si++;
+	else si--;
+	}
+	printf("REP OUTSB\n");
+	break;
+	}
+	break;
+	}
+	}
+	ip++;
+	}
         break;
     }
     case 0x6F:
@@ -2219,6 +2455,36 @@ void rtick()
         printf("JG %02x\n",tmp);
         if((tmp1 == tmp2) && !(flags & 0x0040)) ip += (s8)tmp;
         ip+=2;
+	}
+	else
+	{
+	switch(rep)
+	{
+	case 0:
+	{
+	IO_XT::wb(dx,RAM::rb(ds,si));
+	IO_XT::wb(dx+1,RAM::rb(ds,si+1));
+	if(!(flags & 0x0400)) si+=2;
+	else si-=2;
+	printf("OUTSw\n");
+	break;
+	}
+	default:
+	{
+	for(;cx!=0;cx--)
+	{
+	IO_XT::wb(dx,RAM::rb(ds,si));
+	IO_XT::wb(dx+1,RAM::rb(ds,si+1));
+	if(!(flags & 0x0400)) si+=2;
+	else si-=2;
+	}
+	printf("REP OUTSw\n");
+	break;
+	}
+	break;
+	}
+	}
+	ip++;
 	}
         break;
     }
@@ -2989,6 +3255,48 @@ void rtick()
 	}
         printf("REPNE CMPSB\n");
 	break;
+	case 3:
+	for(;cx!=0;cx--)
+	{
+        u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
+        if(!(flags & 0x0400))
+        {
+            di++;
+            si++;
+        }
+        else
+        {
+            di--;
+            si--;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if(!(flags & 0x0001)) break;
+	}
+        printf("REPC CMPSB\n");
+	break;
+	case 4:
+	for(;cx!=0;cx--)
+	{
+        u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
+        if(!(flags & 0x0400))
+        {
+            di++;
+            si++;
+        }
+        else
+        {
+            di--;
+            si--;
+        }
+        ip++;
+        if(tmp == 0) flags |= 0x0040;
+        else flags &= 0xFFBF;
+	if((flags & 0x0001)) break;
+	}
+        printf("REPNC CMPSB\n");
+	break;
 	}
         break;
     }
@@ -3401,6 +3709,49 @@ void rtick()
         printf("MOV Ev, %04x modrm=%02x\n",tmp,modrm);
         break;
     }
+    case 0xC8:
+    {
+	if(type!=intel8086)
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	u8 tmp1 = RAM::rb(cs,ip+3);
+	u8 tmp2 = tmp1 & 0x1F;
+	sp-=2;
+	RAM::wb(ss,sp,bp&0xFF);
+	RAM::wb(ss,sp+1,bp>>8);
+	u16 tmp3 = sp;
+	if(tmp2 > 0)
+	{
+	for(int i = 0;i<level;i++)
+	{
+	bp-=2;
+	sp-=2;
+	RAM::wb(ss,sp,bp&0xFF);
+	RAM::wb(ss,sp+1,bp>>8);
+	}
+	sp-=2;
+	RAM::wb(ss,sp,tmp3&0xFF);
+	RAM::wb(ss,sp+1,tmp3>>8);
+	}
+	bp = tmp3;
+	sp-=tmp;
+	printf("ENTER %04x,%02x\n",tmp,tmp1);
+	ip+=3;
+	}
+	ip++;
+	break;
+    }
+    case 0xC9:
+    {
+	if(type!=intel8086)
+	{
+	sp = bp;
+	bp = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
+	printf("LEAVE\n");
+	}
+	ip++;
+	break;
+    }
     case 0xCA:
     {
         u16 tmp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
@@ -3745,6 +4096,8 @@ void rtick()
     }
     case 0xD4:
     {
+	if(type != necv20)
+	{
         u8 tmp = RAM::rb(cs,ip+1);
         u8 tmp1 = al / tmp;
         ah = tmp1;
@@ -3752,23 +4105,46 @@ void rtick()
         al = tmp2;
         ip+=2;
         printf("AAM %02x\n",tmp);
+	}
+	else
+	{
+	u8 tmp1 = al / 10;
+        ah = tmp1;
+        u8 tmp2 = al - (tmp1 * 10);
+        al = tmp2;
+	ip+=2;
+	printf("AAM 10\n",tmp);
+	}
         break;
     }
     case 0xD5:
     {
+	if(type != necv20)
+	{
         u8 tmp = RAM::rb(cs,ip+1);
-        al = (ah * 10) + al;
+        al = (ah * tmp) + al;
         ah = 0;
         ip+=2;
         printf("AAD %02x\n",tmp);
+	}
+	else
+	{
+	al = (ah * 10) + al;
+        ah = 0;
+	ip+=2;
+	printf("AAD 10\n",tmp);
+	}
         break;
     }
     case 0xD6:
     {
+	if(type != necv20)
+	{
 	if(flags&0x0001) al = 0xFF;
 	else al = 0;
-	ip++;
 	printf("SALC\n");
+	}
+	ip++;
 	break;
     }
     case 0xD7:
@@ -4187,6 +4563,424 @@ void rtick()
         break;
     }
     }
+    }
+    else
+    {
+	u8 op = RAM::rb(cs,ip); //TODO: I'm guessing that the NEC V20's 8080 mode uses the same stack pointer and instruction pointer.
+	switch(op)
+	{
+	case 0x00: case 0x08: case 0x10: case 0x18: case 0x20: case 0x28: case 0x30: case 0x38:
+	{
+	ip++;
+	printf("NOP\n");
+	break;
+	}
+	case 0x01:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	bc = tmp;
+	ip+=3;
+	printf("LD BC,%04x\n",tmp);
+	break;
+	}
+	case 0x02:
+	{
+	RAM::wb(cs,bc,a);
+	ip++;
+	printf("LD (BC),A\n");
+	break;
+	}
+	case 0x03:
+	{
+	bc++;
+	ip++;
+	printf("INC BC\n");
+	break;
+	}
+	case 0x04:
+	{
+	b++;
+	ip++;
+	printf("INC B\n");
+	break;
+	}
+	case 0x05:
+	{
+	b--;
+	ip++;
+	printf("DEC B\n");
+	break;
+	}
+	case 0x06:
+	{
+	b = RAM::rb(cs,ip+1);
+	ip+=2;
+	printf("LD B,%02x\n",b);
+	break;
+	}
+	case 0x07:
+	{
+	u8 tmp = a;
+	u8 tmp1 = f & 1;
+	a <<= 1;
+	f = (f & 0xFE) | (tmp >> 7);
+	a = (a & 0xFE) | tmp1;
+	ip+=2;
+	printf("RLCA\n");
+	break;
+	}
+	case 0x09:
+	{
+	hl += bc;
+	ip++;
+	printf("ADD HL,BC\n");
+	break;
+	}
+	case 0x0A:
+	{
+	a = RAM::rb(cs,bc);
+	ip++;
+	printf("LD A,(BC)\n");
+	break;
+	}
+	case 0x0B:
+	{
+	bc--;
+	ip++;
+	printf("DEC BC\n");
+	break;
+	}
+	case 0x0C:
+	{
+	c++;
+	ip++;
+	printf("INC C\n");
+	break;
+	}
+	case 0x0D:
+	{
+	c--;
+	ip++;
+	printf("DEC C\n");
+	break;
+	}
+	case 0x0E:
+	{
+	c = RAM::rb(cs,ip+1);
+	ip+=2;
+	printf("LD C,%02x\n",c);
+	break;
+	}
+	case 0x0F:
+	{
+	u8 tmp = a;
+	u8 tmp1 = f & 1;
+	a >>= 1;
+	f = (f & 0xFE) | (tmp & 1);
+	a = (a & 0x7F) | (tmp1 << 7);
+	ip+=2;
+	printf("RRCA\n");
+	break;
+	}
+	case 0x11:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	de = tmp;
+	ip++;
+	printf("LD DE,%04x\n",tmp);
+	break;
+	}
+	case 0x12:
+	{
+	RAM::wb(cs,de,a);
+	ip++;
+	printf("LD (DE),A\n");
+	break;
+	}
+	case 0x13:
+	{
+	de++;
+	ip++;
+	printf("INC DE\n");
+	break;
+	}
+	case 0x14:
+	{
+	d++;
+	ip++;
+	printf("INC D\n");
+	break;
+	}
+	case 0x15:
+	{
+	d--;
+	ip++;
+	printf("DEC D\n");
+	break;
+	}
+	case 0x16:
+	{
+	d = RAM::rb(cs,ip+1);
+	ip+=2;
+	printf("LD D,%02x\n",d);
+	break;
+	}
+	case 0x17:
+	{
+	u8 tmp = a;
+	u8 tmp1 = f & 1;
+	a <<= 1;
+	f = (f & 0xFE) | (tmp >> 7);
+	a = (a & 0xFE) | tmp1;
+	ip+=2;
+	printf("RLA\n");
+	break;
+	}
+	case 0x19:
+	{
+	hl += de;
+	ip++;
+	printf("ADD HL,DE\n");
+	break;
+	}
+	case 0x1A:
+	{
+	a = RAM::rb(cs,de);
+	ip++;
+	printf("LD A,(DE)\n");
+	break;
+	}
+	case 0x1B:
+	{
+	de--;
+	ip++;
+	printf("DEC DE\n");
+	break;
+	}
+	case 0x1C:
+	{
+	e++;
+	ip++;
+	printf("INC E\n");
+	break;
+	}
+	case 0x1D:
+	{
+	e--;
+	ip++;
+	printf("DEC E\n");
+	break;
+	}
+	case 0x1E:
+	{
+	e = RAM::rb(cs,ip+1);
+	ip+=2;
+	printf("LD E,%02x\n",e);
+	break;
+	}
+	case 0x1F:
+	{
+	u8 tmp = a;
+	u8 tmp1 = f & 1;
+	a >>= 1;
+	f = (f & 0xFE) | (tmp & 1);
+	a = (a & 0x7F) | (tmp1 << 7);
+	ip+=2;
+	printf("RRA\n");
+	break;
+	}
+	case 0x21:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	hl = tmp;
+	ip++;
+	printf("LD HL,%04x\n",tmp);
+	break;
+	}
+	case 0x22:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	RAM::wb(cs,tmp,l);
+	RAM::wb(cs,tmp+1,h);
+	ip++;
+	printf("LD (%04x),HL\n",tmp);
+	break;
+	}
+	case 0x23:
+	{
+	hl++;
+	ip++;
+	printf("INC HL\n");
+	break;
+	}
+	case 0x24:
+	{
+	h++;
+	ip++;
+	printf("INC H\n");
+	break;
+	}
+	case 0x25:
+	{
+	h--;
+	ip++;
+	printf("DEC H\n");
+	break;
+	}
+	case 0x26:
+	{
+	h = RAM::rb(cs,ip+1);
+	ip+=2;
+	printf("LD H,%02x\n",h);
+	break;
+	}
+	case 0x27:
+	{
+	if((a&0x0F)>9||(f&0x10))
+	{
+		a += 0x06;
+	}
+	if((a&0xF0)>0x90||(f&0x01))
+	{
+		a += 0x60;
+		f |= 0x01;
+	}
+	else f &= 0xFE;
+	ip++;
+	printf("DAA\n");
+	break;
+	}
+	case 0x29:
+	{
+	hl <<= 1; // x + x = 2x = x << 1
+	ip++;
+	printf("ADD HL,HL\n");
+	break;
+	}
+	case 0x2A:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	u16 tmp1 = RAM::rb(cs,tmp)|(RAM::rb(cs,tmp+1)<<8);
+	hl = tmp1;
+	ip++;
+	printf("LD HL,(%04x)\n",tmp);
+	break;
+	}
+	case 0x2B:
+	{
+	hl--;
+	ip++;
+	printf("DEC HL\n");
+	break;
+	}
+	case 0x2C:
+	{
+	l++;
+	ip++;
+	printf("INC L\n");
+	break;
+	}
+	case 0x2D:
+	{
+	l-;
+	ip++;
+	printf("DEC L\n");
+	break;
+	}
+	case 0x2E:
+	{
+	l = RAM::rb(cs,ip+1);
+	ip+=2;
+	printf("LD L,%02x\n",l);
+	break;
+	}
+	case 0x2F:
+	{
+	a = ~a;
+	ip++;
+	printf("CPL\n");
+	break;
+	}
+	case 0x31:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	sp = tmp;
+	ip+=3;
+	printf("LD SP,%04x\n",tmp);
+	break;
+	}
+	case 0x32:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	RAM::wb(cs,tmp,a);
+	ip+=3;
+	printf("LD (%04x),A\n",tmp);
+	break;
+	}
+	case 0x33:
+	{
+	sp++;
+	ip++;
+	printf("INC SP\n");
+	break;
+	}
+	case 0x34:
+	{
+	u16 tmp = RAM::rb(cs,hl)|(RAM::rb(cs,hl+1)<<8);
+	RAM::wb(cs,hl,(tmp+1)&0xFF);
+	RAM::wb(cs,hl+1,(tmp+1)>>8);
+	ip++;
+	printf("INC (HL)\n");
+	break;
+	}
+	case 0x35:
+	{
+	u16 tmp = RAM::rb(cs,hl)|(RAM::rb(cs,hl+1)<<8);
+	RAM::wb(cs,hl,(tmp-1)&0xFF);
+	RAM::wb(cs,hl+1,(tmp-1)>>8);
+	ip++;
+	printf("DEC (HL)\n");
+	break;
+	}
+	case 0x36:
+	{
+	u8 tmp = RAM::rb(cs,ip+1);
+	RAM::wb(cs,hl,tmp);
+	ip++;
+	printf("LD (HL),%02x\n",tmp);
+	break;
+	}
+	case 0x37:
+	{
+	flags = (flags & 0xFE) | 1;
+	ip++;
+	printf("SCF\n");
+	break;
+	}
+	case 0x39:
+	{
+	hl += sp;
+	ip++;
+	printf("ADD HL,SP\n");
+	break;
+	}
+	case 0x3A:
+	{
+	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+	a = tmp;
+	ip+=3;
+	printf("LD A,(%04x)\n",tmp);
+	break;
+	}
+	case 0x3F:
+	{
+	flags ^= 1;
+	ip++;
+	printf("CCF\n");
+	break;
+	}
+	}
+    }
     printf("ax=%04x\n",ax);
     printf("bx=%04x\n",bx);
     printf("cx=%04x\n",cx);
@@ -4270,6 +5064,17 @@ void tick()
     default:
     seg = SEG_DEFAULT;
     rep = 0;
+    }
+    if(type==necv20)
+    {
+	if(op == 0x65)
+	{
+	    rep = 3;
+	}
+	if(op == 0x64)
+	{
+	    rep = 4;
+	}
     }
     rtick();
     }
