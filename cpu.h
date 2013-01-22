@@ -37,7 +37,6 @@ union reg16
     } parts;
     u16 w;
 } aw,bw,cw,dw;
-reg16 afw, bcw, dew, hlw; //NEC V20 registers
 #define ax aw.w
 #define al aw.parts.lo
 #define ah aw.parts.hi
@@ -51,19 +50,6 @@ reg16 afw, bcw, dew, hlw; //NEC V20 registers
 #define dx dw.w
 #define dl dw.parts.lo
 #define dh dw.parts.hi
-
-#define af afw.w
-#define f afw.parts.lo
-#define a afw.parts.hi
-#define bc afw.w
-#define c afw.parts.lo
-#define b afw.parts.hi
-#define de afw.w
-#define e afw.parts.lo
-#define d afw.parts.hi
-#define hl afw.w
-#define l afw.parts.lo
-#define h afw.parts.hi
 
 u16 ds,es,ss;
 u16 sp,bp,si,di;
@@ -1315,7 +1301,19 @@ void rtick()
 		case 0xFF:
 		{
 		i8080 = true;
-		ip+=3;
+		u8 tmp = RAM::rb(cs,ip+2);
+		sp-=2;
+        	RAM::wb(ss,sp,flags & 0xFF);
+        	RAM::wb(ss,sp+1,flags >> 8);
+        	flags &= 0xFCFF;
+        	sp-=2;
+        	RAM::wb(ss,sp,cs & 0xFF);
+        	RAM::wb(ss,sp+1,cs >> 8);
+        	sp-=2;
+        	RAM::wb(ss,sp,(ip+1) & 0xFF);
+        	RAM::wb(ss,sp+1,(ip+1) >> 8);
+		cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
+        	ip = RAM::rb(0,tmp<<2)|(RAM::rb(0,(tmp<<2)+1)<<8);
 		printf("BRKEM\n");
 		break;
 		}
@@ -4578,106 +4576,106 @@ void rtick()
 	case 0x01:
 	{
 	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-	bc = tmp;
+	cx = tmp;
 	ip+=3;
 	printf("LD BC,%04x\n",tmp);
 	break;
 	}
 	case 0x02:
 	{
-	RAM::wb(cs,bc,a);
+	RAM::wb(cs,cx,al);
 	ip++;
 	printf("LD (BC),A\n");
 	break;
 	}
 	case 0x03:
 	{
-	bc++;
+	cx++;
 	ip++;
 	printf("INC BC\n");
 	break;
 	}
 	case 0x04:
 	{
-	b++;
+	ch++;
 	ip++;
 	printf("INC B\n");
 	break;
 	}
 	case 0x05:
 	{
-	b--;
+	ch--;
 	ip++;
 	printf("DEC B\n");
 	break;
 	}
 	case 0x06:
 	{
-	b = RAM::rb(cs,ip+1);
+	ch = RAM::rb(cs,ip+1);
 	ip+=2;
 	printf("LD B,%02x\n",b);
 	break;
 	}
 	case 0x07:
 	{
-	u8 tmp = a;
-	u8 tmp1 = f & 1;
-	a <<= 1;
-	f = (f & 0xFE) | (tmp >> 7);
-	a = (a & 0xFE) | tmp1;
+	u8 tmp = al;
+	u8 tmp1 = flags & 1;
+	al <<= 1;
+	flags = (flags & 0xFFFE) | (tmp >> 7);
+	al = (al & 0xFE) | tmp1;
 	ip+=2;
 	printf("RLCA\n");
 	break;
 	}
 	case 0x09:
 	{
-	hl += bc;
+	bx += cx;
 	ip++;
 	printf("ADD HL,BC\n");
 	break;
 	}
 	case 0x0A:
 	{
-	a = RAM::rb(cs,bc);
+	al = RAM::rb(cs,cx);
 	ip++;
 	printf("LD A,(BC)\n");
 	break;
 	}
 	case 0x0B:
 	{
-	bc--;
+	cx--;
 	ip++;
 	printf("DEC BC\n");
 	break;
 	}
 	case 0x0C:
 	{
-	c++;
+	cl++;
 	ip++;
 	printf("INC C\n");
 	break;
 	}
 	case 0x0D:
 	{
-	c--;
+	cl--;
 	ip++;
 	printf("DEC C\n");
 	break;
 	}
 	case 0x0E:
 	{
-	c = RAM::rb(cs,ip+1);
+	cl = RAM::rb(cs,ip+1);
 	ip+=2;
 	printf("LD C,%02x\n",c);
 	break;
 	}
 	case 0x0F:
 	{
-	u8 tmp = a;
-	u8 tmp1 = f & 1;
-	a >>= 1;
-	f = (f & 0xFE) | (tmp & 1);
-	a = (a & 0x7F) | (tmp1 << 7);
+	u8 tmp = al;
+	u8 tmp1 = flags & 1;
+	al >>= 1;
+	flags = (flags & 0xFFFE) | (tmp & 1);
+	al = (al & 0x7F) | (tmp1 << 7);
 	ip+=2;
 	printf("RRCA\n");
 	break;
@@ -4685,106 +4683,106 @@ void rtick()
 	case 0x11:
 	{
 	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-	de = tmp;
+	dx = tmp;
 	ip++;
 	printf("LD DE,%04x\n",tmp);
 	break;
 	}
 	case 0x12:
 	{
-	RAM::wb(cs,de,a);
+	RAM::wb(cs,dx,al);
 	ip++;
 	printf("LD (DE),A\n");
 	break;
 	}
 	case 0x13:
 	{
-	de++;
+	dx++;
 	ip++;
 	printf("INC DE\n");
 	break;
 	}
 	case 0x14:
 	{
-	d++;
+	dh++;
 	ip++;
 	printf("INC D\n");
 	break;
 	}
 	case 0x15:
 	{
-	d--;
+	dh--;
 	ip++;
 	printf("DEC D\n");
 	break;
 	}
 	case 0x16:
 	{
-	d = RAM::rb(cs,ip+1);
+	dh = RAM::rb(cs,ip+1);
 	ip+=2;
 	printf("LD D,%02x\n",d);
 	break;
 	}
 	case 0x17:
 	{
-	u8 tmp = a;
-	u8 tmp1 = f & 1;
-	a <<= 1;
-	f = (f & 0xFE) | (tmp >> 7);
-	a = (a & 0xFE) | tmp1;
+	u8 tmp = al;
+	u8 tmp1 = flags & 1;
+	al <<= 1;
+	flags = (flags & 0xFE) | (tmp >> 7);
+	al = (al & 0xFE) | tmp1;
 	ip+=2;
 	printf("RLA\n");
 	break;
 	}
 	case 0x19:
 	{
-	hl += de;
+	bx += dx;
 	ip++;
 	printf("ADD HL,DE\n");
 	break;
 	}
 	case 0x1A:
 	{
-	a = RAM::rb(cs,de);
+	al = RAM::rb(cs,dx);
 	ip++;
 	printf("LD A,(DE)\n");
 	break;
 	}
 	case 0x1B:
 	{
-	de--;
+	dx--;
 	ip++;
 	printf("DEC DE\n");
 	break;
 	}
 	case 0x1C:
 	{
-	e++;
+	dl++;
 	ip++;
 	printf("INC E\n");
 	break;
 	}
 	case 0x1D:
 	{
-	e--;
+	dl--;
 	ip++;
 	printf("DEC E\n");
 	break;
 	}
 	case 0x1E:
 	{
-	e = RAM::rb(cs,ip+1);
+	dl = RAM::rb(cs,ip+1);
 	ip+=2;
 	printf("LD E,%02x\n",e);
 	break;
 	}
 	case 0x1F:
 	{
-	u8 tmp = a;
-	u8 tmp1 = f & 1;
-	a >>= 1;
-	f = (f & 0xFE) | (tmp & 1);
-	a = (a & 0x7F) | (tmp1 << 7);
+	u8 tmp = al;
+	u8 tmp1 = flags & 1;
+	al >>= 1;
+	flags = (flags & 0xFE) | (tmp & 1);
+	al = (al & 0x7F) | (tmp1 << 7);
 	ip+=2;
 	printf("RRA\n");
 	break;
@@ -4792,7 +4790,7 @@ void rtick()
 	case 0x21:
 	{
 	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-	hl = tmp;
+	bx = tmp;
 	ip++;
 	printf("LD HL,%04x\n",tmp);
 	break;
@@ -4800,59 +4798,59 @@ void rtick()
 	case 0x22:
 	{
 	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-	RAM::wb(cs,tmp,l);
-	RAM::wb(cs,tmp+1,h);
+	RAM::wb(cs,tmp,bl);
+	RAM::wb(cs,tmp+1,bh);
 	ip++;
 	printf("LD (%04x),HL\n",tmp);
 	break;
 	}
 	case 0x23:
 	{
-	hl++;
+	bx++;
 	ip++;
 	printf("INC HL\n");
 	break;
 	}
 	case 0x24:
 	{
-	h++;
+	bh++;
 	ip++;
 	printf("INC H\n");
 	break;
 	}
 	case 0x25:
 	{
-	h--;
+	bh--;
 	ip++;
 	printf("DEC H\n");
 	break;
 	}
 	case 0x26:
 	{
-	h = RAM::rb(cs,ip+1);
+	bh = RAM::rb(cs,ip+1);
 	ip+=2;
 	printf("LD H,%02x\n",h);
 	break;
 	}
 	case 0x27:
 	{
-	if((a&0x0F)>9||(f&0x10))
+	if((al&0x0F)>9||(flags&0x10))
 	{
-		a += 0x06;
+		al += 0x06;
 	}
-	if((a&0xF0)>0x90||(f&0x01))
+	if((al&0xF0)>0x90||(flags&0x01))
 	{
-		a += 0x60;
-		f |= 0x01;
+		al += 0x60;
+		flags |= 0x01;
 	}
-	else f &= 0xFE;
+	else flags &= 0xFE;
 	ip++;
 	printf("DAA\n");
 	break;
 	}
 	case 0x29:
 	{
-	hl <<= 1; // x + x = 2x = x << 1
+	bx <<= 1; // x + x = 2x = x << 1
 	ip++;
 	printf("ADD HL,HL\n");
 	break;
@@ -4861,42 +4859,42 @@ void rtick()
 	{
 	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
 	u16 tmp1 = RAM::rb(cs,tmp)|(RAM::rb(cs,tmp+1)<<8);
-	hl = tmp1;
+	bx = tmp1;
 	ip++;
 	printf("LD HL,(%04x)\n",tmp);
 	break;
 	}
 	case 0x2B:
 	{
-	hl--;
+	bx--;
 	ip++;
 	printf("DEC HL\n");
 	break;
 	}
 	case 0x2C:
 	{
-	l++;
+	bl++;
 	ip++;
 	printf("INC L\n");
 	break;
 	}
 	case 0x2D:
 	{
-	l-;
+	bl--;
 	ip++;
 	printf("DEC L\n");
 	break;
 	}
 	case 0x2E:
 	{
-	l = RAM::rb(cs,ip+1);
+	bl = RAM::rb(cs,ip+1);
 	ip+=2;
 	printf("LD L,%02x\n",l);
 	break;
 	}
 	case 0x2F:
 	{
-	a = ~a;
+	al = ~al;
 	ip++;
 	printf("CPL\n");
 	break;
@@ -4912,7 +4910,7 @@ void rtick()
 	case 0x32:
 	{
 	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-	RAM::wb(cs,tmp,a);
+	RAM::wb(cs,tmp,al);
 	ip+=3;
 	printf("LD (%04x),A\n",tmp);
 	break;
@@ -4926,18 +4924,18 @@ void rtick()
 	}
 	case 0x34:
 	{
-	u16 tmp = RAM::rb(cs,hl)|(RAM::rb(cs,hl+1)<<8);
-	RAM::wb(cs,hl,(tmp+1)&0xFF);
-	RAM::wb(cs,hl+1,(tmp+1)>>8);
+	u16 tmp = RAM::rb(cs,bx)|(RAM::rb(cs,bx+1)<<8);
+	RAM::wb(cs,bx,(tmp+1)&0xFF);
+	RAM::wb(cs,bx+1,(tmp+1)>>8);
 	ip++;
 	printf("INC (HL)\n");
 	break;
 	}
 	case 0x35:
 	{
-	u16 tmp = RAM::rb(cs,hl)|(RAM::rb(cs,hl+1)<<8);
-	RAM::wb(cs,hl,(tmp-1)&0xFF);
-	RAM::wb(cs,hl+1,(tmp-1)>>8);
+	u16 tmp = RAM::rb(cs,bx)|(RAM::rb(cs,bx+1)<<8);
+	RAM::wb(cs,bx,(tmp-1)&0xFF);
+	RAM::wb(cs,bx+1,(tmp-1)>>8);
 	ip++;
 	printf("DEC (HL)\n");
 	break;
@@ -4945,7 +4943,7 @@ void rtick()
 	case 0x36:
 	{
 	u8 tmp = RAM::rb(cs,ip+1);
-	RAM::wb(cs,hl,tmp);
+	RAM::wb(cs,bx,tmp);
 	ip++;
 	printf("LD (HL),%02x\n",tmp);
 	break;
@@ -4959,7 +4957,7 @@ void rtick()
 	}
 	case 0x39:
 	{
-	hl += sp;
+	bx += sp;
 	ip++;
 	printf("ADD HL,SP\n");
 	break;
@@ -4967,7 +4965,7 @@ void rtick()
 	case 0x3A:
 	{
 	u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-	a = tmp;
+	al = tmp;
 	ip+=3;
 	printf("LD A,(%04x)\n",tmp);
 	break;
