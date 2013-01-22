@@ -2354,7 +2354,6 @@ void rtick()
 	}
 	break;
 	}
-	}
 	ip++;
 	}
         break;
@@ -2396,7 +2395,6 @@ void rtick()
 	break;
 	}
 	break;
-	}
 	}
 	ip++;
 	}
