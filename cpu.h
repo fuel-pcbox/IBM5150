@@ -3459,6 +3459,7 @@ void rtick()
 	switch(rep)
 	{
 	case 0:
+	{
         u8 tmp = al - RAM::rb(es,di);
         if(!(flags&0x0400)) di++;
         else di--;
@@ -3467,6 +3468,7 @@ void rtick()
         ip++;
         printf("SCASB\n");
 	break;
+	}
 	case 1:
 	for(;cx!=0;cx--)
 	{
@@ -3501,6 +3503,7 @@ void rtick()
 	switch(rep)
 	{
 	case 0:
+	{
         u16 tmp = ax - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
         if(!(flags&0x0400)) di+=2;
         else di-=2;
@@ -3509,6 +3512,7 @@ void rtick()
         ip++;
         printf("SCASW\n");
 	break;
+	}
 	case 1:
 	for(;cx!=0;cx--)
 	{
@@ -3722,7 +3726,7 @@ void rtick()
 	u16 tmp3 = sp;
 	if(tmp2 > 0)
 	{
-	for(int i = 0;i<level;i++)
+	for(int i = 0;i<tmp2;i++)
 	{
 	bp-=2;
 	sp-=2;
