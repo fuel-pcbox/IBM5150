@@ -3191,6 +3191,7 @@ void rtick()
 	switch(rep)
 	{
 	case 0:
+	{
         u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
         if(!(flags & 0x0400))
         {
@@ -3207,7 +3208,9 @@ void rtick()
         else flags &= 0xFFBF;
         printf("CMPSB\n");
 	break;
+	}
 	case 1:
+	{
 	for(;cx!=0;cx--)
 	{
         u8 tmp = RAM::rb(ds,si) - RAM::rb(es,di);
@@ -3228,6 +3231,7 @@ void rtick()
 	}
         printf("REPE CMPSB\n");
 	break;
+	}
 	case 2:
 	for(;cx!=0;cx--)
 	{
@@ -3299,6 +3303,7 @@ void rtick()
 	switch(rep)
 	{
 	case 0:
+	{
         u16 tmp = (RAM::rb(ds,si)|(RAM::rb(ds,si+1)<<8)) - (RAM::rb(es,di)|(RAM::rb(es,di+1)<<8));
         if(!(flags & 0x0400))
         {
@@ -3315,6 +3320,7 @@ void rtick()
         else flags &= 0xFFBF;
         printf("CMPSW\n");
 	break;
+	}
 	case 1:
 	for(;cx!=0;cx--)
 	{
