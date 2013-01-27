@@ -4835,7 +4835,7 @@ void rtick()
 	{
 	bh = RAM::rb(cs,ip+1);
 	ip+=2;
-	printf("LD H,%02x\n",h);
+	printf("LD H,%02x\n",bh);
 	break;
 	}
 	case 0x27:
@@ -4895,7 +4895,7 @@ void rtick()
 	{
 	bl = RAM::rb(cs,ip+1);
 	ip+=2;
-	printf("LD L,%02x\n",l);
+	printf("LD L,%02x\n",bl);
 	break;
 	}
 	case 0x2F:
@@ -4976,11 +4976,992 @@ void rtick()
 	printf("LD A,(%04x)\n",tmp);
 	break;
 	}
+	case 0x3B:
+	{
+	sp--;
+	ip++;
+	printf("DEC SP\n");
+	break;
+	}
+	case 0x3C:
+	{
+	al++;
+	ip++;
+	printf("INC A\n");
+	break;
+	}
+	case 0x3D:
+	{
+	al--;
+	ip++;
+	printf("DEC A\n");
+	break;
+	}
+	case 0x3E:
+	{
+	al = RAM::rb(cs,ip+1);
+	ip+=2;
+	printf("LD A,%02x\n",al);
+	break;
+	}
 	case 0x3F:
 	{
 	flags ^= 1;
 	ip++;
 	printf("CCF\n");
+	break;
+	}
+	case 0x40:
+	{
+	ch = ch;
+	ip++;
+	printf("LD B,B\n");
+	break;
+	}
+	case 0x41:
+	{
+	ch = cl;
+	ip++;
+	printf("LD B,C\n");
+	break;
+	}
+	case 0x42:
+	{
+	ch = dh;
+	ip++;
+	printf("LD B,D\n");
+	break;
+	}
+	case 0x43:
+	{
+	ch = dl;
+	ip++;
+	printf("LD B,E\n");
+	break;
+	}
+	case 0x44:
+	{
+	ch = bh;
+	ip++;
+	printf("LD B,H\n");
+	break;
+	}
+	case 0x45:
+	{
+	ch = bl;
+	ip++;
+	printf("LD B,L\n");
+	break;
+	}
+	case 0x46:
+	{
+	ch = RAM::rb(cs,bx);
+	ip++;
+	printf("LD B,(HL)\n");
+	break;
+	}
+	case 0x47:
+	{
+	ch = al;
+	ip++;
+	printf("LD B,A\n");
+	break;
+	}
+	case 0x48:
+	{
+	cl = ch;
+	ip++;
+	printf("LD C,B\n");
+	break;
+	}
+	case 0x49:
+	{
+	cl = cl;
+	ip++;
+	printf("LD C,C\n");
+	break;
+	}
+	case 0x4A:
+	{
+	cl = dh;
+	ip++;
+	printf("LD C,D\n");
+	break;
+	}
+	case 0x4B:
+	{
+	cl = dl;
+	ip++;
+	printf("LD C,E\n");
+	break;
+	}
+	case 0x4C:
+	{
+	cl = bh;
+	ip++;
+	printf("LD C,H\n");
+	break;
+	}
+	case 0x4D:
+	{
+	cl = bl;
+	ip++;
+	printf("LD C,L\n");
+	break;
+	}
+	case 0x4E:
+	{
+	cl = RAM::rb(cs,bx);
+	ip++;
+	printf("LD C,(HL)\n");
+	break;
+	}
+	case 0x4F:
+	{
+	cl = al;
+	ip++;
+	printf("LD C,A\n");
+	break;
+	}
+	case 0x50:
+	{
+	dh = ch;
+	ip++;
+	printf("LD D,B\n");
+	break;
+	}
+	case 0x51:
+	{
+	dh = cl;
+	ip++;
+	printf("LD D,C\n");
+	break;
+	}
+	case 0x52:
+	{
+	dh = dh;
+	ip++;
+	printf("LD D,D\n");
+	break;
+	}
+	case 0x53:
+	{
+	dh = dl;
+	ip++;
+	printf("LD D,E\n");
+	break;
+	}
+	case 0x54:
+	{
+	dh = bh;
+	ip++;
+	printf("LD D,H\n");
+	break;
+	}
+	case 0x55:
+	{
+	dh = bl;
+	ip++;
+	printf("LD D,L\n");
+	break;
+	}
+	case 0x56:
+	{
+	dh = RAM::rb(cs,bx);
+	ip++;
+	printf("LD D,(HL)\n");
+	break;
+	}
+	case 0x57:
+	{
+	dh = al;
+	ip++;
+	printf("LD D,A\n");
+	break;
+	}
+	case 0x58:
+	{
+	dl = ch;
+	ip++;
+	printf("LD E,B\n");
+	break;
+	}
+	case 0x59:
+	{
+	dl = cl;
+	ip++;
+	printf("LD E,C\n");
+	break;
+	}
+	case 0x5A:
+	{
+	dl = dh;
+	ip++;
+	printf("LD E,D\n");
+	break;
+	}
+	case 0x5B:
+	{
+	dl = dl;
+	ip++;
+	printf("LD E,E\n");
+	break;
+	}
+	case 0x5C:
+	{
+	dl = bh;
+	ip++;
+	printf("LD E,H\n");
+	break;
+	}
+	case 0x5D:
+	{
+	dl = bl;
+	ip++;
+	printf("LD E,L\n");
+	break;
+	}
+	case 0x5E:
+	{
+	dl = RAM::rb(cs,bx);
+	ip++;
+	printf("LD E,(HL)\n");
+	break;
+	}
+	case 0x5F:
+	{
+	dl = al;
+	ip++;
+	printf("LD E,A\n");
+	break;
+	}
+	case 0x60:
+	{
+	bh = ch;
+	ip++;
+	printf("LD H,B\n");
+	break;
+	}
+	case 0x61:
+	{
+	bh = cl;
+	ip++;
+	printf("LD H,C\n");
+	break;
+	}
+	case 0x62:
+	{
+	bh = dh;
+	ip++;
+	printf("LD H,D\n");
+	break;
+	}
+	case 0x63:
+	{
+	bh = dl;
+	ip++;
+	printf("LD H,E\n");
+	break;
+	}
+	case 0x64:
+	{
+	bh = bh;
+	ip++;
+	printf("LD H,H\n");
+	break;
+	}
+	case 0x65:
+	{
+	bh = bl;
+	ip++;
+	printf("LD H,L\n");
+	break;
+	}
+	case 0x66:
+	{
+	bh = RAM::rb(cs,bx);
+	ip++;
+	printf("LD H,(HL)\n");
+	break;
+	}
+	case 0x67:
+	{
+	bh = al;
+	ip++;
+	printf("LD H,A\n");
+	break;
+	}
+	case 0x68:
+	{
+	bl = ch;
+	ip++;
+	printf("LD L,B\n");
+	break;
+	}
+	case 0x69:
+	{
+	bl = cl;
+	ip++;
+	printf("LD L,C\n");
+	break;
+	}
+	case 0x6A:
+	{
+	bl = dh;
+	ip++;
+	printf("LD L,D\n");
+	break;
+	}
+	case 0x6B:
+	{
+	bl = dl;
+	ip++;
+	printf("LD L,E\n");
+	break;
+	}
+	case 0x6C:
+	{
+	bl = bh;
+	ip++;
+	printf("LD L,H\n");
+	break;
+	}
+	case 0x6D:
+	{
+	bl = bl;
+	ip++;
+	printf("LD L,L\n");
+	break;
+	}
+	case 0x6E:
+	{
+	bl = RAM::rb(cs,bx);
+	ip++;
+	printf("LD L,(HL)\n");
+	break;
+	}
+	case 0x6F:
+	{
+	bl = al;
+	ip++;
+	printf("LD L,A\n");
+	break;
+	}
+	case 0x70:
+	{
+	RAM::wb(cs,bx,ch);
+	ip++;
+	printf("LD (HL),B\n");
+	break;
+	}
+	case 0x71:
+	{
+	RAM::wb(cs,bx,cl);
+	ip++;
+	printf("LD (HL),C\n");
+	break;
+	}
+	case 0x72:
+	{
+	RAM::wb(cs,bx,dh);
+	ip++;
+	printf("LD (HL),D\n");
+	break;
+	}
+	case 0x73:
+	{
+	RAM::wb(cs,bx,dl);
+	ip++;
+	printf("LD (HL),E\n");
+	break;
+	}
+	case 0x74:
+	{
+	RAM::wb(cs,bx,bh);
+	ip++;
+	printf("LD (HL),H\n");
+	break;
+	}
+	case 0x75:
+	{
+	RAM::wb(cs,bx,bl);
+	ip++;
+	printf("LD (HL),L\n");
+	break;
+	}
+	case 0x76:
+	{
+	ip++;
+	halted = true;
+	printf("HLT\n");
+	break;
+	}
+	case 0x77:
+	{
+	RAM::wb(cs,bx,al);
+	ip++;
+	printf("LD (HL),A\n");
+	break;
+	}
+	case 0x78:
+	{
+	al = ch;
+	ip++;
+	printf("LD A,B\n");
+	break;
+	}
+	case 0x79:
+	{
+	al = cl;
+	ip++;
+	printf("LD A,C\n");
+	break;
+	}
+	case 0x7A:
+	{
+	al = dh;
+	ip++;
+	printf("LD A,D\n");
+	break;
+	}
+	case 0x7B:
+	{
+	al = dl;
+	ip++;
+	printf("LD A,E\n");
+	break;
+	}
+	case 0x7C:
+	{
+	al = bh;
+	ip++;
+	printf("LD A,H\n");
+	break;
+	}
+	case 0x7D:
+	{
+	al = bl;
+	ip++;
+	printf("LD A,L\n");
+	break;
+	}
+	case 0x7E:
+	{
+	al = RAM::rb(cs,bx);
+	ip++;
+	printf("LD A,(HL)\n");
+	break;
+	}
+	case 0x7F:
+	{
+	al = al;
+	ip++;
+	printf("LD A,A\n");
+	break;
+	}
+	case 0x80:
+	{
+	al += ch;
+	ip++;
+	printf("ADD A,B\n");
+	break;
+	}
+	case 0x81:
+	{
+	al += cl;
+	ip++;
+	printf("ADD A,C\n");
+	break;
+	}
+	case 0x82:
+	{
+	al += dh;
+	ip++;
+	printf("ADD A,D\n");
+	break;
+	}
+	case 0x83:
+	{
+	al += dl;
+	ip++;
+	printf("ADD A,E\n");
+	break;
+	}
+	case 0x84:
+	{
+	al += bh;
+	ip++;
+	printf("ADD A,H\n");
+	break;
+	}
+	case 0x85:
+	{
+	al += bl;
+	ip++;
+	printf("ADD A,L\n");
+	break;
+	}
+	case 0x86:
+	{
+	al += RAM::rb(cs,bx);
+	ip++;
+	printf("ADD A,(HL)\n");
+	break;
+	}
+	case 0x87:
+	{
+	al <<= 1;
+	ip++;
+	printf("ADD A,A\n");
+	break;
+	}
+	case 0x88:
+	{
+	al += ch + (flags & 1);
+	ip++;
+	printf("ADC A,B\n");
+	break;
+	}
+	case 0x89:
+	{
+	al += cl + (flags & 1);
+	ip++;
+	printf("ADC A,C\n");
+	break;
+	}
+	case 0x8A:
+	{
+	al += dh + (flags & 1);
+	ip++;
+	printf("ADC A,D\n");
+	break;
+	}
+	case 0x8B:
+	{
+	al += dl + (flags & 1);
+	ip++;
+	printf("ADC A,E\n");
+	break;
+	}
+	case 0x8C:
+	{
+	al += bh + (flags & 1);
+	ip++;
+	printf("ADC A,H\n");
+	break;
+	}
+	case 0x8D:
+	{
+	al += bl + (flags & 1);
+	ip++;
+	printf("ADC A,L\n");
+	break;
+	}
+	case 0x8E:
+	{
+	al += RAM::rb(cs,bx) + (flags & 1);
+	ip++;
+	printf("ADC A,(HL)\n");
+	break;
+	}
+	case 0x8F:
+	{
+	al += al + (flags & 1);
+	ip++;
+	printf("ADC A,A\n");
+	break;
+	}
+	case 0x90:
+	{
+	al -= ch;
+	ip++;
+	printf("SUB A,B\n");
+	break;
+	}
+	case 0x91:
+	{
+	al -= cl;
+	ip++;
+	printf("SUB A,C\n");
+	break;
+	}
+	case 0x92:
+	{
+	al -= dh;
+	ip++;
+	printf("SUB A,D\n");
+	break;
+	}
+	case 0x93:
+	{
+	al -= dl;
+	ip++;
+	printf("SUB A,E\n");
+	break;
+	}
+	case 0x94:
+	{
+	al -= bh;
+	ip++;
+	printf("SUB A,H\n");
+	break;
+	}
+	case 0x95:
+	{
+	al -= bl;
+	ip++;
+	printf("SUB A,L\n");
+	break;
+	}
+	case 0x96:
+	{
+	al -= RAM::rb(cs,bx);
+	ip++;
+	printf("SUB A,(HL)\n");
+	break;
+	}
+	case 0x97:
+	{
+	al = 0;
+	ip++;
+	printf("SUB A,A\n");
+	break;
+	}
+	case 0x98:
+	{
+	al -= ch + (flags & 1);
+	ip++;
+	printf("SBB A,B\n");
+	break;
+	}
+	case 0x99:
+	{
+	al -= cl + (flags & 1);
+	ip++;
+	printf("SBB A,C\n");
+	break;
+	}
+	case 0x9A:
+	{
+	al -= dh + (flags & 1);
+	ip++;
+	printf("SBB A,D\n");
+	break;
+	}
+	case 0x9B:
+	{
+	al -= dl + (flags & 1);
+	ip++;
+	printf("SBB A,E\n");
+	break;
+	}
+	case 0x9C:
+	{
+	al -= bh + (flags & 1);
+	ip++;
+	printf("SBB A,H\n");
+	break;
+	}
+	case 0x9D:
+	{
+	al -= bl + (flags & 1);
+	ip++;
+	printf("SBB A,L\n");
+	break;
+	}
+	case 0x9E:
+	{
+	al -= RAM::rb(cs,bx) + (flags & 1);
+	ip++;
+	printf("SBB A,(HL)\n");
+	break;
+	}
+	case 0x9F:
+	{
+	al -= al + (flags & 1);
+	ip++;
+	printf("SBB A,A\n");
+	break;
+	}
+	case 0xA0:
+	{
+	al &= ch;
+	ip++;
+	printf("AND A,B\n");
+	break;
+	}
+	case 0xA1:
+	{
+	al &= cl;
+	ip++;
+	printf("AND A,C\n");
+	break;
+	}
+	case 0xA2:
+	{
+	al &= dh;
+	ip++;
+	printf("AND A,D\n");
+	break;
+	}
+	case 0xA3:
+	{
+	al &= dl;
+	ip++;
+	printf("AND A,E\n");
+	break;
+	}
+	case 0xA4:
+	{
+	al &= bh;
+	ip++;
+	printf("AND A,H\n");
+	break;
+	}
+	case 0xA5:
+	{
+	al &= bl;
+	ip++;
+	printf("AND A,L\n");
+	break;
+	}
+	case 0xA6:
+	{
+	al &= RAM::rb(cs,bx);
+	ip++;
+	printf("AND A,(HL)\n");
+	break;
+	}
+	case 0xA7:
+	{
+	ip++;
+	printf("AND A,A\n");
+	break;
+	}
+	case 0xA8:
+	{
+	al ^= ch;
+	ip++;
+	printf("XOR A,B\n");
+	break;
+	}
+	case 0xA9:
+	{
+	al ^= cl;
+	ip++;
+	printf("XOR A,C\n");
+	break;
+	}
+	case 0xAA:
+	{
+	al ^= dh;
+	ip++;
+	printf("XOR A,D\n");
+	break;
+	}
+	case 0xAB:
+	{
+	al ^= dl;
+	ip++;
+	printf("XOR A,E\n");
+	break;
+	}
+	case 0xAC:
+	{
+	al ^= bh;
+	ip++;
+	printf("XOR A,H\n");
+	break;
+	}
+	case 0xAD:
+	{
+	al ^= bl;
+	ip++;
+	printf("XOR A,L\n");
+	break;
+	}
+	case 0xAE:
+	{
+	al ^= RAM::rb(cs,bx);
+	ip++;
+	printf("XOR A,(HL)\n");
+	break;
+	}
+	case 0xAF:
+	{
+	al = 0;
+	ip++;
+	printf("XOR A,A\n");
+	break;
+	}
+	case 0xB0:
+	{
+	al |= ch;
+	ip++;
+	printf("OR A,B\n");
+	break;
+	}
+	case 0xB1:
+	{
+	al |= cl;
+	ip++;
+	printf("OR A,C\n");
+	break;
+	}
+	case 0xB2:
+	{
+	al |= dh;
+	ip++;
+	printf("OR A,D\n");
+	break;
+	}
+	case 0xB3:
+	{
+	al |= dl;
+	ip++;
+	printf("OR A,E\n");
+	break;
+	}
+	case 0xB4:
+	{
+	al |= bh;
+	ip++;
+	printf("OR A,H\n");
+	break;
+	}
+	case 0xB5:
+	{
+	al |= bl;
+	ip++;
+	printf("OR A,L\n");
+	break;
+	}
+	case 0xB6:
+	{
+	al |= RAM::rb(cs,bx);
+	ip++;
+	printf("OR A,(HL)\n");
+	break;
+	}
+	case 0xB7:
+	{
+	ip++;
+	printf("OR A,A\n");
+	break;
+	}
+	case 0xB8:
+	{
+	u8 tmp = al - ch;
+	if(tmp == 0) flags |= 0x0040;
+	else flags &= 0xFFBF;
+	if(tmp >= 0x80) flags |= 0x0080;
+	else flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,B\n");
+	break;
+	}
+	case 0xB9:
+	{
+	u8 tmp = al - cl;
+	if(tmp == 0) flags |= 0x0040;
+	else flags &= 0xFFBF;
+	if(tmp >= 0x80) flags |= 0x0080;
+	else flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,C\n");
+	break;
+	}
+	case 0xBA:
+	{
+	u8 tmp = al - dh;
+	if(tmp == 0) flags |= 0x0040;
+	else flags &= 0xFFBF;
+	if(tmp >= 0x80) flags |= 0x0080;
+	else flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,D\n");
+	break;
+	}
+	case 0xBB:
+	{
+	u8 tmp = al - dl;
+	if(tmp == 0) flags |= 0x0040;
+	else flags &= 0xFFBF;
+	if(tmp >= 0x80) flags |= 0x0080;
+	else flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,E\n");
+	break;
+	}
+	case 0xBC:
+	{
+	u8 tmp = al - bh;
+	if(tmp == 0) flags |= 0x0040;
+	else flags &= 0xFFBF;
+	if(tmp >= 0x80) flags |= 0x0080;
+	else flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,H\n");
+	break;
+	}
+	case 0xBD:
+	{
+	u8 tmp = al - bl;
+	if(tmp == 0) flags |= 0x0040;
+	else flags &= 0xFFBF;
+	if(tmp >= 0x80) flags |= 0x0080;
+	else flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,L\n");
+	break;
+	}
+	case 0xBE:
+	{
+	u8 tmp = al - RAM::rb(cs,bx);
+	if(tmp == 0) flags |= 0x0040;
+	else flags &= 0xFFBF;
+	if(tmp >= 0x80) flags |= 0x0080;
+	else flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,(HL)\n");
+	break;
+	}
+	case 0xBF:
+	{
+	al = 0;
+	flags |= 0x0040;
+	flags &= 0xFF7F;
+	ip++;
+	printf("CMP A,A\n");
+	break;
+	}
+	case 0xC0:
+	{
+	if(!(flags&0x0040))
+	{
+	ip = RAM::rb(cs,sp)|(RAM::rb(cs,sp+1)<<8);
+	sp+=2;
+	}
+	else ip++;
+	printf("RET NZ\n");
+	break;
+	}
+	case 0xC8:
+	{
+	if((flags&0x0040))
+	{
+	ip = RAM::rb(cs,sp)|(RAM::rb(cs,sp+1)<<8);
+	sp+=2;
+	}
+	else ip++;
+	printf("RET Z\n");
+	break;
+	}
+	case 0xC9:
+	{
+	ip = RAM::rb(cs,sp)|(RAM::rb(cs,sp+1)<<8);
+	sp+=2;
+	printf("RET\n");
 	break;
 	}
 	}
