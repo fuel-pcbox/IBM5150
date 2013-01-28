@@ -1319,6 +1319,28 @@ void rtick()
 		}
 	    }
 	}
+	else if(type>=intel286)
+	{
+	    u8 op2 = RAM::rb(cs,ip+1);
+	    switch(op2)
+	    {
+		case 0x02:
+		{
+		u8 modrm = RAM::rb(cs,ip+1)
+		locs loc = decodemodrm(seg,modrm,true,false);
+		*loc.dst16 = *loc.src16 & 0xFF00;
+		flags |= 0x0040;
+		printf("LAR Ev,Gv\n");
+		break;
+		}
+		case 0x06:
+		{
+		cr0 &= 0xFFFFFFF7;
+		printf("CLTS\n");
+		break;
+		}
+	    }
+	}
         break;
     }
     case 0x10:
@@ -2227,6 +2249,19 @@ void rtick()
         printf("JNC %02x\n",tmp);
         if(!(flags&0x0001)) ip += (s8)tmp;
         ip+=2;
+	}
+	else if(type>=intel286)
+	{
+	u8 modrm = RAM::rb(cs,ip+1);
+        locs loc = decodemodrm(seg,modrm,true,false);
+	if((*loc.dst16 & 3) < (*loc.src16 & 3))
+	{
+	flags|=0x0040;
+	*loc.dst16 = (*loc.dst16 & 0xFC) | (*loc.src16 & 3);
+	}
+	else flags&=0xFFBF;
+	printf("ARPL Gv,Ev\n");
+	ip+=2;
 	}
         break;
     }
