@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <vector>
 #include <functional>
+#include <SDL/SDL.h>
 
 typedef uint8_t u8;
 typedef int8_t s8;
@@ -17,6 +18,8 @@ enum
 	update_pixel = 4,
 	update_clock = 8
 };
+
+SDL_Surface* screen = NULL;
 
 struct iohandler
 {
@@ -225,9 +228,16 @@ int main(int ac, char** av)
     IO_XT::handlers.push_back(DMA_XT::handler);
     IO_XT::handlers.push_back(PPI::handler);
 
+    SDL_Init(SDL_INIT_EVERYTHING);
+
+    screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
+
     for(int i = 0; i<65536; i++)
     {
         CPU::tick();
+	if((i%0x80)==0) MDA::tick_frame(); //An utter kludge.
     }
+
+    SDL_Quit();
     return 0;
 }

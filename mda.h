@@ -1,5 +1,6 @@
 namespace MDA
 {
+	u8 ROM[0x2000];
 	u8 crtcindex = 0;
 	u8 htotal = 0;
 	u8 hdisp = 0;
@@ -9,11 +10,13 @@ namespace MDA
 	u8 vtotala = 0;
 	u8 vdisp = 0;
 	u8 vsyncp = 0;
-	u8 maxscan = 0;
+	u8 maxscan = 1;
 	u8 curstart = 0;
 	u8 curend = 0;
 	u16 startaddr = 0;
 	u16 curaddr = 0;
+
+	int framecount = 0;
 
 	u8 dispmode = 2; //Bit 1 must be set at all times, unless the processor wants to be halted.
 	u8 status = 0x80;
@@ -22,7 +25,21 @@ namespace MDA
 	{
 		return status;
 	}
-	void
+	void tick_frame()
+	{
+		for(int y = 0;y<(vdisp*(maxscan+1));y++)
+		{
+			for(int x = 0;x<(hdisp*9);x++)
+			{
+				u8 chr = RAM::RAM[0xB0000 + (((x/9) + (y/(maxscan+1)))>>1)];
+				u8 attr = RAM::RAM[0xB0001 + (((x/9) + (y/(maxscan+1)))>>1)];
+				//TODO: This next part is highly inaccurate and ignores everything but the character chosen.
+				u8 chrdata = ROM[(chr * 14) + (y%(maxscan+1))];
+				if((x % 9) == 0)
+			}
+		}
+		framecount++;
+	}
 	void crtc_w(u16 addr, u8 value)
 	{
 		switch(addr&1)
