@@ -10,6 +10,14 @@ typedef int16_t s16;
 typedef uint32_t u32;
 typedef int32_t s32;
 
+enum
+{
+	update_frame = 1,
+	update_scanline = 2,
+	update_pixel = 4,
+	update_clock = 8
+};
+
 struct iohandler
 {
     u16 start;

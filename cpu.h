@@ -53,6 +53,7 @@ union reg16
 
 u16 ds,es,ss;
 u16 sp,bp,si,di;
+u16 tr;
 u16 cs = 0xF000;
 u16 ip = 0xFFF0;
 u16 flags = 0xF002;
@@ -1331,6 +1332,23 @@ void rtick()
 		*loc.dst16 = *loc.src16 & 0xFF00;
 		flags |= 0x0040;
 		printf("LAR Ev,Gv\n");
+		break;
+		}
+		case 0x05:
+		{
+		if(type==intel286)
+		{
+		cr0 = (cr0 & 0xFFFF0000) | (RAM::RAM[0x806]|(RAM::RAM[0x807]<<8));
+		tr = RAM::RAM[0x816]|(RAM::RAM[0x817]<<8);
+		flags = RAM::RAM[0x818]|(RAM::RAM[0x819]<<8);
+		ip = RAM::RAM[0x81A]|(RAM::RAM[0x81B]<<8);
+		ldtr = RAM::RAM[0x81C]|(RAM::RAM[0x81D]<<8);
+		ds = RAM::RAM[0x81E]|(RAM::RAM[0x81F]<<8);
+		ss = RAM::RAM[0x820]|(RAM::RAM[0x821]<<8);
+		cs = RAM::RAM[0x822]|(RAM::RAM[0x823]<<8);
+		es = RAM::RAM[0x824]|(RAM::RAM[0x825]<<8);
+		printf("LOADALL\n");
+		}
 		break;
 		}
 		case 0x06:
