@@ -1255,7 +1255,7 @@ void rtick()
 		case 0x31:
 		{
 		u8 modrm = RAM::rb(cs,ip+3);
-        	locs loc = decodemodrm(seg,modrm,false,false);	
+        	locs loc = decodemodrm(seg,modrm,false,false);
 		u8 tmp1 = *loc.src8 & 0x0F;
 		u8 tmp2 = 0;
 		for(int i = 0;i<tmp1;i++)
@@ -1279,7 +1279,7 @@ void rtick()
 		{
 		u8 modrm = RAM::rb(cs,ip+3);
         	locs loc = decodemodrm(seg,modrm,false,false);
-		u8 tmp = RAM::rb(cs,ip+2);	
+		u8 tmp = RAM::rb(cs,ip+2);
 		u8 tmp1 = tmp & 0x0F;
 		u8 tmp2 = 0;
 		for(int i = 0;i<tmp1;i++)
@@ -1327,7 +1327,7 @@ void rtick()
 	    {
 		case 0x02:
 		{
-		u8 modrm = RAM::rb(cs,ip+1)
+		u8 modrm = RAM::rb(cs,ip+1);
 		locs loc = decodemodrm(seg,modrm,true,false);
 		*loc.dst16 = *loc.src16 & 0xFF00;
 		flags |= 0x0040;
@@ -1336,7 +1336,7 @@ void rtick()
 		}
 		case 0x05:
 		{
-		if(type==intel286)
+		/*if(type==intel286)
 		{
 		cr0 = (cr0 & 0xFFFF0000) | (RAM::RAM[0x806]|(RAM::RAM[0x807]<<8));
 		tr = RAM::RAM[0x816]|(RAM::RAM[0x817]<<8);
@@ -1347,8 +1347,7 @@ void rtick()
 		ss = RAM::RAM[0x820]|(RAM::RAM[0x821]<<8);
 		cs = RAM::RAM[0x822]|(RAM::RAM[0x823]<<8);
 		es = RAM::RAM[0x824]|(RAM::RAM[0x825]<<8);
-		printf("LOADALL\n");
-		}
+		printf("LOADALL\n");*/
 		break;
 		}
 		case 0x06:
@@ -2727,7 +2726,7 @@ void rtick()
 		if(tmp==0) flags |= 0x0040;
 		else flags &= 0xFFBF;
 		break;
-	    }   
+	    }
 	}
 	ip+=3;
 	break;
@@ -2788,7 +2787,7 @@ void rtick()
 		if(tmp==0) flags |= 0x0040;
 		else flags &= 0xFFBF;
 		break;
-	    }   
+	    }
 	}
 	ip+=3;
 	break;
@@ -2849,7 +2848,7 @@ void rtick()
 		if(tmp==0) flags |= 0x0040;
 		else flags &= 0xFFBF;
 		break;
-	    }   
+	    }
 	}
 	ip+=3;
 	break;
@@ -3424,7 +3423,7 @@ void rtick()
         u8 tmp = RAM::rb(cs,ip+1);
         u8 tmp1 = al & tmp;
         if(tmp == 0) flags |= 0x0040;
-        else flags &= 0xFFBF; 
+        else flags &= 0xFFBF;
         printf("TEST AL, %02x\n",tmp);
         ip+=2;
         break;
@@ -3434,7 +3433,7 @@ void rtick()
         u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
         u16 tmp1 = ax & tmp;
         if(tmp == 0) flags |= 0x0040;
-        else flags &= 0xFFBF; 
+        else flags &= 0xFFBF;
         printf("TEST AX, %04x\n",tmp);
         ip+=3;
         break;
@@ -4170,7 +4169,7 @@ void rtick()
         u8 tmp2 = al - (tmp1 * 10);
         al = tmp2;
 	ip+=2;
-	printf("AAM 10\n",tmp);
+	printf("AAM 10\n");
 	}
         break;
     }
@@ -4189,7 +4188,7 @@ void rtick()
 	al = (ah * 10) + al;
         ah = 0;
 	ip+=2;
-	printf("AAD 10\n",tmp);
+	printf("AAD 10\n");
 	}
         break;
     }
@@ -4620,6 +4619,23 @@ void rtick()
         break;
     }
     }
+    if(hint)
+    {
+        u8 tmp = hintnum;
+        sp-=2;
+        RAM::wb(ss,sp,flags & 0xFF);
+        RAM::wb(ss,sp+1,flags >> 8);
+        flags &= 0xFCFF;
+        sp-=2;
+        RAM::wb(ss,sp,cs & 0xFF);
+        RAM::wb(ss,sp+1,cs >> 8);
+        sp-=2;
+        RAM::wb(ss,sp,(ip+2) & 0xFF);
+        RAM::wb(ss,sp+1,(ip+2) >> 8);
+        cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
+        ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
+        printf("Hardware interrupt %02x triggered!\n",tmp);
+    }
     }
     else
     {
@@ -4672,7 +4688,7 @@ void rtick()
 	{
 	ch = RAM::rb(cs,ip+1);
 	ip+=2;
-	printf("LD B,%02x\n",b);
+	printf("LD B,%02x\n",ch);
 	break;
 	}
 	case 0x07:
@@ -4725,7 +4741,7 @@ void rtick()
 	{
 	cl = RAM::rb(cs,ip+1);
 	ip+=2;
-	printf("LD C,%02x\n",c);
+	printf("LD C,%02x\n",cl);
 	break;
 	}
 	case 0x0F:
@@ -4779,7 +4795,7 @@ void rtick()
 	{
 	dh = RAM::rb(cs,ip+1);
 	ip+=2;
-	printf("LD D,%02x\n",d);
+	printf("LD D,%02x\n",dh);
 	break;
 	}
 	case 0x17:
@@ -4832,7 +4848,7 @@ void rtick()
 	{
 	dl = RAM::rb(cs,ip+1);
 	ip+=2;
-	printf("LD E,%02x\n",e);
+	printf("LD E,%02x\n",dl);
 	break;
 	}
 	case 0x1F:
@@ -6034,8 +6050,6 @@ void rtick()
     printf("bp=%04x\n",bp);
     printf("flags=%04x\n",flags);
 }
-
-bool halted = false;
 
 void tick()
 {

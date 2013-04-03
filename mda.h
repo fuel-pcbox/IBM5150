@@ -35,7 +35,6 @@ namespace MDA
 				u8 attr = RAM::RAM[0xB0001 + (((x/9) + (y/(maxscan+1)))>>1)];
 				//TODO: This next part is highly inaccurate and ignores everything but the character chosen.
 				u8 chrdata = ROM[(chr * 14) + (y%(maxscan+1))];
-				if((x % 9) == 0)
 			}
 		}
 		framecount++;

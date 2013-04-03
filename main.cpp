@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <vector>
 #include <functional>
-#include <SDL/SDL.h>
+//#include <SDL.h>
 
 typedef uint8_t u8;
 typedef int8_t s8;
@@ -19,7 +19,7 @@ enum
 	update_clock = 8
 };
 
-SDL_Surface* screen = NULL;
+//SDL_Surface* screen = NULL;
 
 struct iohandler
 {
@@ -39,12 +39,16 @@ struct memhandler
 
 namespace CPU
 {
+    bool halted = false;
     u32 cr0;
     struct
     {
         u32 base;
         u16 limit;
     }gdtr, ldtr;
+
+    bool hint = false; //Hardware interrupts.
+    u8 hintnum = 0;
 };
 
 namespace RAM
@@ -52,6 +56,7 @@ namespace RAM
 u8 RAM[0x100000];
 std::vector<memhandler> handlers;
 bool write;
+u32 getaddr(u16 seg, u16 off);
 u8 rb(u16 seg, u16 off)
 {
     int i;
@@ -64,9 +69,9 @@ u8 rb(u16 seg, u16 off)
     if(i != handlers.size())return handlers[i].rb(addr);
     else RAM[addr];
 }
-u32 getaddr(u16 seg, u16 off)
+u32 getaddr(u16 seg, u16 offset)
 {
-    if(!(CPU::cr0 & 1)) return ((seg<<4)+off)&0xFFFFF;
+    if(!(CPU::cr0 & 1)) return ((seg<<4)+offset)&0xFFFFF;
     else
     {
         u8 tmp = seg & 0xFFF8;
@@ -213,6 +218,7 @@ void wb(u16 addr, u8 value)
 };
 
 #include "cpu.h"
+#include "mda.h"
 
 int main(int ac, char** av)
 {
@@ -228,16 +234,16 @@ int main(int ac, char** av)
     IO_XT::handlers.push_back(DMA_XT::handler);
     IO_XT::handlers.push_back(PPI::handler);
 
-    SDL_Init(SDL_INIT_EVERYTHING);
+    //SDL_Init(SDL_INIT_EVERYTHING);
 
-    screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
+    //screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
 
     for(int i = 0; i<65536; i++)
     {
         CPU::tick();
-	if((i%0x80)==0) MDA::tick_frame(); //An utter kludge.
+	//if((i%0x80)==0) MDA::tick_frame(); //An utter kludge.
     }
 
-    SDL_Quit();
+    //SDL_Quit();
     return 0;
 }
