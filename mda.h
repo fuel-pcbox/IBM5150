@@ -32,6 +32,7 @@ void putpix(int x, int y, u8 r, u8 g, u8 b)
     p[(((y*screen->w)+x)*3)+1] = g;
     p[(((y*screen->w)+x)*3)+2] = r;
 }
+bool shouldblank = false;
 void tick_frame()
 {
     for(int y = 0; y<(vdisp); y++)
@@ -39,24 +40,109 @@ void tick_frame()
         for(int x = 0; x<(hdisp+1); x++)
         {
             u8 chr = RAM::RAM[0xB0000 + (x + (y*(hdisp+1))<<1)];
-            u8 attr = RAM::RAM[0xB0001 + (0)];
-            //TODO: This next part is highly inaccurate and ignores everything but the character chosen.
+            u8 attr = RAM::RAM[0xB0001 + (x + (y*(hdisp+1))<<1)];
+            u8 fg[3], bg[3];
+            bool blink = false;
+            bool underline = false;
+            switch(attr)
+            {
+                case 0x00: case 0x08: case 0x80: case 0x88:
+                {
+                    for(int i = 0;i<3;i++)
+                    {
+                        fg[i] = 0;
+                        bg[i] = 0;
+                    }
+                    break;
+                }
+                case 0x70:
+                {
+                    for(int i = 0;i<3;i++)
+                    {
+                        fg[i] = 0;
+                        bg[i] = 192;
+                    }
+                    break;
+                }
+                case 0x78:
+                {
+                    for(int i = 0;i<3;i++)
+                    {
+                        fg[i] = 128;
+                        bg[i] = 192;
+                    }
+                    break;
+                }
+                case 0xF0:
+                {
+                    for(int i = 0;i<3;i++)
+                    {
+                        fg[i] = 128;
+                        bg[i] = 192;
+                    }
+                    blink = true;
+                    break;
+                }
+                case 0xF8:
+                {
+                    for(int i = 0;i<3;i++)
+                    {
+                        fg[i] = 128;
+                        bg[i] = 192;
+                    }
+                    blink = true;
+                    break;
+                }
+                default:
+                {
+                    for(int i = 0;i<3;i++)
+                    {
+                        fg[i] = 128;
+                        bg[i] = 0;
+                    }
+                    if(attr & 2) underline = true;
+                    if(attr & 8)
+                    {
+                        fg[0] = fg[1] = fg[2] = 192;
+                    }
+                    if(attr & 0x80) blink = true;
+                }
+            }
             for(int iy = 0;iy<(maxscan+1);iy++) 
             {
-                u8 chrdata = ROM[(chr*14) + (iy % (maxscan+1))];
-                if(chrdata & 0x80) putpix(x*9,(y*(maxscan+1))+iy,192,192,192);
-                if(chrdata & 0x40) putpix((x*9)+1,(y*(maxscan+1))+iy,192,192,192);
-                if(chrdata & 0x20) putpix((x*9)+2,(y*(maxscan+1))+iy,192,192,192);
-                if(chrdata & 0x10) putpix((x*9)+3,(y*(maxscan+1))+iy,192,192,192);
-                if(chrdata & 0x08) putpix((x*9)+4,(y*(maxscan+1))+iy,192,192,192);
-                if(chrdata & 0x04) putpix((x*9)+5,(y*(maxscan+1))+iy,192,192,192);
-                if(chrdata & 0x02) putpix((x*9)+6,(y*(maxscan+1))+iy,192,192,192);
-                if(chrdata & 0x01) putpix((x*9)+7,(y*(maxscan+1))+iy,192,192,192);
+                if(iy==maxscan && underline)
+                {
+                    for(int i = 0;i<9;i++)
+                    {
+                        putpix((x*9)+i,(y*(maxscan+1))+iy,192,192,192);
+                    }
+                }
+                int tmp = iy % (maxscan+1);
+                u8 chrdata;
+                if(tmp & 8) chrdata = ROM[(0x800 | (tmp & 7)) + (chr*8)];
+                else chrdata = ROM[(chr*8) + tmp];
+                if(chrdata & 0x80) putpix(x*9,(y*(maxscan+1))+iy,fg[0],fg[1],fg[2]);
+                if(blink && (framecount & 0x10)) putpix(x*9,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if(chrdata & 0x40) putpix((x*9)+1,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if(blink && (framecount & 0x10)) putpix((x*9)+1,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if(chrdata & 0x20) putpix((x*9)+2,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if(blink && (framecount & 0x10)) putpix((x*9)+2,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if(chrdata & 0x10) putpix((x*9)+3,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if(blink && (framecount & 0x10)) putpix((x*9)+3,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if(chrdata & 0x08) putpix((x*9)+4,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if(blink && (framecount & 0x10)) putpix((x*9)+4,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if(chrdata & 0x04) putpix((x*9)+5,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if(blink && (framecount & 0x10)) putpix((x*9)+5,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if(chrdata & 0x02) putpix((x*9)+6,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if(blink && (framecount & 0x10)) putpix((x*9)+6,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if(chrdata & 0x01) putpix((x*9)+7,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if(blink && (framecount & 0x10)) putpix((x*9)+7,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
                 putpix((x*9)+8,(y*(maxscan+1))+iy,0,0,0);
             }
         }
     }
     framecount++;
+    if(framecount == 0x1F) framecount = 0;
 }
 void crtc_w(u16 addr, u8 value)
 {

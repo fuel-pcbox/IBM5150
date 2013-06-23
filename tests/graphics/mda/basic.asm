@@ -8,18 +8,18 @@ mov dx,0x3B8
 mov al,0x2B
 out dx,al
 mov dx,0x3B4
-mov ax,0x0506
+mov ax,0x1906
 out dx,ax
 mov ax,0x0D09
 out dx,ax
-mov ax,0x0501
+mov ax,0x8001
 out dx,ax
 mov ax,0xB000
 mov ds,ax
 xor bx,bx
 mov byte [bx], 'A'
 inc bx
-mov byte [bx], 0x09
+mov byte [bx], 0x8A
 
 nop
 nop
