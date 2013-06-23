@@ -357,9 +357,9 @@ int main(int ac, char** av)
     IO_XT::handlers.push_back(PIT::pit);
     IO_XT::handlers.push_back(MDA::mdacrtc);
 
-    //SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Init(SDL_INIT_EVERYTHING);
 
-    //screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
+    screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
 
     bool quit = false;
     int i = 0;
@@ -371,24 +371,19 @@ int main(int ac, char** av)
         {
             i=0;
             PIT::tick();
-        }
-
-        /*if(i==10)
-        {
-            i==0;
             MDA::tick_frame();
             SDL_Flip(screen);
-        }*/
+        }
 
-        /*SDL_Event e;
+        SDL_Event e;
         while(SDL_PollEvent(&e))
         {
             if(e.type == SDL_QUIT) quit = true;
         }
-        */
+        
         i++;
     }
 
-    //SDL_Quit();
+    SDL_Quit();
     return 0;
 }
