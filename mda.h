@@ -144,14 +144,14 @@ void tick_frame()
     framecount++;
     if(framecount == 0x1F) framecount = 0;
 }
-void crtc_w(u16 addr, u8 value)
+void mda_w(u16 addr, u8 value)
 {
-    switch(addr&1)
+    switch(addr)
     {
-    case 0:
+    case 4:
         crtcindex = value;
         break;
-    case 1:
+    case 5:
     {
         switch(crtcindex)
         {
@@ -233,8 +233,13 @@ void crtc_w(u16 addr, u8 value)
         }
         break;
     }
+    case 8:
+    {
+        dispmode = value;
+        break;
+    }
     }
 }
 
-iohandler mdacrtc = {0x03B4, 0x03B5, NULL, crtc_w};
+iohandler mdacrtc = {0x03B0, 0x03B8, NULL, mda_w};
 }

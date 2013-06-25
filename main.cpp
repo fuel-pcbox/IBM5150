@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <vector>
+#include <string>
 #include <functional>
 #include <SDL/SDL.h>
 
@@ -327,43 +328,117 @@ void wb(u16 addr, u8 value)
     {
         for(i = 0; i<handlers.size(); i++)
         {
-            if(addr>=handlers[i].start && addr<=handlers[i].end) break;
+            if(addr>=handlers[i].start && addr<=handlers[i].end) handlers[i].wb(addr-handlers[i].start,value);
         }
         printf("Calling callback!\n");
-        if(handlers[i].wb != NULL) handlers[i].wb(addr-handlers[i].start,value);
-        else printf("Function uninitialized!\n");
     }
 }
 };
 
 #include "cpu.h"
 #include "mda.h"
+#include "cga.h"
+
+void savestate_save()
+{
+    FILE* fp = fopen("save/mem.dump","wb");
+    fwrite(RAM::RAM,0x100000,1,fp);
+    fclose(fp);
+    fp = fopen("save/reg.dump","wb");
+    fwrite(&CPU::ax,2,1,fp);
+    fwrite(&CPU::bx,2,1,fp);
+    fwrite(&CPU::cx,2,1,fp);
+    fwrite(&CPU::dx,2,1,fp);
+    fwrite(&CPU::si,2,1,fp);
+    fwrite(&CPU::di,2,1,fp);
+    fwrite(&CPU::sp,2,1,fp);
+    fwrite(&CPU::bp,2,1,fp);
+    fwrite(&CPU::ip,2,1,fp);
+    fwrite(&CPU::cs,2,1,fp);
+    fwrite(&CPU::ds,2,1,fp);
+    fwrite(&CPU::es,2,1,fp);
+    fwrite(&CPU::ss,2,1,fp);
+    fwrite(&CPU::flags,2,1,fp);
+    fclose(fp);
+    fp = fopen("save/mda.dump","wb");
+    fwrite(&MDA::hdisp,2,1,fp);
+    fwrite(&MDA::vdisp,2,1,fp);
+    fwrite(&MDA::maxscan,2,1,fp);
+    fwrite(&MDA::dispmode,2,1,fp);
+}
 
 int main(int ac, char** av)
 {
-    if(ac < 2) return 1;
+    if(ac < 4) return 1;
     FILE* bios = fopen(av[1],"rb");
     fseek(bios,0,SEEK_END);
     long size = ftell(bios);
     fseek(bios,0,SEEK_SET);
     fread(RAM::RAM + (0x100000 - size),1,size,bios);
-    FILE* mda = fopen("mda.rom","rb");
+    FILE* mda = fopen(av[2],"rb");
     fread(MDA::ROM,1,0x2000,mda);
+    fseek(mda,0,SEEK_SET);
+    fread(CGA::ROM,1,0x2000,mda);
     fclose(mda);
     fclose(bios);
-
-    IO_XT::handlers.push_back(DMA_XT::handler);
-    IO_XT::handlers.push_back(PPI::handler);
-    IO_XT::handlers.push_back(PIT::pit);
-    IO_XT::handlers.push_back(MDA::mdacrtc);
-
+    
+    char* isa1 = new char[10];
+    
+    FILE* config = fopen(av[3],"r");
+    fscanf(config,"isa1=%s\n",isa1);
+    fclose(config);
+    
+    std::string isa1slot = isa1;
+    delete[] isa1;
+    
     SDL_Init(SDL_INIT_EVERYTHING);
 
     screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
+    
+    if(isa1slot == "mda")
+    {
+        IO_XT::handlers.push_back(MDA::mdacrtc);
+        SDL_WM_SetCaption("IBM5150:  CPU: 8086 SYSTEM: IBM PC 5150 ISA1: MDA",NULL);
+    }
+    if(isa1slot == "cga")
+    {
+        IO_XT::handlers.push_back(CGA::cgacrtc);
+        SDL_WM_SetCaption("IBM5150:  CPU: 8086 SYSTEM: IBM PC 5150 ISA1: CGA",NULL);
+    }
+
+    IO_XT::handlers.push_back(DMA_XT::handler);
+    IO_XT::handlers.push_back(PPI::handler);
+    IO_XT::handlers.push_back(PIT::pit);  
 
     bool quit = false;
     int i = 0;
-
+    
+    FILE* fp = fopen("save/mem.dump","rb");
+    if(fp != NULL)
+    {
+        fread(RAM::RAM,0x100000,1,fp);
+        fclose(fp);
+    }
+    fp = fopen("save/reg.dump","rb");
+    if(fp != NULL)
+    {
+        fread(&CPU::ax,2,1,fp);
+        fread(&CPU::bx,2,1,fp);
+        fread(&CPU::cx,2,1,fp);
+        fread(&CPU::dx,2,1,fp);
+        fread(&CPU::si,2,1,fp);
+        fread(&CPU::di,2,1,fp);
+        fread(&CPU::sp,2,1,fp);
+        fread(&CPU::bp,2,1,fp);
+        fread(&CPU::ip,2,1,fp);
+        fread(&CPU::cs,2,1,fp);
+        fread(&CPU::ds,2,1,fp);
+        fread(&CPU::es,2,1,fp);
+        fread(&CPU::ss,2,1,fp);
+        fread(&CPU::flags,2,1,fp);
+        fclose(fp);
+    }
+    
     while(quit == false)
     {
         CPU::tick();
@@ -371,7 +446,8 @@ int main(int ac, char** av)
         {
             i=0;
             PIT::tick();
-            MDA::tick_frame();
+            if(isa1slot == "mda") MDA::tick_frame();
+            if(isa1slot == "cga") CGA::tick_frame();
             SDL_Flip(screen);
         }
 
@@ -379,6 +455,17 @@ int main(int ac, char** av)
         while(SDL_PollEvent(&e))
         {
             if(e.type == SDL_QUIT) quit = true;
+            if(e.type == SDL_KEYDOWN)
+            {
+                switch(e.key.keysym.sym)
+                {
+                    case SDLK_s:
+                    {
+                        savestate_save();
+                        break;
+                    }
+                }
+            }
         }
         
         i++;
