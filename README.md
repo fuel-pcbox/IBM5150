@@ -19,8 +19,6 @@ cd IBM5150; make; ./ibm5150 biosFile mdaFile mda.cfg > log.txt
 
 You should see a black window on the screen and log.txt should contain everything the emulator has been doing.
 
-You can get character ROM from http://www.minuszerodegrees.net/rom/IBM_5788005_AM9264_1981_CGA_MDA_CARD.BIN and BIOS from http://www.minuszerodegrees.net/bios/bios.htm.
-
 Todo
 ====
 

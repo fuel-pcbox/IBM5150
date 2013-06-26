@@ -1,5 +1,8 @@
 *.layout
+*.depend
 *~
 ibm5150
 stuff/
 log.txt
+bin/
+obj/

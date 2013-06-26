@@ -38,6 +38,12 @@
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mda.cpp" />
 		<Unit filename="src/mda.h" />
+		<Unit filename="src/misc.cpp" />
+		<Unit filename="src/misc.h" />
+		<Unit filename="src/ram.cpp" />
+		<Unit filename="src/ram.h" />
+		<Unit filename="src/savestate.cpp" />
+		<Unit filename="src/savestate.h" />
 		<Unit filename="tests/graphics/cga/basic.asm" />
 		<Unit filename="tests/graphics/mda/basic.asm" />
 		<Extensions>
