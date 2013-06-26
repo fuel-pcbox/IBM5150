@@ -1,3 +1,6 @@
+#ifndef CGA_H_INCLUDE
+#define CGA_H_INCLUDE
+
 namespace CGA
 {
 u8 ROM[0x2000];
@@ -107,7 +110,7 @@ void tick_frame()
                     if(attr & 0x80) blink = true;
                 }
             }
-            for(int iy = 0;iy<(maxscan+1);iy++) 
+            for(int iy = 0;iy<(maxscan+1);iy++)
             {
                 if(iy==maxscan && underline)
                 {
@@ -242,3 +245,5 @@ void cga_w(u16 addr, u8 value)
 
 iohandler cgacrtc = {0x03D0, 0x03D8, NULL, cga_w};
 }
+
+#endif // CGA_H_INCLUDE

@@ -1,3 +1,6 @@
+#ifndef MDA_H_INCLUDE
+#define MDA_H_INCLUDE
+
 namespace MDA
 {
 u8 ROM[0x2000];
@@ -108,7 +111,7 @@ void tick_frame()
                     if(attr & 0x80) blink = true;
                 }
             }
-            for(int iy = 0;iy<(maxscan+1);iy++) 
+            for(int iy = 0;iy<(maxscan+1);iy++)
             {
                 if(iy==maxscan && underline)
                 {
@@ -243,3 +246,5 @@ void mda_w(u16 addr, u8 value)
 
 iohandler mdacrtc = {0x03B0, 0x03B8, NULL, mda_w};
 }
+
+#endif // MDA_H_INCLUDE
