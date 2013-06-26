@@ -1,3 +1,6 @@
+#ifndef CPU_H_INCLUDE
+#define CPU_H_INCLUDE
+
 namespace CPU
 {
 enum cputype
@@ -6150,3 +6153,6 @@ void tick()
 }
 
 };
+
+
+#endif // CPU_H_INCLUDE
