@@ -44,4 +44,4 @@ Much to be done here.
 PIC
 ===
 
-Barely there at all.
+It's sorta there, but still incomplete.

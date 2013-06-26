@@ -4630,7 +4630,7 @@ void rtick()
         }
         if(hint)
         {
-            u8 tmp = hintnum;
+            u8 tmp = hintnum + PIC::pic[0].offset;
             sp-=2;
             RAM::wb(ss,sp,flags & 0xFF);
             RAM::wb(ss,sp+1,flags >> 8);

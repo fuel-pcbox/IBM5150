@@ -52,6 +52,59 @@ bool hint = false; //Hardware interrupts.
 u8 hintnum = 0;
 };
 
+namespace PIC
+{
+struct
+{
+    u8 icw1,icw3,icw4;
+    
+    bool init1;
+    bool init2;
+    
+    bool enabled;
+
+    u8 intrmask;
+
+    u8 ocw2,ocw3;
+    
+    u8 offset;
+} pic[1]; //The [1] is there to ease future AT implementation.
+
+void pic1_w(u16 addr, u8 value)
+{
+    switch(addr)
+    {
+        case 0:
+        {
+            if(value & 0x10)
+            {
+                pic[0].icw1 = value & 0x1F;
+                pic[0].enabled = false;
+                pic[0].init1 = true;
+            }
+            break;
+        }
+        case 1:
+        {
+            if(pic[0].init1 == true)
+            {
+                pic[0].offset = value;
+                pic[0].init2 = true;
+                pic[0].init1 = false;
+            }
+            else if(pic[0].init2 == true)
+            {
+                pic[0].icw3 = 0;
+            }
+            break;
+        }
+    }
+}
+
+iohandler pic1 = {0x0020,0x0021,NULL,pic1_w};
+
+};
+
 namespace RAM
 {
 u8 RAM[0x100000];
@@ -157,6 +210,10 @@ u8 porta;
 u8 portb;
 u8 portc;
 bool dipsw1set;
+u8 rb(u16 addr)
+{
+    return 0;
+}
 void wb(u16 addr, u8 data)
 {
     switch(addr)
@@ -177,7 +234,7 @@ void wb(u16 addr, u8 data)
     }
     }
 }
-iohandler handler = {0x0060,0x0063,NULL,wb};
+iohandler handler = {0x0060,0x0063,rb,wb};
 };
 
 namespace PIT
@@ -369,6 +426,9 @@ void savestate_save()
 
 int main(int ac, char** av)
 {
+    PIC::pic[0].init1 = false;
+    PIC::pic[0].init2 = false;
+    PIC::pic[0].enabled = false;
     if(ac < 4) return 1;
     FILE* bios = fopen(av[1],"rb");
     fseek(bios,0,SEEK_END);
@@ -408,7 +468,8 @@ int main(int ac, char** av)
 
     IO_XT::handlers.push_back(DMA_XT::handler);
     IO_XT::handlers.push_back(PPI::handler);
-    IO_XT::handlers.push_back(PIT::pit);  
+    IO_XT::handlers.push_back(PIT::pit);
+    IO_XT::handlers.push_back(PIC::pic1);
 
     bool quit = false;
     int i = 0;
