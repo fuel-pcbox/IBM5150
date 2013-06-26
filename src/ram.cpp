@@ -2,6 +2,9 @@
 
 namespace RAM
 {
+u8 RAM[0x100000];
+std::vector<memhandler> handlers;
+bool write;
 
 u32 getaddr(u16 seg, u16 offset)
 {

@@ -8,6 +8,7 @@
 
 namespace CPU
 {
+
 enum cputype
 {
     intel8086 = 0,
@@ -39,15 +40,16 @@ enum
     SEG_SS
 };
 
-union reg16
+typedef union reg16
 {
     struct
     {
         u8 lo,hi;
     } parts;
     u16 w;
-} aw,bw,cw,dw;
+} reg16;
 
+extern reg16 aw,bw,cw,dw,ew;
 
 #define ax aw.w
 #define al aw.parts.lo
@@ -61,15 +63,10 @@ union reg16
 #define cl cw.parts.lo
 #define ch cw.parts.hi
 
-//TODO:
-//WTF? why does this not compile??
-//src/cpu.h:67:14: error: expected ',' or '...' before '.' token
-//#define dx dw.w
-//              ^
-#define dx dw.w
+
+#define dx dw.w //And this kids, is why you should **avoid* using #define
 #define dl dw.parts.lo
 #define dh dw.parts.hi
-
 
 extern u16 ds,es,ss;
 extern u16 sp,bp,si,di;

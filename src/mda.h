@@ -1,7 +1,15 @@
 #ifndef MDA_H_INCLUDE
 #define MDA_H_INCLUDE
 
+//TODO: fix this dirty workaround
+#ifdef dx
+#undef dx
 #include <SDL/SDL.h>
+#define dx dw.w
+#else
+#include <SDL/SDL.h>
+#endif
+
 
 #include "misc.h"
 #include "ram.h"

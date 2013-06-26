@@ -2,6 +2,8 @@
 
 namespace CPU {
 
+reg16 aw,bw,cw,dw,ew;
+
 u16 ds,es,ss;
 u16 sp,bp,si,di;
 u16 tr;
