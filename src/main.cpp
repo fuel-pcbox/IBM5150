@@ -57,16 +57,16 @@ namespace PIC
 struct
 {
     u8 icw1,icw3,icw4;
-    
+
     bool init1;
     bool init2;
-    
+
     bool enabled;
 
     u8 intrmask;
 
     u8 ocw2,ocw3;
-    
+
     u8 offset;
 } pic[1]; //The [1] is there to ease future AT implementation.
 
@@ -268,7 +268,7 @@ namespace PIT
                             if(chan[i].counter==0)
                             {
                                 chan[i].counter = chan[i].reload;
-                                chan[i].gate_out = true; 
+                                chan[i].gate_out = true;
                             }
                         }
                     }
@@ -426,10 +426,16 @@ void savestate_save()
 
 int main(int ac, char** av)
 {
+    if(ac < 4)
+    {
+        printf("Usage:\n\tibm5150 biosFile mdaFile configFile\n");
+        return 1;
+    }
+
     PIC::pic[0].init1 = false;
     PIC::pic[0].init2 = false;
     PIC::pic[0].enabled = false;
-    if(ac < 4) return 1;
+
     FILE* bios = fopen(av[1],"rb");
     fseek(bios,0,SEEK_END);
     long size = ftell(bios);
@@ -441,20 +447,20 @@ int main(int ac, char** av)
     fread(CGA::ROM,1,0x2000,mda);
     fclose(mda);
     fclose(bios);
-    
+
     char* isa1 = new char[10];
-    
+
     FILE* config = fopen(av[3],"r");
     fscanf(config,"isa1=%s\n",isa1);
     fclose(config);
-    
+
     std::string isa1slot = isa1;
     delete[] isa1;
-    
+
     SDL_Init(SDL_INIT_EVERYTHING);
 
     screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
-    
+
     if(isa1slot == "mda")
     {
         IO_XT::handlers.push_back(MDA::mdacrtc);
@@ -473,7 +479,7 @@ int main(int ac, char** av)
 
     bool quit = false;
     int i = 0;
-    
+
     FILE* fp = fopen("save/mem.dump","rb");
     if(fp != NULL)
     {
@@ -499,7 +505,7 @@ int main(int ac, char** av)
         fread(&CPU::flags,2,1,fp);
         fclose(fp);
     }
-    
+
     while(quit == false)
     {
         CPU::tick();
@@ -528,7 +534,7 @@ int main(int ac, char** av)
                 }
             }
         }
-        
+
         i++;
     }
 
