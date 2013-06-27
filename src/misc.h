@@ -49,7 +49,7 @@ void wb(u16 addr, u8 data);
 
 extern iohandler pit;
 
-}
+} //namespace PIT
 
 namespace PIC
 {
@@ -73,7 +73,7 @@ void pic1_w(u16 addr, u8 value);
 
 extern iohandler pic1;
 
-}
+} //namespace PIC
 
 namespace DMA_XT
 {
