@@ -8,17 +8,16 @@
 #include <functional>
 
 #define USE_SDL
+
 #ifdef USE_SDL
-
-//TODO: fix this dirty workaround
-#ifdef dx
-#undef dx
-#include <SDL/SDL.h>
-#define dx dw.w
-#else
-#include <SDL/SDL.h>
-#endif
-
+    //TODO: fix this dirty workaround
+    #ifdef dx
+        #undef dx
+        #include <SDL/SDL.h>
+        #define dx dw.w
+    #else
+        #include <SDL/SDL.h>
+    #endif //dx
 #endif // USE_SDL
 
 //TODO: why not a class?
@@ -30,16 +29,33 @@ extern bool quitflag;
 #ifdef USE_SDL
 typedef SDL_Surface Surface;
 typedef SDL_Event Event;
-
 #endif
 
 extern Surface* screen;
 
-extern int init(int width = 720, int height = 350);
-extern void quit();
-extern void window_caption(const char *title, const char *icon = NULL);
-extern int update_screen();
-extern int handle_events();
+inline int init(int width = 720, int height = 350)
+{
+    int ret = SDL_Init(SDL_INIT_EVERYTHING);
+    screen = SDL_SetVideoMode(width, height, 24, SDL_SWSURFACE);
+    return ret;
+}
+
+inline void quit()
+{
+    SDL_Quit();
+}
+
+inline void window_caption(const char *title, const char *icon = NULL)
+{
+    SDL_WM_SetCaption(title, icon);
+}
+
+inline int update_screen()
+{
+    SDL_Flip(screen);
+}
+
+int handle_events();
 
 
 } //namespace INTERFACE

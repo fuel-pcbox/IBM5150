@@ -1,5 +1,9 @@
+CC=g++
+CFLAGS=-g -O3 -std=c++11
+LIBS=-lSDL
+
 all:
-	g++ -g src/*.cpp -o ibm5150 -std=c++11 -lSDL
+	$(CC) $(CFLAGS) src/*.cpp -o ibm51501 $(LIBS)
 
 clean:
 	rm ibm5150
