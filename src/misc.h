@@ -77,15 +77,18 @@ extern iohandler pic1;
 
 namespace DMA_XT
 {
-struct DMA_chan
+typedef struct DMA_chan
 {
     u16 start_addr;
     u8 page;
     u16 count;
-} chan0,chan1,chan2,chan3;
+} DMA_chan;
+
+extern DMA_chan chan0,chan1,chan2,chan3;
 
 void page_w(u16 addr, u8 value);
 u8 page_r(u16 addr);
+
 extern iohandler handler;
 } //namespace DMA_XT
 

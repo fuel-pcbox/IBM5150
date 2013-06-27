@@ -193,6 +193,8 @@ iohandler pic1 = {0x0020,0x0021,NULL,pic1_w};
 namespace DMA_XT
 {
 
+DMA_chan chan0,chan1,chan2,chan3;
+
 void page_w(u16 addr, u8 value)
 {
     switch(addr)
