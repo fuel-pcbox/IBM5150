@@ -1,6 +1,7 @@
 #ifndef CGA_H_INCLUDE
 #define CGA_H_INCLUDE
 
+#include "interface.h"
 #include "misc.h"
 #include "mda.h"
 

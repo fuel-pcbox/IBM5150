@@ -35,6 +35,8 @@
 		<Unit filename="src/cga.h" />
 		<Unit filename="src/cpu.cpp" />
 		<Unit filename="src/cpu.h" />
+		<Unit filename="src/interface.cpp" />
+		<Unit filename="src/interface.h" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mda.cpp" />
 		<Unit filename="src/mda.h" />

@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 
+#include "interface.h"
 #include "misc.h"
 
 enum
@@ -13,8 +14,6 @@ enum
     update_clock = 8
 };
 
-
-
 #include "cpu.h"
 #include "mda.h"
 #include "cga.h"
@@ -24,7 +23,7 @@ int main(int ac, char** av)
 {
     if(ac < 4)
     {
-        printf("Usage:\n\tibm5150 biosFile mda.cfg configFile\n");
+        printf("Usage:\n\tibm5150 biosFile configFile mda.cfg\n");
         return 1;
     }
 
@@ -37,6 +36,7 @@ int main(int ac, char** av)
     long size = ftell(bios);
     fseek(bios,0,SEEK_SET);
     fread(RAM::RAM + (0x100000 - size),1,size,bios);
+
     FILE* mda = fopen(av[2],"rb");
     fread(MDA::ROM,1,0x2000,mda);
     fseek(mda,0,SEEK_SET);
@@ -53,19 +53,17 @@ int main(int ac, char** av)
     std::string isa1slot = isa1;
     delete[] isa1;
 
-    SDL_Init(SDL_INIT_EVERYTHING);
-
-    screen = SDL_SetVideoMode(720,350,24,SDL_SWSURFACE);
+    INTERFACE::init();
 
     if(isa1slot == "mda")
     {
         IO_XT::handlers.push_back(MDA::mdacrtc);
-        SDL_WM_SetCaption("IBM5150:  CPU: 8086 SYSTEM: IBM PC 5150 ISA1: MDA",NULL);
+        INTERFACE::window_caption("IBM5150:  CPU: 8086 SYSTEM: IBM PC 5150 ISA1: MDA");
     }
     if(isa1slot == "cga")
     {
         IO_XT::handlers.push_back(CGA::cgacrtc);
-        SDL_WM_SetCaption("IBM5150:  CPU: 8086 SYSTEM: IBM PC 5150 ISA1: CGA",NULL);
+        INTERFACE::window_caption("IBM5150:  CPU: 8086 SYSTEM: IBM PC 5150 ISA1: CGA");
     }
 
     IO_XT::handlers.push_back(DMA_XT::handler);
@@ -111,29 +109,37 @@ int main(int ac, char** av)
             PIT::tick();
             if(isa1slot == "mda") MDA::tick_frame();
             if(isa1slot == "cga") CGA::tick_frame();
-            SDL_Flip(screen);
+            INTERFACE::update_screen();
         }
 
-        SDL_Event e;
-        while(SDL_PollEvent(&e))
-        {
-            if(e.type == SDL_QUIT) quit = true;
-            if(e.type == SDL_KEYDOWN)
+
+        //TODO: remove SDL_* prefix
+        INTERFACE::handle_events(
+            [&](INTERFACE::Event e)
             {
-                switch(e.key.keysym.sym)
+                if(e.type == INTERFACE::SDL_QUIT)
+                    quit = true;
+                if(e.type == INTERFACE::SDL_KEYDOWN)
                 {
-                    case SDLK_s:
+                    switch(e.key.keysym.sym)
                     {
-                        savestate_save();
-                        break;
+                        case INTERFACE::SDLK_s:
+                        {
+                            savestate_save();
+                            break;
+                        }
                     }
                 }
-            }
-        }
+                return 0;
+            }                   );
+
+
+//
 
         i++;
     }
 
-    SDL_Quit();
+    INTERFACE::quit();
+
     return 0;
 }
