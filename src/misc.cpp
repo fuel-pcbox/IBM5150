@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "misc.h"
 
 namespace IO_XT
