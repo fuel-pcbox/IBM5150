@@ -60,10 +60,13 @@ void wb(u16 seg, u16 off, u8 value)
     for(i = 0; i<handlers.size(); i++)
     {
         if(i == handlers.size()) break;
-        if(addr>handlers[i].start && addr<handlers[i].end) break;
+        if(addr>handlers[i].start && addr<handlers[i].end)
+        {
+            handlers[i].wb(addr,value);
+            return;
+        }
     }
-    if(i != handlers.size()) handlers[i].wb(addr,value);
-    else RAM[addr] = value;
+    RAM[addr] = value;
 }
 
 } //namespace RAM
