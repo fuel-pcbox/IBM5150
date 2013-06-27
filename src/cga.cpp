@@ -50,73 +50,76 @@ void tick_frame()
             bool underline = false;
             switch(attr)
             {
-                case 0x00: case 0x08: case 0x80: case 0x88:
+            case 0x00:
+            case 0x08:
+            case 0x80:
+            case 0x88:
+            {
+                for(int i = 0; i<3; i++)
                 {
-                    for(int i = 0;i<3;i++)
-                    {
-                        fg[i] = 0;
-                        bg[i] = 0;
-                    }
-                    break;
+                    fg[i] = 0;
+                    bg[i] = 0;
                 }
-                case 0x70:
-                {
-                    for(int i = 0;i<3;i++)
-                    {
-                        fg[i] = 0;
-                        bg[i] = 192;
-                    }
-                    break;
-                }
-                case 0x78:
-                {
-                    for(int i = 0;i<3;i++)
-                    {
-                        fg[i] = 128;
-                        bg[i] = 192;
-                    }
-                    break;
-                }
-                case 0xF0:
-                {
-                    for(int i = 0;i<3;i++)
-                    {
-                        fg[i] = 128;
-                        bg[i] = 192;
-                    }
-                    blink = true;
-                    break;
-                }
-                case 0xF8:
-                {
-                    for(int i = 0;i<3;i++)
-                    {
-                        fg[i] = 128;
-                        bg[i] = 192;
-                    }
-                    blink = true;
-                    break;
-                }
-                default:
-                {
-                    for(int i = 0;i<3;i++)
-                    {
-                        fg[i] = 128;
-                        bg[i] = 0;
-                    }
-                    if(attr & 2) underline = true;
-                    if(attr & 8)
-                    {
-                        fg[0] = fg[1] = fg[2] = 192;
-                    }
-                    if(attr & 0x80) blink = true;
-                }
+                break;
             }
-            for(int iy = 0;iy<(maxscan+1);iy++)
+            case 0x70:
+            {
+                for(int i = 0; i<3; i++)
+                {
+                    fg[i] = 0;
+                    bg[i] = 192;
+                }
+                break;
+            }
+            case 0x78:
+            {
+                for(int i = 0; i<3; i++)
+                {
+                    fg[i] = 128;
+                    bg[i] = 192;
+                }
+                break;
+            }
+            case 0xF0:
+            {
+                for(int i = 0; i<3; i++)
+                {
+                    fg[i] = 128;
+                    bg[i] = 192;
+                }
+                blink = true;
+                break;
+            }
+            case 0xF8:
+            {
+                for(int i = 0; i<3; i++)
+                {
+                    fg[i] = 128;
+                    bg[i] = 192;
+                }
+                blink = true;
+                break;
+            }
+            default:
+            {
+                for(int i = 0; i<3; i++)
+                {
+                    fg[i] = 128;
+                    bg[i] = 0;
+                }
+                if(attr & 2) underline = true;
+                if(attr & 8)
+                {
+                    fg[0] = fg[1] = fg[2] = 192;
+                }
+                if(attr & 0x80) blink = true;
+            }
+            }
+            for(int iy = 0; iy<(maxscan+1); iy++)
             {
                 if(iy==maxscan && underline)
                 {
-                    for(int i = 0;i<9;i++)
+                    for(int i = 0; i<9; i++)
                     {
                         putpix((x*9)+i,(y*(maxscan+1))+iy,192,192,192);
                     }

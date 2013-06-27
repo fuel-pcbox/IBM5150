@@ -7,10 +7,6 @@
 
 #include <functional>
 
-//TODO: why not a class?
-namespace INTERFACE
-{
-
 #define USE_SDL
 #ifdef USE_SDL
 
@@ -23,17 +19,27 @@ namespace INTERFACE
 #include <SDL/SDL.h>
 #endif
 
+#endif // USE_SDL
+
+//TODO: why not a class?
+namespace INTERFACE
+{
+
+extern bool quitflag;
+
+#ifdef USE_SDL
 typedef SDL_Surface Surface;
 typedef SDL_Event Event;
-#endif // USE_SDL
+
+#endif
 
 extern Surface* screen;
 
-int init(int width = 720, int height = 350);
-void quit();
-void window_caption(const char *title, const char *icon = NULL);
-int update_screen();
-int handle_events(std::function<void(Event)> handle_event);
+extern int init(int width = 720, int height = 350);
+extern void quit();
+extern void window_caption(const char *title, const char *icon = NULL);
+extern int update_screen();
+extern int handle_events();
 
 
 } //namespace INTERFACE

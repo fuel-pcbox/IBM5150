@@ -1,5 +1,7 @@
 #include "interface.h"
 
+#include "savestate.h"
+
 namespace INTERFACE
 {
 
@@ -8,6 +10,7 @@ namespace INTERFACE
 #endif // USE_SDL
 
 Surface* screen = NULL;
+bool quitflag = false;
 
 inline int init(int width, int height)
 {
@@ -16,7 +19,7 @@ inline int init(int width, int height)
     return ret;
 }
 
-inline void quit()
+void quit()
 {
     SDL_Quit();
 }
@@ -31,13 +34,25 @@ inline int update_screen()
     SDL_Flip(screen);
 }
 
-int handle_events(std::function<int(Event)> handle_event)
+int handle_events()
 {
     SDL_Event e;
 
-    while(SDL_PollEvent(&e) && handle_event(e) == 0) ;
-
-    return 0;
+    while(SDL_PollEvent(&e))
+    {
+        if(e.type == SDL_QUIT) quitflag = true;
+        if(e.type == SDL_KEYDOWN)
+        {
+            switch(e.key.keysym.sym)
+            {
+            case SDLK_s:
+            {
+                savestate_save();
+                break;
+            }
+            }
+        }
+    }
 }
 
 } //namespace INTERFACE

@@ -35,50 +35,50 @@ namespace PIT
 {
 void tick()
 {
-    for(int i = 0;i<3;i++)
+    for(int i = 0; i<3; i++)
     {
         switch(chan[i].mode)
         {
-            case 0:
+        case 0:
+        {
+            if(i == 2)
             {
-                if(i == 2)
+            }
+            else
+            {
+                if(chan[i].enabled)
                 {
-                }
-                else
-                {
-                    if(chan[i].enabled)
+                    chan[i].counter--;
+                    if(chan[i].counter==0)
                     {
-                        chan[i].counter--;
-                        if(chan[i].counter==0)
-                        {
-                            chan[i].counter = chan[i].reload;
-                            chan[i].gate_out = true;
-                        }
+                        chan[i].counter = chan[i].reload;
+                        chan[i].gate_out = true;
                     }
                 }
-                break;
             }
-            case 2:
+            break;
+        }
+        case 2:
+        {
+            if(i == 2)
             {
-                if(i == 2)
+            }
+            else
+            {
+                if(chan[i].enabled)
                 {
-                }
-                else
-                {
-                    if(chan[i].enabled)
+                    chan[i].gate_out = true;
+                    chan[i].counter--;
+                    if(chan[i].counter==1) chan[i].gate_out = false;
+                    if(chan[i].counter==0)
                     {
                         chan[i].gate_out = true;
-                        chan[i].counter--;
-                        if(chan[i].counter==1) chan[i].gate_out = false;
-                        if(chan[i].counter==0)
-                        {
-                            chan[i].gate_out = true;
-                            chan[i].counter = chan[i].reload;
-                        }
+                        chan[i].counter = chan[i].reload;
                     }
                 }
-                break;
             }
+            break;
+        }
         }
     }
 }
@@ -87,15 +87,15 @@ u8 rb(u16 addr)
 {
     switch(addr)
     {
-        case 1:
+    case 1:
+    {
+        if(chan[1].accessmode == 0)
         {
-            if(chan[1].accessmode == 0)
-            {
-                chan[1].enabled = true;
-                return chan[1].counter;
-            }
-            break;
+            chan[1].enabled = true;
+            return chan[1].counter;
         }
+        break;
+    }
     }
     return 0;
 }
@@ -104,47 +104,47 @@ void wb(u16 addr, u8 data)
 {
     switch(addr)
     {
+    case 1:
+    {
+        switch(chan[1].accessmode)
+        {
         case 1:
         {
-            switch(chan[1].accessmode)
-            {
-                case 1:
-                {
-                    chan[1].reload = (chan[1].reload & 0xFF00) | data;
-                    chan[1].enabled = true;
-                    break;
-                }
-            }
+            chan[1].reload = (chan[1].reload & 0xFF00) | data;
+            chan[1].enabled = true;
             break;
         }
-        case 3:
+        }
+        break;
+    }
+    case 3:
+    {
+        switch(data & 0xC0)
         {
-            switch(data & 0xC0)
-            {
-                case 0:
-                {
-                    chan[0].accessmode = (data >> 4) & 3;
-                    chan[0].mode = (data >> 1) & 7;
-                    chan[0].enabled = false;
-                    break;
-                }
-                case 1:
-                {
-                    chan[1].accessmode = (data >> 4) & 3;
-                    chan[1].mode = (data >> 1) & 7;
-                    chan[1].enabled = false;
-                    break;
-                }
-                case 2:
-                {
-                    chan[2].accessmode = (data >> 4) & 3;
-                    chan[2].mode = (data >> 1) & 7;
-                    chan[2].enabled = false;
-                    break;
-                }
-            }
+        case 0:
+        {
+            chan[0].accessmode = (data >> 4) & 3;
+            chan[0].mode = (data >> 1) & 7;
+            chan[0].enabled = false;
             break;
         }
+        case 1:
+        {
+            chan[1].accessmode = (data >> 4) & 3;
+            chan[1].mode = (data >> 1) & 7;
+            chan[1].enabled = false;
+            break;
+        }
+        case 2:
+        {
+            chan[2].accessmode = (data >> 4) & 3;
+            chan[2].mode = (data >> 1) & 7;
+            chan[2].enabled = false;
+            break;
+        }
+        }
+        break;
+    }
     }
 }
 
@@ -159,30 +159,30 @@ void pic1_w(u16 addr, u8 value)
 {
     switch(addr)
     {
-        case 0:
+    case 0:
+    {
+        if(value & 0x10)
         {
-            if(value & 0x10)
-            {
-                pic[0].icw1 = value & 0x1F;
-                pic[0].enabled = false;
-                pic[0].init1 = true;
-            }
-            break;
+            pic[0].icw1 = value & 0x1F;
+            pic[0].enabled = false;
+            pic[0].init1 = true;
         }
-        case 1:
+        break;
+    }
+    case 1:
+    {
+        if(pic[0].init1 == true)
         {
-            if(pic[0].init1 == true)
-            {
-                pic[0].offset = value;
-                pic[0].init2 = true;
-                pic[0].init1 = false;
-            }
-            else if(pic[0].init2 == true)
-            {
-                pic[0].icw3 = 0;
-            }
-            break;
+            pic[0].offset = value;
+            pic[0].init2 = true;
+            pic[0].init1 = false;
         }
+        else if(pic[0].init2 == true)
+        {
+            pic[0].icw3 = 0;
+        }
+        break;
+    }
     }
 }
 

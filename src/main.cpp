@@ -100,7 +100,7 @@ int main(int ac, char** av)
         fclose(fp);
     }
 
-    while(quit == false)
+    while(INTERFACE::quitflag == false)
     {
         CPU::tick();
         if(i==5)
@@ -114,28 +114,7 @@ int main(int ac, char** av)
 
 
         //TODO: remove SDL_* prefix
-        INTERFACE::handle_events(
-            [&](INTERFACE::Event e)
-            {
-                if(e.type == INTERFACE::SDL_QUIT)
-                    quit = true;
-                if(e.type == INTERFACE::SDL_KEYDOWN)
-                {
-                    switch(e.key.keysym.sym)
-                    {
-                        case INTERFACE::SDLK_s:
-                        {
-                            savestate_save();
-                            break;
-                        }
-                    }
-                }
-                return 0;
-            }                   );
-
-
-//
-
+        INTERFACE::handle_events();
         i++;
     }
 
