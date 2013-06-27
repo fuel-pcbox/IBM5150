@@ -5,34 +5,14 @@
 namespace INTERFACE
 {
 
-#ifndef USE_SDL
-#error You need SDL to run this emulator
-#endif // USE_SDL
-
-Surface* screen = NULL;
 bool quitflag = false;
+Surface* screen = NULL;
 
-inline int init(int width, int height)
-{
-    int ret = SDL_Init(SDL_INIT_EVERYTHING);
-    screen = SDL_SetVideoMode(width, height, 24, SDL_SWSURFACE);
-    return ret;
-}
+extern inline int init(int width, int height);
+extern inline void quit();
+extern inline void window_caption(const char *title, const char *icon);
+extern inline int update_screen();
 
-void quit()
-{
-    SDL_Quit();
-}
-
-inline void window_caption(const char *title, const char *icon)
-{
-    SDL_WM_SetCaption(title, icon);
-}
-
-inline int update_screen()
-{
-    SDL_Flip(screen);
-}
 
 int handle_events()
 {
