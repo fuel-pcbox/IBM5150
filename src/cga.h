@@ -28,6 +28,10 @@ extern int framecount;
 extern u8 dispmode; //Bit 1 must be set at all times, unless the processor wants to be halted.
 extern u8 status;
 
+extern u8 color;
+
+extern u8 palette[16][3];
+
 u8 status_r(u16 addr);
 void putpix(int x, int y, u8 r, u8 g, u8 b);
 

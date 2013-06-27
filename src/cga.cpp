@@ -21,8 +21,29 @@ u16 curaddr = 0;
 
 int framecount = 0;
 
-u8 dispmode = 2; //Bit 1 must be set at all times, unless the processor wants to be halted.
+u8 dispmode = 0;
 u8 status = 0x80;
+u8 color = 0;
+
+u8 palette[16][3] =
+{
+    {0x00,0x00,0x00},
+    {0xFF,0xFF,0xFF},
+    {0xAA,0xAA,0xAA},
+    {0x55,0x55,0x55},
+    {0xFF,0xFF,0x55},
+    {0xAA,0x55,0x00},
+    {0xFF,0x55,0x55},
+    {0xAA,0x00,0x00},
+    {0x55,0xFF,0x55},
+    {0x00,0xAA,0x00},
+    {0x55,0xFF,0xFF},
+    {0x00,0xAA,0xAA},
+    {0x55,0x55,0xFF},
+    {0x00,0x00,0xAA},
+    {0xFF,0x55,0xFF},
+    {0xAA,0x00,0xAA},
+};
 
 u8 status_r(u16 addr)
 {
@@ -39,117 +60,75 @@ void putpix(int x, int y, u8 r, u8 g, u8 b)
 
 void tick_frame()
 {
-    for(int y = 0; y<(vdisp); y++)
+    if(dispmode & 2)
     {
-        for(int x = 0; x<(hdisp+1); x++)
+    }
+    else
+    {
+        for(int y = 0; y<(vdisp); y++)
         {
-            u8 chr = RAM::RAM[0xB8000 + (x + (y*(hdisp+1))<<1)];
-            u8 attr = RAM::RAM[0xB8001 + (x + (y*(hdisp+1))<<1)];
-            u8 fg[3], bg[3];
-            bool blink = false;
-            bool underline = false;
-            switch(attr)
+            for(int x = 0; x<(hdisp+1); x++)
             {
-            case 0x00:
-            case 0x08:
-            case 0x80:
-            case 0x88:
-            {
-                for(int i = 0; i<3; i++)
+                u8 chr = RAM::RAM[0xB8000 + (x + (y*(hdisp+1))<<1)];
+                u8 attr = RAM::RAM[0xB8001 + (x + (y*(hdisp+1))<<1)];
+                u8 fg[3], bg[3];
+                bool blink = false;
+                bool underline = false;
+                fg[0] = fg[1] = fg[2] = 0;
+                bg[0] = bg[1] = bg[2] = 0;
+                
+                if(attr & 0x08)
                 {
-                    fg[i] = 0;
-                    bg[i] = 0;
+                    if(attr & 1) fg[2] = 0xFF;
+                    if(attr & 2) fg[1] = 0xFF;
+                    if(attr & 4) fg[0] = 0xFF;
                 }
-                break;
-            }
-            case 0x70:
-            {
-                for(int i = 0; i<3; i++)
+                else
                 {
-                    fg[i] = 0;
-                    bg[i] = 192;
+                    if(attr & 1) fg[2] = 0xAA;
+                    if(attr & 2) fg[1] = 0xAA;
+                    if(attr & 4) fg[0] = 0xAA;
                 }
-                break;
-            }
-            case 0x78:
-            {
-                for(int i = 0; i<3; i++)
+                if(attr & 0x80)
                 {
-                    fg[i] = 128;
-                    bg[i] = 192;
+                    if(attr & 0x10) bg[2] = 0xFF;
+                    if(attr & 0x20) bg[1] = 0xFF;
+                    if(attr & 0x40) bg[0] = 0xFF;
                 }
-                break;
-            }
-            case 0xF0:
-            {
-                for(int i = 0; i<3; i++)
+                else
                 {
-                    fg[i] = 128;
-                    bg[i] = 192;
+                    if(attr & 0x10) bg[2] = 0xAA;
+                    if(attr & 0x20) bg[1] = 0xAA;
+                    if(attr & 0x40) bg[0] = 0xAA;
                 }
-                blink = true;
-                break;
-            }
-            case 0xF8:
-            {
-                for(int i = 0; i<3; i++)
+                for(int iy = 0; iy<(maxscan+1); iy++)
                 {
-                    fg[i] = 128;
-                    bg[i] = 192;
+                    int tmp = iy % (maxscan+1);
+                    u8 chrdata;
+                    if(tmp & 8) chrdata = ROM[(0x1800 | (tmp & 7)) + (chr*8)];
+                    else chrdata = ROM[0x1000 + (chr*8) + tmp];
+                    if(chrdata & 0x80) putpix(x*8,(y*(maxscan+1))+iy,fg[0],fg[1],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix(x*8,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                    if(chrdata & 0x40) putpix((x*8)+1,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix((x*8)+1,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                    if(chrdata & 0x20) putpix((x*8)+2,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix((x*8)+2,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                    if(chrdata & 0x10) putpix((x*8)+3,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix((x*8)+3,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                    if(chrdata & 0x08) putpix((x*8)+4,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix((x*8)+4,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                    if(chrdata & 0x04) putpix((x*8)+5,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix((x*8)+5,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                    if(chrdata & 0x02) putpix((x*8)+6,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix((x*8)+6,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                    if(chrdata & 0x01) putpix((x*8)+7,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                    if(blink && (framecount & 0x10)) putpix((x*8)+7,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
                 }
-                blink = true;
-                break;
-            }
-            default:
-            {
-                for(int i = 0; i<3; i++)
-                {
-                    fg[i] = 128;
-                    bg[i] = 0;
-                }
-                if(attr & 2) underline = true;
-                if(attr & 8)
-                {
-                    fg[0] = fg[1] = fg[2] = 192;
-                }
-                if(attr & 0x80) blink = true;
-            }
-            }
-            for(int iy = 0; iy<(maxscan+1); iy++)
-            {
-                if(iy==maxscan && underline)
-                {
-                    for(int i = 0; i<9; i++)
-                    {
-                        putpix((x*9)+i,(y*(maxscan+1))+iy,192,192,192);
-                    }
-                }
-                int tmp = iy % (maxscan+1);
-                u8 chrdata;
-                if(tmp & 8) chrdata = ROM[(0x1800 | (tmp & 7)) + (chr*8)];
-                else chrdata = ROM[0x1000 + (chr*8) + tmp];
-                if(chrdata & 0x80) putpix(x*9,(y*(maxscan+1))+iy,fg[0],fg[1],fg[2]);
-                if(blink && (framecount & 0x10)) putpix(x*9,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x40) putpix((x*9)+1,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+1,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x20) putpix((x*9)+2,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+2,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x10) putpix((x*9)+3,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+3,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x08) putpix((x*9)+4,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+4,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x04) putpix((x*9)+5,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+5,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x02) putpix((x*9)+6,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+6,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x01) putpix((x*9)+7,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+7,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                putpix((x*9)+8,(y*(maxscan+1))+iy,0,0,0);
             }
         }
+        framecount++;
+        if(framecount == 0x1F) framecount = 0;
     }
-    framecount++;
-    if(framecount == 0x1F) framecount = 0;
 }
 void cga_w(u16 addr, u8 value)
 {
@@ -245,8 +224,13 @@ void cga_w(u16 addr, u8 value)
         dispmode = value;
         break;
     }
+    case 9:
+    {
+        color = value;
+        break;
+    }
     }
 }
 
-iohandler cgacrtc = {0x03D0, 0x03D8, NULL, cga_w};
+iohandler cgacrtc = {0x03D0, 0x03DA, NULL, cga_w};
 }

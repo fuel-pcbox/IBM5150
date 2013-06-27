@@ -4211,7 +4211,7 @@ void rtick()
         }
         case 0xE4:
         {
-            u8 tmp = RAM::rb(cs,ip+1);
+            u16 tmp = RAM::rb(cs,ip+1);
             printf("IN AL,%02x\n",tmp);
             al = IO_XT::rb((u16)tmp);
             ip+=2;

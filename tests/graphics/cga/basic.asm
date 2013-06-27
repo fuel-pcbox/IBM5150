@@ -5,7 +5,7 @@ org 0xFE000
 start:
 
 mov dx,0x3D8
-mov al,0x2B
+mov al,0x29
 out dx,al
 mov dx,0x3D4
 mov ax,0x1906
@@ -19,7 +19,7 @@ mov ds,ax
 xor bx,bx
 mov byte [bx], 'A'
 inc bx
-mov byte [bx], 0x8A
+mov byte [bx], 0x09
 
 nop
 nop
