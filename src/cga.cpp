@@ -1,3 +1,4 @@
+#include "interface.h"
 #include "cga.h"
 
 namespace CGA
@@ -30,10 +31,10 @@ u8 status_r(u16 addr)
 
 void putpix(int x, int y, u8 r, u8 g, u8 b)
 {
-    u8* p = (u8*)screen->pixels;
-    p[(((y*screen->w)+x)*3)] = b;
-    p[(((y*screen->w)+x)*3)+1] = g;
-    p[(((y*screen->w)+x)*3)+2] = r;
+    u8* p = (u8*)INTERFACE::screen->pixels;
+    p[(((y*INTERFACE::screen->w)+x)*3)] = b;
+    p[(((y*INTERFACE::screen->w)+x)*3)+1] = g;
+    p[(((y*INTERFACE::screen->w)+x)*3)+2] = r;
 }
 
 void tick_frame()

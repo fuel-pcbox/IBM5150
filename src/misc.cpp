@@ -151,7 +151,7 @@ void wb(u16 addr, u8 data)
 iohandler pit = {0x0040,0x0043,rb,wb};
 } //namespace PIT
 
-
+//http://en.wikipedia.org/wiki/PIC_microcontroller
 namespace PIC
 {
 

@@ -1,7 +1,7 @@
 #include "mda.h"
 
-SDL_Surface* screen = NULL;
 
+//http://en.wikipedia.org/wiki/IBM_Monochrome_Display_Adapter
 namespace MDA
 {
 u8 ROM[0x2000];
@@ -32,10 +32,10 @@ u8 status_r(u16 addr)
 
 void putpix(int x, int y, u8 r, u8 g, u8 b)
 {
-    u8* p = (u8*)screen->pixels;
-    p[(((y*screen->w)+x)*3)] = b;
-    p[(((y*screen->w)+x)*3)+1] = g;
-    p[(((y*screen->w)+x)*3)+2] = r;
+    u8* p = (u8*)INTERFACE::screen->pixels;
+    p[(((y*INTERFACE::screen->w)+x)*3)] = b;
+    p[(((y*INTERFACE::screen->w)+x)*3)+1] = g;
+    p[(((y*INTERFACE::screen->w)+x)*3)+2] = r;
 }
 
 bool shouldblank = false;
@@ -115,35 +115,54 @@ void tick_frame()
                     if(attr & 0x80) blink = true;
                 }
             }
-            for(int iy = 0;iy<(maxscan+1);iy++)
+            for (int iy = 0;iy<(maxscan+1);iy++)
             {
-                if(iy==maxscan && underline)
+                if (iy==maxscan && underline)
                 {
-                    for(int i = 0;i<9;i++)
+                    for (int i = 0;i<9;i++)
                     {
                         putpix((x*9)+i,(y*(maxscan+1))+iy,192,192,192);
                     }
                 }
                 int tmp = iy % (maxscan+1);
                 u8 chrdata;
-                if(tmp & 8) chrdata = ROM[(0x800 | (tmp & 7)) + (chr*8)];
-                else chrdata = ROM[(chr*8) + tmp];
-                if(chrdata & 0x80) putpix(x*9,(y*(maxscan+1))+iy,fg[0],fg[1],fg[2]);
-                if(blink && (framecount & 0x10)) putpix(x*9,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x40) putpix((x*9)+1,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+1,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x20) putpix((x*9)+2,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+2,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x10) putpix((x*9)+3,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+3,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x08) putpix((x*9)+4,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+4,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x04) putpix((x*9)+5,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+5,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x02) putpix((x*9)+6,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+6,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
-                if(chrdata & 0x01) putpix((x*9)+7,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
-                if(blink && (framecount & 0x10)) putpix((x*9)+7,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+
+                if (tmp & 8)
+                    chrdata = ROM[(0x800 | (tmp & 7)) + (chr*8)];
+                else
+                    chrdata = ROM[(chr*8) + tmp];
+                if (chrdata & 0x80)
+                    putpix(x*9,(y*(maxscan+1))+iy,fg[0],fg[1],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix(x*9,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if (chrdata & 0x40)
+                    putpix((x*9)+1,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix((x*9)+1,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if (chrdata & 0x20)
+                    putpix((x*9)+2,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix((x*9)+2,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if (chrdata & 0x10)
+                    putpix((x*9)+3,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix((x*9)+3,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if (chrdata & 0x08)
+                    putpix((x*9)+4,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix((x*9)+4,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if (chrdata & 0x04)
+                    putpix((x*9)+5,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix((x*9)+5,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if (chrdata & 0x02)
+                    putpix((x*9)+6,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix((x*9)+6,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
+                if (chrdata & 0x01)
+                    putpix((x*9)+7,(y*(maxscan+1))+iy,fg[2],fg[2],fg[2]);
+                if (blink && (framecount & 0x10))
+                    putpix((x*9)+7,(y*(maxscan+1))+iy,bg[2],bg[2],bg[2]);
                 putpix((x*9)+8,(y*(maxscan+1))+iy,0,0,0);
             }
         }

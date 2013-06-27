@@ -6,7 +6,7 @@ An emulator of the IBM PC 5150, and its descendants and clones.
 IRC Channel
 ===========
 
-Join x86emulator channel at freenode to talk about the emulator.
+Join x8x channel at freenode to talk about the emulator.
 
 Compiling and running
 =====================

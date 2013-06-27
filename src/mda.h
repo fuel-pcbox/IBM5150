@@ -1,21 +1,11 @@
 #ifndef MDA_H_INCLUDE
 #define MDA_H_INCLUDE
 
-//TODO: fix this dirty workaround
-#ifdef dx
-#undef dx
-#include <SDL/SDL.h>
-#define dx dw.w
-#else
-#include <SDL/SDL.h>
-#endif
-
+#include "interface.h"
 
 #include "misc.h"
 #include "ram.h"
 
-//TODO: separate graphics from SDL
-extern SDL_Surface* screen;
 
 namespace MDA
 {
