@@ -25,6 +25,8 @@ extern u16 curaddr;
 
 extern int framecount;
 
+extern bool rgb; //Not used yet.
+
 extern u8 dispmode; //Bit 1 must be set at all times, unless the processor wants to be halted.
 extern u8 status;
 

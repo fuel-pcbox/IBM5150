@@ -21,6 +21,8 @@ u16 curaddr = 0;
 
 int framecount = 0;
 
+bool crt = false;
+
 u8 dispmode = 0;
 u8 status = 0x80;
 u8 color = 0;
@@ -62,6 +64,34 @@ void tick_frame()
 {
     if(dispmode & 2)
     {
+        for(int y = 0;y<(vdisp*(maxscan+1));y++)
+        {
+            for(int x = 0; x<((hdisp+1)*8);x++)
+            {
+                int tmp = (x+(y*((hdisp+1)*8)));
+                u8 data = RAM::RAM[0xB8000 + (tmp>>2)];
+                u8 pixel = (data >> ((tmp & 3) << 1)) & 3;
+                switch(pixel)
+                {
+                    case 0:
+                    {
+                        putpix(x,y,palette[13][0],palette[13][1],palette[13][2]);
+                    }
+                    case 1:
+                    {
+                        putpix(x,y,palette[11][0],palette[11][1],palette[11][2]);
+                    }
+                    case 2:
+                    {
+                        putpix(x,y,palette[15][0],palette[15][1],palette[15][2]);
+                    }
+                    case 3:
+                    {
+                        putpix(x,y,palette[1][0],palette[1][1],palette[1][2]);
+                    }
+                }
+            }
+        }
     }
     else
     {
