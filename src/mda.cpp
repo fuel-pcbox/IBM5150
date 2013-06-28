@@ -116,6 +116,7 @@ void tick_frame()
                     fg[0] = fg[1] = fg[2] = 192;
                 }
                 if(attr & 0x80) blink = true;
+                break;
             }
             }
             for (int iy = 0; iy<(maxscan+1); iy++)

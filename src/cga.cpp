@@ -70,24 +70,28 @@ void tick_frame()
             {
                 int tmp = (x+(y*((hdisp+1)*8)));
                 u8 data = RAM::RAM[0xB8000 + (tmp>>2)];
-                u8 pixel = (data >> ((tmp & 3) << 1)) & 3;
+                u8 pixel = (data >> (((tmp % 8) & 3) << 1)) & 3;
                 switch(pixel)
                 {
                     case 0:
                     {
                         putpix(x,y,palette[13][0],palette[13][1],palette[13][2]);
+                        break;
                     }
                     case 1:
                     {
                         putpix(x,y,palette[11][0],palette[11][1],palette[11][2]);
+                        break;
                     }
                     case 2:
                     {
                         putpix(x,y,palette[15][0],palette[15][1],palette[15][2]);
+                        break;
                     }
                     case 3:
                     {
                         putpix(x,y,palette[1][0],palette[1][1],palette[1][2]);
+                        break;
                     }
                 }
             }

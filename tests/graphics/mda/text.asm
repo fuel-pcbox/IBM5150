@@ -25,10 +25,10 @@ nop
 nop
 nop
 
-jmp start
+jmp near start
 
 times 8176 - ($-$$) db 0x90
 
-jmp start
+jmp near start
 
 times 8192 - ($-$$) db 0x90
