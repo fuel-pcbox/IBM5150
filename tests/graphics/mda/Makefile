@@ -1,2 +1,2 @@
 all:
-	yasm -fbin basic.asm -o basic.bin
+	yasm -fbin text.asm -o text.bin
