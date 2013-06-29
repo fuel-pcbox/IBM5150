@@ -469,7 +469,15 @@ u8 portc;
 bool dipsw1set;
 u8 rb(u16 addr)
 {
-    return 0;
+    switch(addr)
+    {
+        case 0:
+        {
+            //TODO: currently hardcoded for 3 memory banks, an MDA display, and no floppy drives.
+            return 0x3C;
+            break;
+        }
+    }
 }
 void wb(u16 addr, u8 data)
 {

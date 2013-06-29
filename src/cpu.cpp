@@ -1086,7 +1086,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("ADD AL,%02x\n",al);
+            printf("ADD AL,%02x\n",tmp);
             break;
         }
         case 0x05:
@@ -1540,7 +1540,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("AND AL,%02x\n",al);
+            printf("AND AL,%02x\n",tmp);
             break;
         }
         case 0x25:

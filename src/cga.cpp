@@ -71,7 +71,7 @@ void tick_frame()
             for(int x = 0; x<((hdisp+1)*8);x++)
             {
                 int tmp = (x+(y*((hdisp+1)*8)));
-                u8 data = RAM::RAM[0xB8000 + (tmp>>2)];
+                u8 data = RAM::RAM[((y&1) ? 0xB8000 : 0xBA000) + (tmp>>2)];
                 u8 pixel = (data >> (((tmp % 8) & 3) << 1)) & 3;
                 switch(pixel)
                 {
@@ -106,7 +106,7 @@ void tick_frame()
             for(int x = 0; x<((hdisp+1)*8);x++)
             {
                 int tmp = (x+(y*((hdisp+1)*8)));
-                u8 data = RAM::RAM[0xB8000 + (tmp>>3)];
+                u8 data = RAM::RAM[((y&1) ? 0xB8000 : 0xBA000) + (tmp>>3)];
                 u8 pixel = (data >> (((tmp % 8) & 7) << 1)) & 1;
                 switch(pixel)
                 {

@@ -67,6 +67,7 @@ void wb(u16 seg, u16 off, u8 value)
         }
     }
     RAM[addr] = value;
+    else return;
 }
 
 } //namespace RAM
