@@ -105,6 +105,12 @@ int main(int ac, char** av)
     while(INTERFACE::quitflag == false)
     {
         CPU::tick();
+        
+        if(CPU::ip == 0xE169)
+        {
+            savestate_save();
+        }
+        
         if(i==5)
         {
             i=0;

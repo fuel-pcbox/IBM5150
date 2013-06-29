@@ -477,6 +477,11 @@ u8 rb(u16 addr)
             return 0x3C;
             break;
         }
+        case 2:
+        {
+            return 0x00;
+            break;
+        }
     }
 }
 void wb(u16 addr, u8 data)

@@ -1085,7 +1085,7 @@ void rtick()
             al += tmp;
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
-            ip+=3;
+            ip+=2;
             printf("ADD AL,%02x\n",tmp);
             break;
         }
@@ -1539,7 +1539,7 @@ void rtick()
             al &= tmp;
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
-            ip+=3;
+            ip+=2;
             printf("AND AL,%02x\n",tmp);
             break;
         }
