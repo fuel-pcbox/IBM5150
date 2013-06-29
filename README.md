@@ -27,7 +27,7 @@ Todo
 ISA DMA
 -------
 
-I don't quite understand how transfers are started, but then again, I haven't even started on this.
+I don't quite understand how transfers are started.
 
 MDA
 ---
@@ -37,7 +37,7 @@ Only updates every frame. Might want to change that eventually.
 CGA
 ---
 
-Right now, it's just in there as a slightly modified MDA clone. Lots to be done.
+It's got basic text and graphics capabilities.
 
 8088
 ----
