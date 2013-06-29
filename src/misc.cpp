@@ -150,7 +150,7 @@ void wb(u16 addr, u8 data)
 iohandler pit = {0x0040,0x0043,rb,wb};
 } //namespace PIT
 
-//http://en.wikipedia.org/wiki/PIC_microcontroller
+//Programmable Interrupt Controller
 namespace PIC
 {
 
@@ -193,7 +193,7 @@ iohandler pic1 = {0x0020,0x0021,NULL,pic1_w};
 namespace DMA_XT
 {
 
-DMA_chan chan0,chan1,chan2,chan3;
+DMA_chan chan[4];
 
 void page_w(u16 addr, u8 value)
 {
@@ -201,7 +201,7 @@ void page_w(u16 addr, u8 value)
     {
     case 3:
     {
-        chan3.page = value & 0x0F;
+        chan[3].page = value & 0x0F;
         break;
     }
     }
@@ -212,12 +212,252 @@ u8 page_r(u16 addr)
     {
     case 3:
     {
-        return chan3.page & 0x0F;
+        return chan[3].page & 0x0F;
         break;
     }
     }
 }
+
+void dma1_w(u16 addr, u8 value)
+{
+    switch(addr)
+    {
+    case 0:
+    {
+        if(!chan[0].access_flip_flop)
+        {
+            chan[0].start_addr = (chan[0].start_addr & 0xFF00) | value;
+            chan[0].access_flip_flop = true;
+        }
+        else
+        {
+            chan[0].start_addr = (chan[0].start_addr & 0xFF) | (value << 8);
+            chan[0].access_flip_flop = false;
+        }
+        break;
+    }
+    case 1:
+    {
+        if(!chan[0].access_flip_flop)
+        {
+            chan[0].count = (chan[0].count & 0xFF00) | value;
+            chan[0].access_flip_flop = true;
+        }
+        else
+        {
+            chan[0].count = (chan[0].count & 0xFF) | (value << 8);
+            chan[0].access_flip_flop = false;
+        }
+        break;
+    }
+    case 2:
+    {
+        if(!chan[1].access_flip_flop)
+        {
+            chan[1].start_addr = (chan[1].start_addr & 0xFF00) | value;
+            chan[1].access_flip_flop = true;
+        }
+        else
+        {
+            chan[1].start_addr = (chan[1].start_addr & 0xFF) | (value << 8);
+            chan[1].access_flip_flop = false;
+        }
+        break;
+    }
+    case 3:
+    {
+        if(!chan[1].access_flip_flop)
+        {
+            chan[1].count = (chan[1].count & 0xFF00) | value;
+            chan[1].access_flip_flop = true;
+        }
+        else
+        {
+            chan[1].count = (chan[1].count & 0xFF) | (value << 8);
+            chan[1].access_flip_flop = false;
+        }
+        break;
+    }
+	case 4:
+    {
+        if(!chan[2].access_flip_flop)
+        {
+            chan[2].start_addr = (chan[2].start_addr & 0xFF00) | value;
+            chan[2].access_flip_flop = true;
+        }
+        else
+        {
+            chan[2].start_addr = (chan[2].start_addr & 0xFF) | (value << 8);
+            chan[2].access_flip_flop = false;
+        }
+        break;
+    }
+    case 5:
+    {
+        if(!chan[2].access_flip_flop)
+        {
+            chan[2].count = (chan[2].count & 0xFF00) | value;
+            chan[2].access_flip_flop = true;
+        }
+        else
+        {
+            chan[2].count = (chan[2].count & 0xFF) | (value << 8);
+            chan[2].access_flip_flop = false;
+        }
+        break;
+    }
+	case 6:
+    {
+        if(!chan[3].access_flip_flop)
+        {
+            chan[3].start_addr = (chan[3].start_addr & 0xFF00) | value;
+            chan[3].access_flip_flop = true;
+        }
+        else
+        {
+            chan[3].start_addr = (chan[3].start_addr & 0xFF) | (value << 8);
+            chan[3].access_flip_flop = false;
+        }
+        break;
+    }
+    case 7:
+    {
+        if(!chan[3].access_flip_flop)
+        {
+            chan[3].count = (chan[3].count & 0xFF00) | value;
+            chan[3].access_flip_flop = true;
+        }
+        else
+        {
+            chan[3].count = (chan[3].count & 0xFF) | (value << 8);
+            chan[3].access_flip_flop = false;
+        }
+        break;
+    }
+    }
+}
+
+u8 dma1_r(u16 addr)
+{
+    switch(addr)
+    {
+    case 0:
+    {
+        if(!chan[0].access_flip_flop)
+        {
+            chan[0].access_flip_flop = true;
+            return (chan[0].start_addr & 0xFF);
+        }
+        else
+        {
+            chan[0].access_flip_flop = false;
+            return (chan[0].start_addr & 0xFF00) >> 8;
+        }
+        break;
+    }
+    case 1:
+    {
+        if(!chan[0].access_flip_flop)
+        {
+            chan[0].access_flip_flop = true;
+            return (chan[0].count & 0xFF);
+        }
+        else
+        {
+            chan[0].access_flip_flop = false;
+            return (chan[0].count & 0xFF00) >> 8;
+        }
+        break;
+    }
+    case 2:
+    {
+        if(!chan[1].access_flip_flop)
+        {
+            chan[1].access_flip_flop = true;
+            return (chan[1].start_addr & 0xFF);
+        }
+        else
+        {
+            chan[1].access_flip_flop = false;
+            return (chan[1].start_addr & 0xFF00) >> 8;
+        }
+        break;
+    }
+    case 3:
+    {
+        if(!chan[1].access_flip_flop)
+        {
+            chan[1].access_flip_flop = true;
+            return (chan[1].count & 0xFF);
+        }
+        else
+        {
+            chan[1].access_flip_flop = false;
+            return (chan[1].count & 0xFF00) >> 8;
+        }
+        break;
+    }
+	case 4:
+    {
+        if(!chan[2].access_flip_flop)
+        {
+            chan[2].access_flip_flop = true;
+            return (chan[2].start_addr & 0xFF);
+        }
+        else
+        {
+            chan[2].access_flip_flop = false;
+            return (chan[2].start_addr & 0xFF00) >> 8;
+        }
+        break;
+    }
+    case 5:
+    {
+        if(!chan[2].access_flip_flop)
+        {
+            chan[2].access_flip_flop = true;
+            return (chan[2].count & 0xFF);
+        }
+        else
+        {
+            chan[2].access_flip_flop = false;
+            return (chan[2].count & 0xFF00) >> 8;
+        }
+        break;
+    }
+	case 6:
+    {
+        if(!chan[3].access_flip_flop)
+        {
+            chan[3].access_flip_flop = true;
+            return (chan[3].start_addr & 0xFF);
+        }
+        else
+        {
+            chan[3].access_flip_flop = false;
+            return (chan[3].start_addr & 0xFF00) >> 8;
+        }
+        break;
+    }
+    case 7:
+    {
+        if(!chan[3].access_flip_flop)
+        {
+            chan[3].access_flip_flop = true;
+            return (chan[3].count & 0xFF);
+        }
+        else
+        {
+            chan[3].access_flip_flop = false;
+            return (chan[3].count & 0xFF00) >> 8;
+        }
+        break;
+    }
+    }
+}
+
 iohandler handler = {0x0080, 0x0083, page_r, page_w};
+iohandler handler2 = {0x0000,0x0007, dma1_r, dma1_w};
 } //namespace DMA_XT
 
 namespace PPI

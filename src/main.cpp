@@ -30,6 +30,7 @@ int main(int ac, char** av)
     PIC::pic[0].init1 = false;
     PIC::pic[0].init2 = false;
     PIC::pic[0].enabled = false;
+    DMA_XT::chan[0].access_flip_flop = false;
 
     FILE* bios = fopen(av[1],"rb");
     fseek(bios,0,SEEK_END);
@@ -67,6 +68,7 @@ int main(int ac, char** av)
     }
 
     IO_XT::handlers.push_back(DMA_XT::handler);
+    IO_XT::handlers.push_back(DMA_XT::handler2);
     IO_XT::handlers.push_back(PPI::handler);
     IO_XT::handlers.push_back(PIT::pit);
     IO_XT::handlers.push_back(PIC::pic1);

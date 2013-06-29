@@ -64,6 +64,8 @@ void tick_frame()
 {
     if(dispmode & 2)
     {
+        if(!(dispmode & 0x10))
+        {
         for(int y = 0;y<(vdisp*(maxscan+1));y++)
         {
             for(int x = 0; x<((hdisp+1)*8);x++)
@@ -95,6 +97,32 @@ void tick_frame()
                     }
                 }
             }
+        }
+        }
+        else
+        {
+        for(int y = 0;y<(vdisp*(maxscan+1));y++)
+        {
+            for(int x = 0; x<((hdisp+1)*8);x++)
+            {
+                int tmp = (x+(y*((hdisp+1)*8)));
+                u8 data = RAM::RAM[0xB8000 + (tmp>>3)];
+                u8 pixel = (data >> (((tmp % 8) & 7) << 1)) & 1;
+                switch(pixel)
+                {
+                    case 0:
+                    {
+                        putpix(x,y,0,0,0);
+                        break;
+                    }
+                    case 1:
+                    {
+                        putpix(x,y,255,255,255);
+                        break;
+                    }
+                }
+            }
+        }
         }
     }
     else

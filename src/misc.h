@@ -82,14 +82,15 @@ typedef struct DMA_chan
     u16 start_addr;
     u8 page;
     u16 count;
+    bool access_flip_flop;
 } DMA_chan;
 
-extern DMA_chan chan0,chan1,chan2,chan3;
+extern DMA_chan chan[4];
 
 void page_w(u16 addr, u8 value);
 u8 page_r(u16 addr);
 
-extern iohandler handler;
+extern iohandler handler, handler2;
 } //namespace DMA_XT
 
 namespace PPI
