@@ -1017,6 +1017,12 @@ int seg = SEG_DEFAULT;
 int rep = 0; //0 is no rep. 1 is repe. 2 is repne.
 bool i8080 = false; //This is for the NEC V20.
 
+#ifndef DEBUG
+#define debug_print(...)
+#else
+#define debug_print(...) debug_print(...)
+#endif
+
 void rtick()
 {
     u8 op = RAM::rb(cs,ip);
@@ -1040,7 +1046,7 @@ void rtick()
             if(!v) flags |= 0x0004;
             else flags &= 0xFFFB;
             ip+=2;
-            printf("ADD Eb,Gb modrm=%02x\n",modrm);
+            debug_print("ADD Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x01:
@@ -1052,7 +1058,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADD Ev,Gv modrm=%02x\n",modrm);
+            debug_print("ADD Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x02:
@@ -1064,7 +1070,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADD Eb,Gb modrm=%02x\n",modrm);
+            debug_print("ADD Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x03:
@@ -1076,7 +1082,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADD Ev,Gv modrm=%02x\n",modrm);
+            debug_print("ADD Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x04:
@@ -1086,7 +1092,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADD AL,%02x\n",tmp);
+            debug_print("ADD AL,%02x\n",tmp);
             break;
         }
         case 0x05:
@@ -1096,12 +1102,12 @@ void rtick()
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADD AX,%04x\n",ax);
+            debug_print("ADD AX,%04x\n",ax);
             break;
         }
         case 0x06:
         {
-            printf("PUSH ES\n");
+            debug_print("PUSH ES\n");
             sp -= 2;
             RAM::wb(ss,sp,es & 0xFF);
             RAM::wb(ss,sp+1,es >> 8);
@@ -1110,7 +1116,7 @@ void rtick()
         }
         case 0x07:
         {
-            printf("POP ES\n");
+            debug_print("POP ES\n");
             es = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -1125,7 +1131,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("OR Eb,Gb modrm=%02x\n",modrm);
+            debug_print("OR Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x09:
@@ -1137,7 +1143,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("OR Ev,Gv modrm=%02x\n",modrm);
+            debug_print("OR Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x0A:
@@ -1149,7 +1155,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("OR Gb,Eb modrm=%02x\n",modrm);
+            debug_print("OR Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x0B:
@@ -1161,7 +1167,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("OR Gv,Ev modrm=%02x\n",modrm);
+            debug_print("OR Gv,Ev modrm=%02x\n",modrm);
             break;
         }
         case 0x0C:
@@ -1171,7 +1177,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("OR AL,%02x\n",al);
+            debug_print("OR AL,%02x\n",al);
             break;
         }
         case 0x0D:
@@ -1181,12 +1187,12 @@ void rtick()
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("OR AX,%04x\n",ax);
+            debug_print("OR AX,%04x\n",ax);
             break;
         }
         case 0x0E:
         {
-            printf("PUSH CS\n");
+            debug_print("PUSH CS\n");
             sp -= 2;
             RAM::wb(ss,sp,cs & 0xFF);
             RAM::wb(ss,sp+1,cs >> 8);
@@ -1197,7 +1203,7 @@ void rtick()
         {
             if(type == intel8086)
             {
-                printf("POP CS\n");
+                debug_print("POP CS\n");
                 cs = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
                 sp+=2;
                 ip++;
@@ -1227,7 +1233,7 @@ void rtick()
                     }
                     di++;
                     ip+=3;
-                    printf("INS Gb,Eb\n");
+                    debug_print("INS Gb,Eb\n");
                     break;
                 }
                 case 0x39:
@@ -1251,7 +1257,7 @@ void rtick()
                     }
                     di++;
                     ip+=3;
-                    printf("INS Gb,%02x\n",tmp);
+                    debug_print("INS Gb,%02x\n",tmp);
                     break;
                 }
                 case 0xFF:
@@ -1270,7 +1276,7 @@ void rtick()
                     RAM::wb(ss,sp+1,(ip+1) >> 8);
                     cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
                     ip = RAM::rb(0,tmp<<2)|(RAM::rb(0,(tmp<<2)+1)<<8);
-                    printf("BRKEM\n");
+                    debug_print("BRKEM\n");
                     break;
                 }
                 }
@@ -1286,7 +1292,7 @@ void rtick()
                     locs loc = decodemodrm(seg,modrm,true,false);
                     *loc.dst16 = *loc.src16 & 0xFF00;
                     flags |= 0x0040;
-                    printf("LAR Ev,Gv\n");
+                    debug_print("LAR Ev,Gv\n");
                     break;
                 }
                 case 0x05:
@@ -1302,13 +1308,13 @@ void rtick()
                     ss = RAM::RAM[0x820]|(RAM::RAM[0x821]<<8);
                     cs = RAM::RAM[0x822]|(RAM::RAM[0x823]<<8);
                     es = RAM::RAM[0x824]|(RAM::RAM[0x825]<<8);
-                    printf("LOADALL\n");*/
+                    debug_print("LOADALL\n");*/
                     break;
                 }
                 case 0x06:
                 {
                     cr0 &= 0xFFFFFFF7;
-                    printf("CLTS\n");
+                    debug_print("CLTS\n");
                     break;
                 }
                 }
@@ -1324,7 +1330,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADC Eb,Gb modrm=%02x\n",modrm);
+            debug_print("ADC Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x11:
@@ -1336,7 +1342,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADC Ev,Gv modrm=%02x\n",modrm);
+            debug_print("ADC Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x12:
@@ -1348,7 +1354,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADC Eb,Gb modrm=%02x\n",modrm);
+            debug_print("ADC Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x13:
@@ -1360,7 +1366,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADC Ev,Gv modrm=%02x\n",modrm);
+            debug_print("ADC Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x14:
@@ -1370,7 +1376,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("ADC AL,%02x\n",al);
+            debug_print("ADC AL,%02x\n",al);
             break;
         }
         case 0x15:
@@ -1380,12 +1386,12 @@ void rtick()
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("ADC AX,%04x\n",ax);
+            debug_print("ADC AX,%04x\n",ax);
             break;
         }
         case 0x16:
         {
-            printf("PUSH SS\n");
+            debug_print("PUSH SS\n");
             sp -= 2;
             RAM::wb(ss,sp,ss & 0xFF);
             RAM::wb(ss,sp+1,ss >> 8);
@@ -1394,7 +1400,7 @@ void rtick()
         }
         case 0x17:
         {
-            printf("POP SS\n");
+            debug_print("POP SS\n");
             ss = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -1409,7 +1415,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SBB Eb,Gb modrm=%02x\n",modrm);
+            debug_print("SBB Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x19:
@@ -1421,7 +1427,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SBB Ev,Gv modrm=%02x\n",modrm);
+            debug_print("SBB Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x1A:
@@ -1433,7 +1439,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SBB Eb,Gb modrm=%02x\n",modrm);
+            debug_print("SBB Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x1B:
@@ -1445,7 +1451,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SBB Ev,Gv modrm=%02x\n",modrm);
+            debug_print("SBB Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x1C:
@@ -1455,7 +1461,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("SBB AL,%02x\n",al);
+            debug_print("SBB AL,%02x\n",al);
             break;
         }
         case 0x1D:
@@ -1465,12 +1471,12 @@ void rtick()
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SBB AX,%04x\n",ax);
+            debug_print("SBB AX,%04x\n",ax);
             break;
         }
         case 0x1E:
         {
-            printf("PUSH DS\n");
+            debug_print("PUSH DS\n");
             sp -= 2;
             RAM::wb(ss,sp,ds & 0xFF);
             RAM::wb(ss,sp+1,ds >> 8);
@@ -1479,7 +1485,7 @@ void rtick()
         }
         case 0x1F:
         {
-            printf("POP DS\n");
+            debug_print("POP DS\n");
             ds = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -1494,7 +1500,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("AND Eb,Gb modrm=%02x\n",modrm);
+            debug_print("AND Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x21:
@@ -1506,7 +1512,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("AND Ev,Gv modrm=%02x\n",modrm);
+            debug_print("AND Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x22:
@@ -1518,7 +1524,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("AND Gb,Eb modrm=%02x\n",modrm);
+            debug_print("AND Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x23:
@@ -1530,7 +1536,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("AND Ev,Gv modrm=%02x\n",modrm);
+            debug_print("AND Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x24:
@@ -1540,7 +1546,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("AND AL,%02x\n",tmp);
+            debug_print("AND AL,%02x\n",tmp);
             break;
         }
         case 0x25:
@@ -1550,7 +1556,7 @@ void rtick()
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("AND AX,%04x\n",ax);
+            debug_print("AND AX,%04x\n",ax);
             break;
         }
         case 0x27:
@@ -1567,7 +1573,7 @@ void rtick()
                 flags |= 0x0001;
             }
             else flags &= 0xFFFE;
-            printf("DAA\n");
+            debug_print("DAA\n");
             ip++;
             break;
         }
@@ -1580,7 +1586,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SUB Eb,Gb modrm=%02x\n",modrm);
+            debug_print("SUB Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x29:
@@ -1592,7 +1598,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SUB Ev,Gv modrm=%02x\n",modrm);
+            debug_print("SUB Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x2A:
@@ -1604,7 +1610,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SUB Gb,Eb modrm=%02x\n",modrm);
+            debug_print("SUB Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x2B:
@@ -1616,7 +1622,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SUB Gv,Ev modrm=%02x\n",modrm);
+            debug_print("SUB Gv,Ev modrm=%02x\n",modrm);
             break;
         }
         case 0x2C:
@@ -1626,7 +1632,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("SUB AL,%02x\n",al);
+            debug_print("SUB AL,%02x\n",al);
             break;
         }
         case 0x2D:
@@ -1636,7 +1642,7 @@ void rtick()
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("SUB AX,%04x\n",ax);
+            debug_print("SUB AX,%04x\n",ax);
             break;
         }
         case 0x2F:
@@ -1653,7 +1659,7 @@ void rtick()
                 flags |= 0x0001;
             }
             else flags &= 0xFFFE;
-            printf("DAS\n");
+            debug_print("DAS\n");
             ip++;
             break;
         }
@@ -1666,7 +1672,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("XOR Eb,Gb modrm=%02x\n",modrm);
+            debug_print("XOR Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x31:
@@ -1678,7 +1684,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("XOR Ev,Gv modrm=%02x\n",modrm);
+            debug_print("XOR Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x32:
@@ -1690,7 +1696,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("XOR Gb,Eb modrm=%02x\n",modrm);
+            debug_print("XOR Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x33:
@@ -1709,7 +1715,7 @@ void rtick()
             if(!v) flags |= 0x0004;
             else flags &= 0xFFFB;
             ip+=2;
-            printf("XOR Gv,Ev modrm=%02x\n",modrm);
+            debug_print("XOR Gv,Ev modrm=%02x\n",modrm);
             break;
         }
         case 0x34:
@@ -1719,7 +1725,7 @@ void rtick()
             if(al == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("XOR AL,%02x\n",al);
+            debug_print("XOR AL,%02x\n",al);
             break;
         }
         case 0x35:
@@ -1729,7 +1735,7 @@ void rtick()
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("XOR AX,%04x\n",ax);
+            debug_print("XOR AX,%04x\n",ax);
             break;
         }
         case 0x37:
@@ -1741,7 +1747,7 @@ void rtick()
                 flags |= 0x0011;
             }
             else flags &= 0xFFEE;
-            printf("AAA\n");
+            debug_print("AAA\n");
             ip++;
             break;
         }
@@ -1753,7 +1759,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("CMP Eb,Gb modrm=%02x\n",modrm);
+            debug_print("CMP Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x39:
@@ -1764,7 +1770,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("CMP Ev,Gv modrm=%02x\n",modrm);
+            debug_print("CMP Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x3A:
@@ -1775,7 +1781,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("CMP Gb,Eb modrm=%02x\n",modrm);
+            debug_print("CMP Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x3B:
@@ -1786,7 +1792,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("CMP Gv,Ev modrm=%02x\n",modrm);
+            debug_print("CMP Gv,Ev modrm=%02x\n",modrm);
             break;
         }
         case 0x3C:
@@ -1796,7 +1802,7 @@ void rtick()
             if(tmp1 == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("CMP AL,%02x\n",tmp);
+            debug_print("CMP AL,%02x\n",tmp);
             break;
         }
         case 0x3D:
@@ -1806,7 +1812,7 @@ void rtick()
             if(tmp1 == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=3;
-            printf("CMP AX,%04x\n",tmp);
+            debug_print("CMP AX,%04x\n",tmp);
             break;
         }
         case 0x3F:
@@ -1818,14 +1824,14 @@ void rtick()
                 flags |= 0x0011;
             }
             else flags &= 0xFFEE;
-            printf("AAS\n");
+            debug_print("AAS\n");
             ip++;
             break;
         }
         case 0x40:
         {
             u16 tmp = ax;
-            printf("INC AX\n");
+            debug_print("INC AX\n");
             ax++;
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1836,7 +1842,7 @@ void rtick()
         }
         case 0x41:
         {
-            printf("INC CX\n");
+            debug_print("INC CX\n");
             cx++;
             if(cx == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1845,7 +1851,7 @@ void rtick()
         }
         case 0x42:
         {
-            printf("INC DX\n");
+            debug_print("INC DX\n");
             dx++;
             if(dx == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1854,7 +1860,7 @@ void rtick()
         }
         case 0x43:
         {
-            printf("INC BX\n");
+            debug_print("INC BX\n");
             bx++;
             if(bx == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1863,7 +1869,7 @@ void rtick()
         }
         case 0x44:
         {
-            printf("INC SP\n");
+            debug_print("INC SP\n");
             sp++;
             if(sp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1872,7 +1878,7 @@ void rtick()
         }
         case 0x45:
         {
-            printf("INC BP\n");
+            debug_print("INC BP\n");
             bp++;
             if(bp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1881,7 +1887,7 @@ void rtick()
         }
         case 0x46:
         {
-            printf("INC SI\n");
+            debug_print("INC SI\n");
             si++;
             if(si == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1890,7 +1896,7 @@ void rtick()
         }
         case 0x47:
         {
-            printf("INC DI\n");
+            debug_print("INC DI\n");
             di++;
             if(di == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1899,7 +1905,7 @@ void rtick()
         }
         case 0x48:
         {
-            printf("DEC AX\n");
+            debug_print("DEC AX\n");
             ax--;
             if(ax == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1908,7 +1914,7 @@ void rtick()
         }
         case 0x49:
         {
-            printf("DEC CX\n");
+            debug_print("DEC CX\n");
             cx--;
             if(cx == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1917,7 +1923,7 @@ void rtick()
         }
         case 0x4A:
         {
-            printf("DEC DX\n");
+            debug_print("DEC DX\n");
             dx--;
             if(dx == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1926,7 +1932,7 @@ void rtick()
         }
         case 0x4B:
         {
-            printf("DEC CX\n");
+            debug_print("DEC CX\n");
             cx--;
             if(cx == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1935,7 +1941,7 @@ void rtick()
         }
         case 0x4C:
         {
-            printf("DEC SP\n");
+            debug_print("DEC SP\n");
             sp--;
             if(sp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1944,7 +1950,7 @@ void rtick()
         }
         case 0x4D:
         {
-            printf("DEC BP\n");
+            debug_print("DEC BP\n");
             bp--;
             if(bp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1953,7 +1959,7 @@ void rtick()
         }
         case 0x4E:
         {
-            printf("DEC SI\n");
+            debug_print("DEC SI\n");
             si--;
             if(si == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1962,7 +1968,7 @@ void rtick()
         }
         case 0x4F:
         {
-            printf("DEC DI\n");
+            debug_print("DEC DI\n");
             di--;
             if(di == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
@@ -1971,7 +1977,7 @@ void rtick()
         }
         case 0x50:
         {
-            printf("PUSH AX\n");
+            debug_print("PUSH AX\n");
             sp -= 2;
             RAM::wb(ss,sp,al);
             RAM::wb(ss,sp+1,ah);
@@ -1980,7 +1986,7 @@ void rtick()
         }
         case 0x51:
         {
-            printf("PUSH CX\n");
+            debug_print("PUSH CX\n");
             sp -= 2;
             RAM::wb(ss,sp,cl);
             RAM::wb(ss,sp+1,ch);
@@ -1989,7 +1995,7 @@ void rtick()
         }
         case 0x52:
         {
-            printf("PUSH DX\n");
+            debug_print("PUSH DX\n");
             sp -= 2;
             RAM::wb(ss,sp,dl);
             RAM::wb(ss,sp+1,dh);
@@ -1998,7 +2004,7 @@ void rtick()
         }
         case 0x53:
         {
-            printf("PUSH BX\n");
+            debug_print("PUSH BX\n");
             sp -= 2;
             RAM::wb(ss,sp,bl);
             RAM::wb(ss,sp+1,bh);
@@ -2009,7 +2015,7 @@ void rtick()
         {
             if(type == intel8086)
             {
-                printf("PUSH SP\n");
+                debug_print("PUSH SP\n");
                 sp -= 2;
                 RAM::wb(ss,sp,sp & 0xFF);
                 RAM::wb(ss,sp+1,sp >> 8);
@@ -2019,7 +2025,7 @@ void rtick()
         }
         case 0x55:
         {
-            printf("PUSH BP\n");
+            debug_print("PUSH BP\n");
             sp -= 2;
             RAM::wb(ss,sp,bp & 0xFF);
             RAM::wb(ss,sp+1,bp >> 8);
@@ -2028,7 +2034,7 @@ void rtick()
         }
         case 0x56:
         {
-            printf("PUSH SI\n");
+            debug_print("PUSH SI\n");
             sp -= 2;
             RAM::wb(ss,sp,si & 0xFF);
             RAM::wb(ss,sp+1,si >> 8);
@@ -2037,7 +2043,7 @@ void rtick()
         }
         case 0x57:
         {
-            printf("PUSH DI\n");
+            debug_print("PUSH DI\n");
             sp -= 2;
             RAM::wb(ss,sp,di & 0xFF);
             RAM::wb(ss,sp+1,di >> 8);
@@ -2046,7 +2052,7 @@ void rtick()
         }
         case 0x58:
         {
-            printf("POP AX\n");
+            debug_print("POP AX\n");
             ax = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2054,7 +2060,7 @@ void rtick()
         }
         case 0x59:
         {
-            printf("POP CX\n");
+            debug_print("POP CX\n");
             cx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2062,7 +2068,7 @@ void rtick()
         }
         case 0x5A:
         {
-            printf("POP DX\n");
+            debug_print("POP DX\n");
             dx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2070,7 +2076,7 @@ void rtick()
         }
         case 0x5B:
         {
-            printf("POP BX\n");
+            debug_print("POP BX\n");
             bx = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2078,7 +2084,7 @@ void rtick()
         }
         case 0x5C:
         {
-            printf("POP SP\n");
+            debug_print("POP SP\n");
             sp = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2086,7 +2092,7 @@ void rtick()
         }
         case 0x5D:
         {
-            printf("POP BP\n");
+            debug_print("POP BP\n");
             bp = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2094,7 +2100,7 @@ void rtick()
         }
         case 0x5E:
         {
-            printf("POP SI\n");
+            debug_print("POP SI\n");
             si = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2102,7 +2108,7 @@ void rtick()
         }
         case 0x5F:
         {
-            printf("POP DI\n");
+            debug_print("POP DI\n");
             di = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
             sp+=2;
             ip++;
@@ -2114,7 +2120,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JO %02x\n",tmp);
+                debug_print("JO %02x\n",tmp);
                 if((flags&0x0800)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2145,7 +2151,7 @@ void rtick()
                 sp -= 2;
                 RAM::wb(ss,sp,di & 0xFF);
                 RAM::wb(ss,sp+1,di >> 8);
-                printf("PUSHA\n");
+                debug_print("PUSHA\n");
                 ip++;
             }
             break;
@@ -2155,7 +2161,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JNO %02x\n",tmp);
+                debug_print("JNO %02x\n",tmp);
                 if(!(flags&0x0800)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2175,7 +2181,7 @@ void rtick()
                 sp+=2;
                 ax = RAM::rb(ss,sp) | (RAM::rb(ss,sp+1)<<8);
                 sp+=2;
-                printf("POPA\n");
+                debug_print("POPA\n");
                 ip++;
             }
             break;
@@ -2185,7 +2191,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JC %02x\n",tmp);
+                debug_print("JC %02x\n",tmp);
                 if((flags&0x0001)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2218,7 +2224,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JNC %02x\n",tmp);
+                debug_print("JNC %02x\n",tmp);
                 if(!(flags&0x0001)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2232,7 +2238,7 @@ void rtick()
                     *loc.dst16 = (*loc.dst16 & 0xFC) | (*loc.src16 & 3);
                 }
                 else flags&=0xFFBF;
-                printf("ARPL Gv,Ev\n");
+                debug_print("ARPL Gv,Ev\n");
                 ip+=2;
             }
             break;
@@ -2242,7 +2248,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JZ %02x\n",tmp);
+                debug_print("JZ %02x\n",tmp);
                 if((flags&0x0040)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2253,7 +2259,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JNZ %02x\n",tmp);
+                debug_print("JNZ %02x\n",tmp);
                 if(!(flags&0x0040)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2264,7 +2270,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JBE %02x\n",tmp);
+                debug_print("JBE %02x\n",tmp);
                 if((flags&0x0040) || (flags&0x0001)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2275,7 +2281,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JA %02x\n",tmp);
+                debug_print("JA %02x\n",tmp);
                 if(!(flags&0x0040) && !(flags&0x0001)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2286,7 +2292,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JS %02x\n",tmp);
+                debug_print("JS %02x\n",tmp);
                 if((flags&0x0080)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2297,7 +2303,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JNS %02x\n",tmp);
+                debug_print("JNS %02x\n",tmp);
                 if(!(flags&0x0080)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2308,7 +2314,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JP %02x\n",tmp);
+                debug_print("JP %02x\n",tmp);
                 if((flags&0x0004)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2319,7 +2325,7 @@ void rtick()
             if(type==intel8086)
             {
                 u8 tmp = RAM::rb(cs,ip+1);
-                printf("JNP %02x\n",tmp);
+                debug_print("JNP %02x\n",tmp);
                 if(!(flags&0x0004)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2332,7 +2338,7 @@ void rtick()
                 u8 tmp = RAM::rb(cs,ip+1);
                 bool tmp1 = (flags >> 7) & 1;
                 bool tmp2 = (flags >> 11) & 1;
-                printf("JL %02x\n",tmp);
+                debug_print("JL %02x\n",tmp);
                 if(tmp1 != tmp2) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2345,7 +2351,7 @@ void rtick()
                     RAM::wb(es,di,IO_XT::rb(dx));
                     if(!(flags & 0x0400)) di++;
                     else di--;
-                    printf("INSB\n");
+                    debug_print("INSB\n");
                     break;
                 }
                 default:
@@ -2356,7 +2362,7 @@ void rtick()
                         if(!(flags & 0x0400)) di++;
                         else di--;
                     }
-                    printf("REP INSB\n");
+                    debug_print("REP INSB\n");
                     break;
                 }
                 break;
@@ -2372,7 +2378,7 @@ void rtick()
                 u8 tmp = RAM::rb(cs,ip+1);
                 bool tmp1 = (flags >> 7) & 1;
                 bool tmp2 = (flags >> 11) & 1;
-                printf("JGE %02x\n",tmp);
+                debug_print("JGE %02x\n",tmp);
                 if(tmp1 == tmp2) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2386,7 +2392,7 @@ void rtick()
                     RAM::wb(es,di+1,IO_XT::rb(dx));
                     if(!(flags & 0x0400)) di+=2;
                     else di-=2;
-                    printf("INSW\n");
+                    debug_print("INSW\n");
                     break;
                 }
                 default:
@@ -2398,7 +2404,7 @@ void rtick()
                         if(!(flags & 0x0400)) di+=2;
                         else di-=2;
                     }
-                    printf("REP INSW\n");
+                    debug_print("REP INSW\n");
                     break;
                 }
                 break;
@@ -2414,7 +2420,7 @@ void rtick()
                 u8 tmp = RAM::rb(cs,ip+1);
                 bool tmp1 = (flags >> 7) & 1;
                 bool tmp2 = (flags >> 11) & 1;
-                printf("JLE %02x\n",tmp);
+                debug_print("JLE %02x\n",tmp);
                 if((tmp1 != tmp2) || (flags & 0x0040)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2427,7 +2433,7 @@ void rtick()
                     IO_XT::wb(dx,RAM::rb(ds,si));
                     if(!(flags & 0x0400)) si++;
                     else si--;
-                    printf("OUTSB\n");
+                    debug_print("OUTSB\n");
                     break;
                 }
                 default:
@@ -2438,7 +2444,7 @@ void rtick()
                         if(!(flags & 0x0400)) si++;
                         else si--;
                     }
-                    printf("REP OUTSB\n");
+                    debug_print("REP OUTSB\n");
                     break;
                 }
                 break;
@@ -2454,7 +2460,7 @@ void rtick()
                 u8 tmp = RAM::rb(cs,ip+1);
                 bool tmp1 = (flags >> 7) & 1;
                 bool tmp2 = (flags >> 11) & 1;
-                printf("JG %02x\n",tmp);
+                debug_print("JG %02x\n",tmp);
                 if((tmp1 == tmp2) && !(flags & 0x0040)) ip += (s8)tmp;
                 ip+=2;
             }
@@ -2468,7 +2474,7 @@ void rtick()
                     IO_XT::wb(dx+1,RAM::rb(ds,si+1));
                     if(!(flags & 0x0400)) si+=2;
                     else si-=2;
-                    printf("OUTSw\n");
+                    debug_print("OUTSw\n");
                     break;
                 }
                 default:
@@ -2480,7 +2486,7 @@ void rtick()
                         if(!(flags & 0x0400)) si+=2;
                         else si-=2;
                     }
-                    printf("REP OUTSw\n");
+                    debug_print("REP OUTSw\n");
                     break;
                 }
                 break;
@@ -2492,7 +2498,7 @@ void rtick()
         case 0x70:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JO %02x\n",tmp);
+            debug_print("JO %02x\n",tmp);
             if((flags&0x0800)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2500,7 +2506,7 @@ void rtick()
         case 0x71:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JNO %02x\n",tmp);
+            debug_print("JNO %02x\n",tmp);
             if(!(flags&0x0800)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2508,7 +2514,7 @@ void rtick()
         case 0x72:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JC %02x\n",tmp);
+            debug_print("JC %02x\n",tmp);
             if((flags&0x0001)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2516,7 +2522,7 @@ void rtick()
         case 0x73:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JNC %02x\n",tmp);
+            debug_print("JNC %02x\n",tmp);
             if(!(flags&0x0001)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2524,7 +2530,7 @@ void rtick()
         case 0x74:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JZ %02x\n",tmp);
+            debug_print("JZ %02x\n",tmp);
             if((flags&0x0040)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2532,7 +2538,7 @@ void rtick()
         case 0x75:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JNZ %02x\n",tmp);
+            debug_print("JNZ %02x\n",tmp);
             if(!(flags&0x0040)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2540,7 +2546,7 @@ void rtick()
         case 0x76:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JBE %02x\n",tmp);
+            debug_print("JBE %02x\n",tmp);
             if((flags&0x0040) || (flags&0x0001)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2548,7 +2554,7 @@ void rtick()
         case 0x77:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JA %02x\n",tmp);
+            debug_print("JA %02x\n",tmp);
             if(!(flags&0x0040) && !(flags&0x0001)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2556,7 +2562,7 @@ void rtick()
         case 0x78:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JS %02x\n",tmp);
+            debug_print("JS %02x\n",tmp);
             if((flags&0x0080)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2564,7 +2570,7 @@ void rtick()
         case 0x79:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JNS %02x\n",tmp);
+            debug_print("JNS %02x\n",tmp);
             if(!(flags&0x0080)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2572,7 +2578,7 @@ void rtick()
         case 0x7A:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JP %02x\n",tmp);
+            debug_print("JP %02x\n",tmp);
             if((flags&0x0004)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2580,7 +2586,7 @@ void rtick()
         case 0x7B:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JNP %02x\n",tmp);
+            debug_print("JNP %02x\n",tmp);
             if(!(flags&0x0004)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2590,7 +2596,7 @@ void rtick()
             u8 tmp = RAM::rb(cs,ip+1);
             bool tmp1 = (flags >> 7) & 1;
             bool tmp2 = (flags >> 11) & 1;
-            printf("JL %02x\n",tmp);
+            debug_print("JL %02x\n",tmp);
             if(tmp1 != tmp2) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2600,7 +2606,7 @@ void rtick()
             u8 tmp = RAM::rb(cs,ip+1);
             bool tmp1 = (flags >> 7) & 1;
             bool tmp2 = (flags >> 11) & 1;
-            printf("JGE %02x\n",tmp);
+            debug_print("JGE %02x\n",tmp);
             if(tmp1 == tmp2) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2610,7 +2616,7 @@ void rtick()
             u8 tmp = RAM::rb(cs,ip+1);
             bool tmp1 = (flags >> 7) & 1;
             bool tmp2 = (flags >> 11) & 1;
-            printf("JLE %02x\n",tmp);
+            debug_print("JLE %02x\n",tmp);
             if((tmp1 != tmp2) || (flags & 0x0040)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2620,7 +2626,7 @@ void rtick()
             u8 tmp = RAM::rb(cs,ip+1);
             bool tmp1 = (flags >> 7) & 1;
             bool tmp2 = (flags >> 11) & 1;
-            printf("JG %02x\n",tmp);
+            debug_print("JG %02x\n",tmp);
             if((tmp1 == tmp2) && !(flags & 0x0040)) ip += (s8)tmp;
             ip+=2;
             break;
@@ -2635,49 +2641,49 @@ void rtick()
             {
             case 0x00:
             {
-                printf("ADD Eb,%02x\n",op3);
+                debug_print("ADD Eb,%02x\n",op3);
                 *loc.src8 += op3;
                 break;
             }
             case 0x08:
             {
-                printf("OR Eb,%02x\n",op3);
+                debug_print("OR Eb,%02x\n",op3);
                 *loc.src8 |= op3;
                 break;
             }
             case 0x10:
             {
-                printf("ADC Eb,%02x\n",op3);
+                debug_print("ADC Eb,%02x\n",op3);
                 *loc.src8 += op3 + (flags & 0x0001);
                 break;
             }
             case 0x18:
             {
-                printf("SBB Eb,%02x\n",op3);
+                debug_print("SBB Eb,%02x\n",op3);
                 *loc.src8 -= op3 + (flags & 0x0001);
                 break;
             }
             case 0x20:
             {
-                printf("AND Eb,%02x\n",op3);
+                debug_print("AND Eb,%02x\n",op3);
                 *loc.src8 &= op3;
                 break;
             }
             case 0x28:
             {
-                printf("SUB Eb,%02x\n",op3);
+                debug_print("SUB Eb,%02x\n",op3);
                 *loc.src8 -= op3;
                 break;
             }
             case 0x30:
             {
-                printf("XOR Eb,%02x\n",op3);
+                debug_print("XOR Eb,%02x\n",op3);
                 *loc.src8 &= op3;
                 break;
             }
             case 0x38:
             {
-                printf("CMP Eb,%02x\n",op3);
+                debug_print("CMP Eb,%02x\n",op3);
                 u8 tmp = *loc.src8 - op3;
                 if(tmp==0) flags |= 0x0040;
                 else flags &= 0xFFBF;
@@ -2696,49 +2702,49 @@ void rtick()
             {
             case 0x00:
             {
-                printf("ADD Ev,%04x\n",op3);
+                debug_print("ADD Ev,%04x\n",op3);
                 *loc.src16 += op3;
                 break;
             }
             case 0x08:
             {
-                printf("OR Ev,%04x\n",op3);
+                debug_print("OR Ev,%04x\n",op3);
                 *loc.src16 |= op3;
                 break;
             }
             case 0x10:
             {
-                printf("ADC Ev,%04x\n",op3);
+                debug_print("ADC Ev,%04x\n",op3);
                 *loc.src16 += op3 + (flags & 0x0001);
                 break;
             }
             case 0x18:
             {
-                printf("SBB Ev,%04x\n",op3);
+                debug_print("SBB Ev,%04x\n",op3);
                 *loc.src16 -= op3 + (flags & 0x0001);
                 break;
             }
             case 0x20:
             {
-                printf("AND Ev,%04x\n",op3);
+                debug_print("AND Ev,%04x\n",op3);
                 *loc.src16 &= op3;
                 break;
             }
             case 0x28:
             {
-                printf("SUB Eb,%04x\n",op3);
+                debug_print("SUB Eb,%04x\n",op3);
                 *loc.src16 -= op3;
                 break;
             }
             case 0x30:
             {
-                printf("XOR Ev,%04x\n",op3);
+                debug_print("XOR Ev,%04x\n",op3);
                 *loc.src16 &= op3;
                 break;
             }
             case 0x38:
             {
-                printf("CMP Ev,%04x\n",op3);
+                debug_print("CMP Ev,%04x\n",op3);
                 u16 tmp = *loc.src16 - op3;
                 if(tmp==0) flags |= 0x0040;
                 else flags &= 0xFFBF;
@@ -2757,49 +2763,49 @@ void rtick()
             {
             case 0x00:
             {
-                printf("ADD Ev,%02x\n",op3);
+                debug_print("ADD Ev,%02x\n",op3);
                 *loc.src16 += op3;
                 break;
             }
             case 0x08:
             {
-                printf("OR Ev,%02x\n",op3);
+                debug_print("OR Ev,%02x\n",op3);
                 *loc.src16 |= op3;
                 break;
             }
             case 0x10:
             {
-                printf("ADC Ev,%02x\n",op3);
+                debug_print("ADC Ev,%02x\n",op3);
                 *loc.src16 += op3 + (flags & 0x0001);
                 break;
             }
             case 0x18:
             {
-                printf("SBB Ev,%02x\n",op3);
+                debug_print("SBB Ev,%02x\n",op3);
                 *loc.src16 -= op3 + (flags & 0x0001);
                 break;
             }
             case 0x20:
             {
-                printf("AND Ev,%02x\n",op3);
+                debug_print("AND Ev,%02x\n",op3);
                 *loc.src16 &= op3;
                 break;
             }
             case 0x28:
             {
-                printf("SUB Eb,%02x\n",op3);
+                debug_print("SUB Eb,%02x\n",op3);
                 *loc.src16 -= op3;
                 break;
             }
             case 0x30:
             {
-                printf("XOR Ev,%02x\n",op3);
+                debug_print("XOR Ev,%02x\n",op3);
                 *loc.src16 &= op3;
                 break;
             }
             case 0x38:
             {
-                printf("CMP Ev,%02x\n",op3);
+                debug_print("CMP Ev,%02x\n",op3);
                 u16 tmp = *loc.src16 - op3;
                 if(tmp==0) flags |= 0x0040;
                 else flags &= 0xFFBF;
@@ -2817,7 +2823,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("TEST Eb,Gb modrm=%02x\n",modrm);
+            debug_print("TEST Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x85:
@@ -2828,7 +2834,7 @@ void rtick()
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
             ip+=2;
-            printf("TEST Ev,Gv modrm=%02x\n",modrm);
+            debug_print("TEST Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x86:
@@ -2839,7 +2845,7 @@ void rtick()
             *loc.src8 = *loc.dst8;
             *loc.dst8 = tmp;
             ip+=2;
-            printf("XCHG Gb,Eb modrm=%02x\n",modrm);
+            debug_print("XCHG Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x87:
@@ -2850,7 +2856,7 @@ void rtick()
             *loc.src16 = *loc.dst16;
             *loc.dst16 = tmp;
             ip+=2;
-            printf("XCHG Gv,Ev modrm=%02x\n",modrm);
+            debug_print("XCHG Gv,Ev modrm=%02x\n",modrm);
             break;
         }
         case 0x88:
@@ -2859,7 +2865,7 @@ void rtick()
             locs loc = decodemodrm(seg,modrm,false,false);
             *loc.src8 = *loc.dst8;
             ip+=2;
-            printf("MOV Eb,Gb modrm=%02x\n",modrm);
+            debug_print("MOV Eb,Gb modrm=%02x\n",modrm);
             break;
         }
         case 0x89:
@@ -2868,7 +2874,7 @@ void rtick()
             locs loc = decodemodrm(seg,modrm,true,false);
             *loc.src16 = *loc.dst16;
             ip+=2;
-            printf("MOV Ev,Gv modrm=%02x\n",modrm);
+            debug_print("MOV Ev,Gv modrm=%02x\n",modrm);
             break;
         }
         case 0x8A:
@@ -2877,7 +2883,7 @@ void rtick()
             locs loc = decodemodrm(seg,modrm,false,false);
             *loc.dst8 = *loc.src8;
             ip+=2;
-            printf("MOV Gb,Eb modrm=%02x\n",modrm);
+            debug_print("MOV Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x8B:
@@ -2886,7 +2892,7 @@ void rtick()
             locs loc = decodemodrm(seg,modrm,true,false);
             *loc.dst16 = *loc.src16;
             ip+=2;
-            printf("MOV Gv,Ev modrm=%02x\n",modrm);
+            debug_print("MOV Gv,Ev modrm=%02x\n",modrm);
             break;
         }
         case 0x8C:
@@ -2895,7 +2901,7 @@ void rtick()
             locs loc = decodemodrm(seg,modrm,true,true);
             *loc.src16 = *loc.dst16;
             ip+=2;
-            printf("MOV Ew,Sw modrm=%02x\n",modrm);
+            debug_print("MOV Ew,Sw modrm=%02x\n",modrm);
             break;
         }
         case 0x8D:
@@ -2929,7 +2935,7 @@ void rtick()
             }
             *loc.src16 = tmp;
             ip+=2;
-            printf("LEA Gv,M modrm=%02x\n",modrm);
+            debug_print("LEA Gv,M modrm=%02x\n",modrm);
             break;
         }
         case 0x8E:
@@ -2938,7 +2944,7 @@ void rtick()
             locs loc = decodemodrm(seg,modrm,true,true);
             *loc.dst16 = *loc.src16;
             ip+=2;
-            printf("MOV Sw,Ew modrm=%02x\n",modrm);
+            debug_print("MOV Sw,Ew modrm=%02x\n",modrm);
             break;
         }
         case 0x8F:
@@ -2948,13 +2954,13 @@ void rtick()
             *loc.src16 = RAM::rb(ss,sp+1)|(RAM::rb(ss,sp+2)<<8);
             sp+=2;
             ip+=2;
-            printf("POP Ev modrm=%02x\n",modrm);
+            debug_print("POP Ev modrm=%02x\n",modrm);
             break;
         }
         case 0x90:
         {
             ip++;
-            printf("NOP\n");
+            debug_print("NOP\n");
             break;
         }
         case 0x91:
@@ -2963,7 +2969,7 @@ void rtick()
             u16 tmp = cx;
             cx = ax;
             ax = tmp;
-            printf("XCHG CX,AX\n");
+            debug_print("XCHG CX,AX\n");
             break;
         }
         case 0x92:
@@ -2972,7 +2978,7 @@ void rtick()
             u16 tmp = dx;
             dx = ax;
             ax = tmp;
-            printf("XCHG DX,AX\n");
+            debug_print("XCHG DX,AX\n");
             break;
         }
         case 0x93:
@@ -2981,7 +2987,7 @@ void rtick()
             u16 tmp = bx;
             bx = ax;
             ax = tmp;
-            printf("XCHG BX,AX\n");
+            debug_print("XCHG BX,AX\n");
             break;
         }
         case 0x94:
@@ -2990,7 +2996,7 @@ void rtick()
             u16 tmp = sp;
             sp = ax;
             ax = tmp;
-            printf("XCHG SP,AX\n");
+            debug_print("XCHG SP,AX\n");
             break;
         }
         case 0x95:
@@ -2999,7 +3005,7 @@ void rtick()
             u16 tmp = bp;
             bp = ax;
             ax = tmp;
-            printf("XCHG BP,AX\n");
+            debug_print("XCHG BP,AX\n");
             break;
         }
         case 0x96:
@@ -3008,7 +3014,7 @@ void rtick()
             u16 tmp = si;
             si = ax;
             ax = tmp;
-            printf("XCHG SI,AX\n");
+            debug_print("XCHG SI,AX\n");
             break;
         }
         case 0x97:
@@ -3017,7 +3023,7 @@ void rtick()
             u16 tmp = di;
             di = ax;
             ax = tmp;
-            printf("XCHG DI,AX\n");
+            debug_print("XCHG DI,AX\n");
             break;
         }
         case 0x98:
@@ -3025,7 +3031,7 @@ void rtick()
             if(al & 0x80) ah = 0xFF;
             else ah = 0;
             ip++;
-            printf("CBW");
+            debug_print("CBW");
             break;
         }
         case 0x99:
@@ -3033,7 +3039,7 @@ void rtick()
             if(ax & 0x8000) dx = 0xFFFF;
             else dx = 0;
             ip++;
-            printf("CWD");
+            debug_print("CWD");
             break;
         }
         case 0x9A:
@@ -3045,7 +3051,7 @@ void rtick()
             RAM::wb(ss,sp+1,(ip+5)>>8);
             cs = (RAM::rb(tmp,tmp1+4)<<8)|RAM::rb(tmp,tmp1+3);
             ip = (RAM::rb(tmp,tmp1+2)<<8)|RAM::rb(tmp,tmp1+1);
-            printf("CALL %04x:%04x\n",cs,ip);
+            debug_print("CALL %04x:%04x\n",cs,ip);
             break;
         }
         case 0x9C:
@@ -3054,7 +3060,7 @@ void rtick()
             RAM::wb(ss,sp,flags&0xFF);
             RAM::wb(ss,sp+1,flags>>8);
             ip++;
-            printf("PUSHF\n");
+            debug_print("PUSHF\n");
             break;
         }
         case 0x9D:
@@ -3062,12 +3068,12 @@ void rtick()
             flags = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
             sp-=2;
             ip++;
-            printf("POPF\n");
+            debug_print("POPF\n");
             break;
         }
         case 0x9E:
         {
-            printf("SAHF\n");
+            debug_print("SAHF\n");
             flags &= 0xFF2A;
             flags |= ah & 0xD5;
             ip++;
@@ -3075,7 +3081,7 @@ void rtick()
         }
         case 0x9F:
         {
-            printf("LAHF\n");
+            debug_print("LAHF\n");
             ah = (ah & 0x2A) | (flags & 0x00D5);
             ip++;
             break;
@@ -3085,7 +3091,7 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             al = RAM::rb(ds,tmp);
             ip+=3;
-            printf("MOV AL, BYTE PTR DS:%04x\n",tmp);
+            debug_print("MOV AL, BYTE PTR DS:%04x\n",tmp);
             break;
         }
         case 0xA1:
@@ -3093,7 +3099,7 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             ax = RAM::rb(ds,tmp)|(RAM::rb(ds,tmp+1)<<8);
             ip+=3;
-            printf("MOV AX, WORD PTR DS:%04x\n",tmp);
+            debug_print("MOV AX, WORD PTR DS:%04x\n",tmp);
             break;
         }
         case 0xA2:
@@ -3101,7 +3107,7 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             RAM::wb(ds,tmp,al);
             ip+=3;
-            printf("MOV BYTE PTR DS:%04x\n, AL",tmp);
+            debug_print("MOV BYTE PTR DS:%04x\n, AL",tmp);
             break;
         }
         case 0xA3:
@@ -3110,7 +3116,7 @@ void rtick()
             RAM::wb(ds,tmp,al);
             RAM::wb(ds,tmp+1,ah);
             ip+=3;
-            printf("MOV WORD PTR DS:%04x\n, AX",tmp);
+            debug_print("MOV WORD PTR DS:%04x\n, AX",tmp);
             break;
         }
         case 0xA4:
@@ -3130,7 +3136,7 @@ void rtick()
                     si--;
                 }
                 ip++;
-                printf("MOVSB\n");
+                debug_print("MOVSB\n");
                 break;
             case 1:
             case 2:
@@ -3149,7 +3155,7 @@ void rtick()
                     }
                 }
                 ip++;
-                printf("REP MOVSB\n");
+                debug_print("REP MOVSB\n");
                 break;
             }
             break;
@@ -3172,7 +3178,7 @@ void rtick()
                     si-=2;
                 }
                 ip++;
-                printf("MOVSW\n");
+                debug_print("MOVSW\n");
                 break;
             case 1:
             case 2:
@@ -3192,7 +3198,7 @@ void rtick()
                     }
                 }
                 ip++;
-                printf("REP MOVSW\n");
+                debug_print("REP MOVSW\n");
                 break;
             }
             break;
@@ -3217,7 +3223,7 @@ void rtick()
                 ip++;
                 if(tmp == 0) flags |= 0x0040;
                 else flags &= 0xFFBF;
-                printf("CMPSB\n");
+                debug_print("CMPSB\n");
                 break;
             }
             case 1:
@@ -3240,7 +3246,7 @@ void rtick()
                     else flags &= 0xFFBF;
                     if(!(flags & 0x0040)) break;
                 }
-                printf("REPE CMPSB\n");
+                debug_print("REPE CMPSB\n");
                 break;
             }
             case 2:
@@ -3262,7 +3268,7 @@ void rtick()
                     else flags &= 0xFFBF;
                     if((flags & 0x0040)) break;
                 }
-                printf("REPNE CMPSB\n");
+                debug_print("REPNE CMPSB\n");
                 break;
             case 3:
                 for(; cx!=0; cx--)
@@ -3283,7 +3289,7 @@ void rtick()
                     else flags &= 0xFFBF;
                     if(!(flags & 0x0001)) break;
                 }
-                printf("REPC CMPSB\n");
+                debug_print("REPC CMPSB\n");
                 break;
             case 4:
                 for(; cx!=0; cx--)
@@ -3304,7 +3310,7 @@ void rtick()
                     else flags &= 0xFFBF;
                     if((flags & 0x0001)) break;
                 }
-                printf("REPNC CMPSB\n");
+                debug_print("REPNC CMPSB\n");
                 break;
             }
             break;
@@ -3329,7 +3335,7 @@ void rtick()
                 ip++;
                 if(tmp == 0) flags |= 0x0040;
                 else flags &= 0xFFBF;
-                printf("CMPSW\n");
+                debug_print("CMPSW\n");
                 break;
             }
             case 1:
@@ -3351,7 +3357,7 @@ void rtick()
                     else flags &= 0xFFBF;
                     if(!(flags&0x0040)) break;
                 }
-                printf("REPE CMPSW\n");
+                debug_print("REPE CMPSW\n");
                 break;
             case 2:
                 for(; cx!=0; cx--)
@@ -3372,7 +3378,7 @@ void rtick()
                     else flags &= 0xFFBF;
                     if((flags&0x0040)) break;
                 }
-                printf("REPNE CMPSW\n");
+                debug_print("REPNE CMPSW\n");
                 break;
             }
             break;
@@ -3383,7 +3389,7 @@ void rtick()
             u8 tmp1 = al & tmp;
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
-            printf("TEST AL, %02x\n",tmp);
+            debug_print("TEST AL, %02x\n",tmp);
             ip+=2;
             break;
         }
@@ -3393,7 +3399,7 @@ void rtick()
             u16 tmp1 = ax & tmp;
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
-            printf("TEST AX, %04x\n",tmp);
+            debug_print("TEST AX, %04x\n",tmp);
             ip+=3;
             break;
         }
@@ -3406,7 +3412,7 @@ void rtick()
                 if(!(flags&0x0400)) di++;
                 else di--;
                 ip++;
-                printf("STOSB\n");
+                debug_print("STOSB\n");
                 break;
             case 1:
             case 2:
@@ -3417,7 +3423,7 @@ void rtick()
                     else di--;
                 }
                 ip++;
-                printf("REP STOSB\n");
+                debug_print("REP STOSB\n");
                 break;
             }
             break;
@@ -3432,7 +3438,7 @@ void rtick()
                 if(!(flags&0x0400)) di+=2;
                 else di-=2;
                 ip++;
-                printf("STOSW\n");
+                debug_print("STOSW\n");
                 break;
             case 1:
             case 2:
@@ -3444,7 +3450,7 @@ void rtick()
                     else di-=2;
                 }
                 ip++;
-                printf("STOSW\n");
+                debug_print("STOSW\n");
                 break;
             }
             break;
@@ -3455,7 +3461,7 @@ void rtick()
             if(!(flags&0x0400)) di++;
             else di--;
             ip++;
-            printf("LODSB\n");
+            debug_print("LODSB\n");
             break;
         }
         case 0xAD:
@@ -3464,7 +3470,7 @@ void rtick()
             if(!(flags&0x0400)) di+=2;
             else di-=2;
             ip++;
-            printf("LODSW\n");
+            debug_print("LODSW\n");
             break;
         }
         case 0xAE:
@@ -3479,7 +3485,7 @@ void rtick()
                 if(tmp==0) flags |= 0x0040;
                 else flags &= 0xFFBF;
                 ip++;
-                printf("SCASB\n");
+                debug_print("SCASB\n");
                 break;
             }
             case 1:
@@ -3493,7 +3499,7 @@ void rtick()
                     if(!(flags&0x0040)) break;
                 }
                 ip++;
-                printf("REPE SCASB\n");
+                debug_print("REPE SCASB\n");
                 break;
             case 2:
                 for(; cx!=0; cx--)
@@ -3506,7 +3512,7 @@ void rtick()
                     if((flags&0x0040)) break;
                 }
                 ip++;
-                printf("REPNE SCASB\n");
+                debug_print("REPNE SCASB\n");
                 break;
             }
             break;
@@ -3523,7 +3529,7 @@ void rtick()
                 if(tmp==0) flags |= 0x0040;
                 else flags &= 0xFFBF;
                 ip++;
-                printf("SCASW\n");
+                debug_print("SCASW\n");
                 break;
             }
             case 1:
@@ -3537,7 +3543,7 @@ void rtick()
                     if(!(flags&0x0040)) break;
                 }
                 ip++;
-                printf("REPE SCASW\n");
+                debug_print("REPE SCASW\n");
                 break;
             case 2:
                 for(; cx!=0; cx--)
@@ -3550,7 +3556,7 @@ void rtick()
                     if((flags&0x0040)) break;
                 }
                 ip++;
-                printf("REPNE SCASW\n");
+                debug_print("REPNE SCASW\n");
                 break;
             }
             break;
@@ -3558,112 +3564,112 @@ void rtick()
         case 0xB0:
         {
             al = RAM::rb(cs,ip+1);
-            printf("MOV AL,%02x\n",al);
+            debug_print("MOV AL,%02x\n",al);
             ip+=2;
             break;
         }
         case 0xB1:
         {
             cl = RAM::rb(cs,ip+1);
-            printf("MOV CL,%02x\n",cl);
+            debug_print("MOV CL,%02x\n",cl);
             ip+=2;
             break;
         }
         case 0xB2:
         {
             dl = RAM::rb(cs,ip+1);
-            printf("MOV DL,%02x\n",dl);
+            debug_print("MOV DL,%02x\n",dl);
             ip+=2;
             break;
         }
         case 0xB3:
         {
             bl = RAM::rb(cs,ip+1);
-            printf("MOV BL,%02x\n",bl);
+            debug_print("MOV BL,%02x\n",bl);
             ip+=2;
             break;
         }
         case 0xB4:
         {
             ah = RAM::rb(cs,ip+1);
-            printf("MOV AH,%02x\n",ah);
+            debug_print("MOV AH,%02x\n",ah);
             ip+=2;
             break;
         }
         case 0xB5:
         {
             ch = RAM::rb(cs,ip+1);
-            printf("MOV CH,%02x\n",ch);
+            debug_print("MOV CH,%02x\n",ch);
             ip+=2;
             break;
         }
         case 0xB6:
         {
             dh = RAM::rb(cs,ip+1);
-            printf("MOV DH,%02x\n",dh);
+            debug_print("MOV DH,%02x\n",dh);
             ip+=2;
             break;
         }
         case 0xB7:
         {
             bh = RAM::rb(cs,ip+1);
-            printf("MOV BH,%02x\n",bh);
+            debug_print("MOV BH,%02x\n",bh);
             ip+=2;
             break;
         }
         case 0xB8:
         {
             ax = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV AX,%04x\n",ax);
+            debug_print("MOV AX,%04x\n",ax);
             ip+=3;
             break;
         }
         case 0xB9:
         {
             cx = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV CX,%04x\n",cx);
+            debug_print("MOV CX,%04x\n",cx);
             ip+=3;
             break;
         }
         case 0xBA:
         {
             dx = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV DX,%04x\n",dx);
+            debug_print("MOV DX,%04x\n",dx);
             ip+=3;
             break;
         }
         case 0xBB:
         {
             bx = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV BX,%04x\n",bx);
+            debug_print("MOV BX,%04x\n",bx);
             ip+=3;
             break;
         }
         case 0xBC:
         {
             sp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV SP,%04x\n",sp);
+            debug_print("MOV SP,%04x\n",sp);
             ip+=3;
             break;
         }
         case 0xBD:
         {
             bp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV BP,%04x\n",bp);
+            debug_print("MOV BP,%04x\n",bp);
             ip+=3;
             break;
         }
         case 0xBE:
         {
             si = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV SI,%04x\n",si);
+            debug_print("MOV SI,%04x\n",si);
             ip+=3;
             break;
         }
         case 0xBF:
         {
             di = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
-            printf("MOV DI,%04x\n",di);
+            debug_print("MOV DI,%04x\n",di);
             ip+=3;
             break;
         }
@@ -3672,14 +3678,14 @@ void rtick()
             u16 tmp = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
             ip = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
             sp+=tmp+2;
-            printf("RET %04x\n",tmp);
+            debug_print("RET %04x\n",tmp);
             break;
         }
         case 0xC3:
         {
             ip = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
             sp+=2;
-            printf("RET\n");
+            debug_print("RET\n");
             break;
         }
         case 0xC4:
@@ -3691,7 +3697,7 @@ void rtick()
             *loc.dst16 = tmp;
             es = tmp1;
             ip+=6;
-            printf("LES Gv,Mp modrm=%02x\n",modrm);
+            debug_print("LES Gv,Mp modrm=%02x\n",modrm);
             break;
         }
         case 0xC5:
@@ -3703,7 +3709,7 @@ void rtick()
             *loc.dst16 = tmp;
             ds = tmp1;
             ip+=6;
-            printf("LDS Gv,Mp modrm=%02x\n",modrm);
+            debug_print("LDS Gv,Mp modrm=%02x\n",modrm);
             break;
         }
         case 0xC6:
@@ -3713,7 +3719,7 @@ void rtick()
             u8 tmp = RAM::rb(cs,ip+2);
             *loc.src8 = tmp;
             ip+=3;
-            printf("MOV Eb, %02x modrm=%02x\n",tmp,modrm);
+            debug_print("MOV Eb, %02x modrm=%02x\n",tmp,modrm);
             break;
         }
         case 0xC7:
@@ -3723,7 +3729,7 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
             *loc.src16 = tmp;
             ip+=4;
-            printf("MOV Ev, %04x modrm=%02x\n",tmp,modrm);
+            debug_print("MOV Ev, %04x modrm=%02x\n",tmp,modrm);
             break;
         }
         case 0xC8:
@@ -3752,7 +3758,7 @@ void rtick()
                 }
                 bp = tmp3;
                 sp-=tmp;
-                printf("ENTER %04x,%02x\n",tmp,tmp1);
+                debug_print("ENTER %04x,%02x\n",tmp,tmp1);
                 ip+=3;
             }
             ip++;
@@ -3764,7 +3770,7 @@ void rtick()
             {
                 sp = bp;
                 bp = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
-                printf("LEAVE\n");
+                debug_print("LEAVE\n");
             }
             ip++;
             break;
@@ -3776,7 +3782,7 @@ void rtick()
             sp+=2;
             cs = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
             sp+=tmp+2;
-            printf("RETF %04x\n",tmp);
+            debug_print("RETF %04x\n",tmp);
             break;
         }
         case 0xCB:
@@ -3785,7 +3791,7 @@ void rtick()
             sp+=2;
             cs = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
             sp+=2;
-            printf("RETF\n");
+            debug_print("RETF\n");
             break;
         }
         case 0xCC:
@@ -3802,7 +3808,7 @@ void rtick()
             RAM::wb(ss,sp+1,(ip+1) >> 8);
             cs = RAM::rb(0,15)|(RAM::rb(0,14)<<8);
             ip = RAM::rb(0,12)|(RAM::rb(0,13)<<8);
-            printf("INT 3\n");
+            debug_print("INT 3\n");
             break;
         }
         case 0xCD:
@@ -3820,7 +3826,7 @@ void rtick()
             RAM::wb(ss,sp+1,(ip+2) >> 8);
             cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
             ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
-            printf("INT %02x\n",tmp);
+            debug_print("INT %02x\n",tmp);
             break;
         }
         case 0xCE:
@@ -3837,7 +3843,7 @@ void rtick()
             RAM::wb(ss,sp+1,(ip+1) >> 8);
             cs = RAM::rb(0,19)|(RAM::rb(0,18)<<8);
             ip = RAM::rb(0,16)|(RAM::rb(0,17)<<8);
-            printf("INTO\n");
+            debug_print("INTO\n");
             break;
         }
         case 0xCF:
@@ -3848,7 +3854,7 @@ void rtick()
             sp+=2;
             flags = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
             sp+=2;
-            printf("IRET\n");
+            debug_print("IRET\n");
             break;
         }
         case 0xD0:
@@ -3859,19 +3865,19 @@ void rtick()
             {
             case 0x00:
             {
-                printf("ROL Eb,1 modrm=%02x\n",op2);
+                debug_print("ROL Eb,1 modrm=%02x\n",op2);
                 *loc.src8 = (*loc.src8 << 1) | (*loc.src8 >> 7);
                 break;
             }
             case 0x08:
             {
-                printf("ROR Eb,1 modrm=%02x\n",op2);
+                debug_print("ROR Eb,1 modrm=%02x\n",op2);
                 *loc.src8 = (*loc.src8 >> 1) | (*loc.src8 << 7);
                 break;
             }
             case 0x10:
             {
-                printf("RCL Eb,1 modrm=%02x\n",op2);
+                debug_print("RCL Eb,1 modrm=%02x\n",op2);
                 u8 tmp = *loc.src8;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src8 = (*loc.src8 << 1) | tmp1;
@@ -3880,7 +3886,7 @@ void rtick()
             }
             case 0x18:
             {
-                printf("RCR Eb,1 modrm=%02x\n",op2);
+                debug_print("RCR Eb,1 modrm=%02x\n",op2);
                 u8 tmp = *loc.src8 & 1;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src8 = (*loc.src8 >> 1) | tmp1 << 7;
@@ -3889,7 +3895,7 @@ void rtick()
             }
             case 0x20:
             {
-                printf("SHL Eb,1 modrm=%02x\n",op2);
+                debug_print("SHL Eb,1 modrm=%02x\n",op2);
                 flags = (flags & 0xFFFE) | ((*loc.src8 >> 7) & 1);
                 u8 tmp = ((*loc.src8 >> 7) & 1);
                 *loc.src8 <<= 1;
@@ -3898,19 +3904,19 @@ void rtick()
             }
             case 0x28:
             {
-                printf("SHR Eb,1 modrm=%02x\n",op2);
+                debug_print("SHR Eb,1 modrm=%02x\n",op2);
                 *loc.src8 >>= 1;
                 break;
             }
             case 0x30:
             {
-                printf("SAL Eb,1 modrm=%02x\n",op2);
+                debug_print("SAL Eb,1 modrm=%02x\n",op2);
                 *loc.src8 <<= 1;
                 break;
             }
             case 0x38:
             {
-                printf("SAR Eb,1 modrm=%02x\n",op2);
+                debug_print("SAR Eb,1 modrm=%02x\n",op2);
                 *loc.src8 = (*loc.src8 & 0x80) | (*loc.src8 >> 1);
                 break;
             }
@@ -3926,19 +3932,19 @@ void rtick()
             {
             case 0x00:
             {
-                printf("ROL Ev,1 modrm=%02x\n",op2);
+                debug_print("ROL Ev,1 modrm=%02x\n",op2);
                 *loc.src16 = (*loc.src16 << 1) | (*loc.src16 >> 15);
                 break;
             }
             case 0x08:
             {
-                printf("ROR Ev,1 modrm=%02x\n",op2);
+                debug_print("ROR Ev,1 modrm=%02x\n",op2);
                 *loc.src16 = (*loc.src16 >> 1) | (*loc.src16 << 15);
                 break;
             }
             case 0x10:
             {
-                printf("RCL Ev,1 modrm=%02x\n",op2);
+                debug_print("RCL Ev,1 modrm=%02x\n",op2);
                 u8 tmp = *loc.src16;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src16 = (*loc.src16 << 1) | tmp1;
@@ -3947,7 +3953,7 @@ void rtick()
             }
             case 0x18:
             {
-                printf("RCR Ev,1 modrm=%02x\n",op2);
+                debug_print("RCR Ev,1 modrm=%02x\n",op2);
                 u8 tmp = *loc.src16 & 1;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src16 = (*loc.src16 >> 1) | tmp1 << 15;
@@ -3956,7 +3962,7 @@ void rtick()
             }
             case 0x20:
             {
-                printf("SHL Ev,1 modrm=%02x\n",op2);
+                debug_print("SHL Ev,1 modrm=%02x\n",op2);
                 u16 tmp = *loc.src16 >> 15;
                 *loc.src16 <<= 1;
                 flags = (flags & 0xFFFE) | tmp;
@@ -3966,19 +3972,19 @@ void rtick()
             }
             case 0x28:
             {
-                printf("SHR Ev,1 modrm=%02x\n",op2);
+                debug_print("SHR Ev,1 modrm=%02x\n",op2);
                 *loc.src16 >>= 1;
                 break;
             }
             case 0x30:
             {
-                printf("SAL Ev,1 modrm=%02x\n",op2);
+                debug_print("SAL Ev,1 modrm=%02x\n",op2);
                 *loc.src16 <<= 1;
                 break;
             }
             case 0x38:
             {
-                printf("SAR Ev,1 modrm=%02x\n",op2);
+                debug_print("SAR Ev,1 modrm=%02x\n",op2);
                 *loc.src16 = (*loc.src16 & 0x8000) | (*loc.src16 >> 1);
                 break;
             }
@@ -3994,19 +4000,19 @@ void rtick()
             {
             case 0x00:
             {
-                printf("ROL Eb,CL modrm=%02x\n",op2);
+                debug_print("ROL Eb,CL modrm=%02x\n",op2);
                 *loc.src8 = (*loc.src8 << cl) | (*loc.src8 >> (8-cl));
                 break;
             }
             case 0x08:
             {
-                printf("ROR Eb,CL modrm=%02x\n",op2);
+                debug_print("ROR Eb,CL modrm=%02x\n",op2);
                 *loc.src8 = (*loc.src8 >> cl) | (*loc.src8 << (8-cl));
                 break;
             }
             case 0x10:
             {
-                printf("RCL Eb,CL modrm=%02x\n",op2);
+                debug_print("RCL Eb,CL modrm=%02x\n",op2);
                 u8 tmp = *loc.src8;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src8 = (*loc.src8 << cl) | tmp1;
@@ -4015,7 +4021,7 @@ void rtick()
             }
             case 0x18:
             {
-                printf("RCR Eb,CL modrm=%02x\n",op2);
+                debug_print("RCR Eb,CL modrm=%02x\n",op2);
                 u8 tmp = *loc.src8 & 1;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src8 = (*loc.src8 >> cl) | tmp1 << (8-cl);
@@ -4024,25 +4030,25 @@ void rtick()
             }
             case 0x20:
             {
-                printf("SHL Eb,CL modrm=%02x\n",op2);
+                debug_print("SHL Eb,CL modrm=%02x\n",op2);
                 *loc.src8 <<= cl;
                 break;
             }
             case 0x28:
             {
-                printf("SHR Eb,CL modrm=%02x\n",op2);
+                debug_print("SHR Eb,CL modrm=%02x\n",op2);
                 *loc.src8 >>= cl;
                 break;
             }
             case 0x30:
             {
-                printf("SAL Eb,CL modrm=%02x\n",op2);
+                debug_print("SAL Eb,CL modrm=%02x\n",op2);
                 *loc.src8 <<= cl;
                 break;
             }
             case 0x38:
             {
-                printf("SAR Eb,CL modrm=%02x\n",op2);
+                debug_print("SAR Eb,CL modrm=%02x\n",op2);
                 *loc.src8 = (*loc.src8 & 0x80) | (*loc.src8 >> cl);
                 break;
             }
@@ -4058,19 +4064,19 @@ void rtick()
             {
             case 0x00:
             {
-                printf("ROL Ev,CL modrm=%02x\n",op2);
+                debug_print("ROL Ev,CL modrm=%02x\n",op2);
                 *loc.src16 = (*loc.src16 << cl) | (*loc.src16 >> (16-cl));
                 break;
             }
             case 0x08:
             {
-                printf("ROR Ev,CL modrm=%02x\n",op2);
+                debug_print("ROR Ev,CL modrm=%02x\n",op2);
                 *loc.src16 = (*loc.src16 >> cl) | (*loc.src16 << (16-cl));
                 break;
             }
             case 0x10:
             {
-                printf("RCL Ev,CL modrm=%02x\n",op2);
+                debug_print("RCL Ev,CL modrm=%02x\n",op2);
                 u8 tmp = *loc.src16;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src16 = (*loc.src16 << cl) | tmp1;
@@ -4079,7 +4085,7 @@ void rtick()
             }
             case 0x18:
             {
-                printf("RCR Ev,CL modrm=%02x\n",op2);
+                debug_print("RCR Ev,CL modrm=%02x\n",op2);
                 u8 tmp = *loc.src16 & 1;
                 u8 tmp1 = flags & 0x0001;
                 *loc.src16 = (*loc.src16 >> cl) | tmp1 << (16-cl);
@@ -4088,25 +4094,25 @@ void rtick()
             }
             case 0x20:
             {
-                printf("SHL Ev,CL modrm=%02x\n",op2);
+                debug_print("SHL Ev,CL modrm=%02x\n",op2);
                 *loc.src16 <<= cl;
                 break;
             }
             case 0x28:
             {
-                printf("SHR Ev,CL modrm=%02x\n",op2);
+                debug_print("SHR Ev,CL modrm=%02x\n",op2);
                 *loc.src16 >>= cl;
                 break;
             }
             case 0x30:
             {
-                printf("SAL Ev,CL modrm=%02x\n",op2);
+                debug_print("SAL Ev,CL modrm=%02x\n",op2);
                 *loc.src16 <<= cl;
                 break;
             }
             case 0x38:
             {
-                printf("SAR Ev,CL modrm=%02x\n",op2);
+                debug_print("SAR Ev,CL modrm=%02x\n",op2);
                 *loc.src16 = (*loc.src16 & 0x8000) | (*loc.src16 >> cl);
                 break;
             }
@@ -4124,7 +4130,7 @@ void rtick()
                 u8 tmp2 = al - (tmp1 * tmp);
                 al = tmp2;
                 ip+=2;
-                printf("AAM %02x\n",tmp);
+                debug_print("AAM %02x\n",tmp);
             }
             else
             {
@@ -4133,7 +4139,7 @@ void rtick()
                 u8 tmp2 = al - (tmp1 * 10);
                 al = tmp2;
                 ip+=2;
-                printf("AAM 10\n");
+                debug_print("AAM 10\n");
             }
             break;
         }
@@ -4145,14 +4151,14 @@ void rtick()
                 al = (ah * tmp) + al;
                 ah = 0;
                 ip+=2;
-                printf("AAD %02x\n",tmp);
+                debug_print("AAD %02x\n",tmp);
             }
             else
             {
                 al = (ah * 10) + al;
                 ah = 0;
                 ip+=2;
-                printf("AAD 10\n");
+                debug_print("AAD 10\n");
             }
             break;
         }
@@ -4162,7 +4168,7 @@ void rtick()
             {
                 if(flags&0x0001) al = 0xFF;
                 else al = 0;
-                printf("SALC\n");
+                debug_print("SALC\n");
             }
             ip++;
             break;
@@ -4171,13 +4177,13 @@ void rtick()
         {
             al = RAM::rb(ds,bx+al);
             ip++;
-            printf("XLAT\n");
+            debug_print("XLAT\n");
             break;
         }
         case 0xE0:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("LOOPNZ %02x\n",tmp);
+            debug_print("LOOPNZ %02x\n",tmp);
             cx--;
             if((cx!=0) && (!(flags & 0x0040))) ip += (s8)tmp;
             ip+=2;
@@ -4186,7 +4192,7 @@ void rtick()
         case 0xE1:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("LOOPZ %02x\n",tmp);
+            debug_print("LOOPZ %02x\n",tmp);
             cx--;
             if((cx!=0) && ((flags & 0x0040))) ip += (s8)tmp;
             ip+=2;
@@ -4195,7 +4201,7 @@ void rtick()
         case 0xE2:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("LOOP %02x\n",tmp);
+            debug_print("LOOP %02x\n",tmp);
             cx--;
             if(cx!=0) ip += (s8)tmp;
             ip+=2;
@@ -4204,7 +4210,7 @@ void rtick()
         case 0xE3:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JCXZ %02x\n",tmp);
+            debug_print("JCXZ %02x\n",tmp);
             if(cx==0) ip += (s8)tmp;
             ip+=2;
             break;
@@ -4212,7 +4218,7 @@ void rtick()
         case 0xE4:
         {
             u16 tmp = RAM::rb(cs,ip+1);
-            printf("IN AL,%02x\n",tmp);
+            debug_print("IN AL,%02x\n",tmp);
             al = IO_XT::rb((u16)tmp);
             ip+=2;
             break;
@@ -4220,7 +4226,7 @@ void rtick()
         case 0xE5:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("IN AX,%02x\n",tmp);
+            debug_print("IN AX,%02x\n",tmp);
             ax = IO_XT::rb((u16)tmp)|(IO_XT::rb((u16)(tmp+1))<<8);
             ip+=2;
             break;
@@ -4228,7 +4234,7 @@ void rtick()
         case 0xE6:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("OUT %02x,AL\n",tmp);
+            debug_print("OUT %02x,AL\n",tmp);
             IO_XT::wb((u16)tmp,al);
             ip+=2;
             break;
@@ -4236,7 +4242,7 @@ void rtick()
         case 0xE7:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("OUT %02x,AX\n",tmp);
+            debug_print("OUT %02x,AX\n",tmp);
             IO_XT::wb((u16)tmp,al);
             IO_XT::wb((u16)(tmp+1),ah);
             ip+=2;
@@ -4245,7 +4251,7 @@ void rtick()
         case 0xE8:
         {
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            printf("CALL %04x\n",tmp);
+            debug_print("CALL %04x\n",tmp);
             sp-=2;
             RAM::wb(ss,sp,(ip+3)&0xFF);
             RAM::wb(ss,sp+1,(ip+3)>>8);
@@ -4256,7 +4262,7 @@ void rtick()
         case 0xE9:
         {
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
-            printf("JMP %04x\n",tmp);
+            debug_print("JMP %04x\n",tmp);
             ip += (s16)tmp;
             ip+=3;
             break;
@@ -4267,27 +4273,27 @@ void rtick()
             u16 tmp1 = ip;
             cs = (RAM::rb(tmp,tmp1+4)<<8)|RAM::rb(tmp,tmp1+3);
             ip = (RAM::rb(tmp,tmp1+2)<<8)|RAM::rb(tmp,tmp1+1);
-            printf("JMP %04x:%04x\n",cs,ip);
+            debug_print("JMP %04x:%04x\n",cs,ip);
             break;
         }
         case 0xEB:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            printf("JMP %02x\n",tmp);
+            debug_print("JMP %02x\n",tmp);
             ip += (s8)tmp;
             ip+=2;
             break;
         }
         case 0xEC:
         {
-            printf("IN AL,DX\n");
+            debug_print("IN AL,DX\n");
             al = IO_XT::rb(dx);
             ip++;
             break;
         }
         case 0xED:
         {
-            printf("IN AX,DX\n");
+            debug_print("IN AX,DX\n");
             al = IO_XT::rb(dx);
             ah = IO_XT::rb(dx+1);
             ip++;
@@ -4295,14 +4301,14 @@ void rtick()
         }
         case 0xEE:
         {
-            printf("OUT DX,AL\n");
+            debug_print("OUT DX,AL\n");
             IO_XT::wb(dx,al);
             ip++;
             break;
         }
         case 0xEF:
         {
-            printf("OUT DX,AX\n");
+            debug_print("OUT DX,AX\n");
             IO_XT::wb(dx,al);
             IO_XT::wb(dx+1,ah);
             ip++;
@@ -4310,7 +4316,7 @@ void rtick()
         }
         case 0xF5:
         {
-            printf("CMC\n");
+            debug_print("CMC\n");
             flags ^= 0x0001;
             ip++;
             break;
@@ -4328,31 +4334,31 @@ void rtick()
                 if(tmp == 0) flags |= 0x0040;
                 else flags &= 0xFFBF;
                 ip++;
-                printf("TEST Eb,%02x\n",op3);
+                debug_print("TEST Eb,%02x\n",op3);
                 break;
             }
             case 0x10:
             {
                 *loc.src8 = ~*loc.src8;
-                printf("NOT Eb\n");
+                debug_print("NOT Eb\n");
                 break;
             }
             case 0x18:
             {
                 *loc.src8 = (~*loc.src8) + 1;
-                printf("NEG Eb\n");
+                debug_print("NEG Eb\n");
                 break;
             }
             case 0x20:
             {
                 ax = *loc.src8 * al;
-                printf("MUL Eb\n");
+                debug_print("MUL Eb\n");
                 break;
             }
             case 0x28:
             {
                 ax = (s16)(*loc.src8 * al);
-                printf("IMUL Eb\n");
+                debug_print("IMUL Eb\n");
                 break;
             }
             case 0x30:
@@ -4361,7 +4367,7 @@ void rtick()
                 u8 tmp1 = ax - (tmp * (*loc.src8));
                 al = tmp;
                 ah = tmp1;
-                printf("DIV Eb\n");
+                debug_print("DIV Eb\n");
                 break;
             }
             case 0x38:
@@ -4370,7 +4376,7 @@ void rtick()
                 u8 tmp1 = ax - (tmp * (*loc.src8));
                 al = tmp;
                 ah = tmp1;
-                printf("IDIV Eb\n");
+                debug_print("IDIV Eb\n");
                 break;
             }
             }
@@ -4390,19 +4396,19 @@ void rtick()
                 if(tmp == 0) flags |= 0x0040;
                 else flags &= 0xFFBF;
                 ip+=2;
-                printf("TEST Ev,%04x\n",op3);
+                debug_print("TEST Ev,%04x\n",op3);
                 break;
             }
             case 0x10:
             {
                 *loc.src16 = ~*loc.src16;
-                printf("NOT Ev\n");
+                debug_print("NOT Ev\n");
                 break;
             }
             case 0x18:
             {
                 *loc.src16 = (~*loc.src16) + 1;
-                printf("NEG Ev\n");
+                debug_print("NEG Ev\n");
                 break;
             }
             case 0x20:
@@ -4410,7 +4416,7 @@ void rtick()
                 u32 tmp = *loc.src16 * ax;
                 ax = tmp & 0xFFFF;
                 dx = tmp >> 16;
-                printf("MUL Ev\n");
+                debug_print("MUL Ev\n");
                 break;
             }
             case 0x28:
@@ -4418,7 +4424,7 @@ void rtick()
                 s32 tmp = *loc.src16 * ax;
                 ax = (u32)tmp & 0xFFFF;
                 dx = (u32)tmp >> 16;
-                printf("IMUL Ev\n");
+                debug_print("IMUL Ev\n");
                 break;
             }
             case 0x30:
@@ -4427,7 +4433,7 @@ void rtick()
                 u16 tmp1 = (ax|(dx<<16)) - (tmp * (*loc.src16));
                 ax = tmp;
                 dx = tmp1;
-                printf("DIV Ev\n");
+                debug_print("DIV Ev\n");
                 break;
             }
             case 0x38:
@@ -4436,7 +4442,7 @@ void rtick()
                 u16 tmp1 = (ax|(dx<<16)) - (tmp * (*loc.src16));
                 ax = tmp;
                 dx = tmp1;
-                printf("IDIV Ev\n");
+                debug_print("IDIV Ev\n");
                 break;
             }
             }
@@ -4445,42 +4451,42 @@ void rtick()
         }
         case 0xF8:
         {
-            printf("CLC\n");
+            debug_print("CLC\n");
             flags &= 0xFFFE;
             ip++;
             break;
         }
         case 0xF9:
         {
-            printf("STC\n");
+            debug_print("STC\n");
             flags |= 0x0001;
             ip++;
             break;
         }
         case 0xFA:
         {
-            printf("CLI\n");
+            debug_print("CLI\n");
             flags &= 0xFDFF;
             ip++;
             break;
         }
         case 0xFB:
         {
-            printf("STI\n");
+            debug_print("STI\n");
             flags |= 0x0200;
             ip++;
             break;
         }
         case 0xFC:
         {
-            printf("CLD\n");
+            debug_print("CLD\n");
             flags &= 0xFBFF;
             ip++;
             break;
         }
         case 0xFD:
         {
-            printf("STD\n");
+            debug_print("STD\n");
             flags |= 0x0400;
             ip++;
             break;
@@ -4493,13 +4499,13 @@ void rtick()
             {
             case 0x00:
             {
-                printf("INC Eb\n");
+                debug_print("INC Eb\n");
                 *loc.src8++;
                 break;
             }
             case 0x08:
             {
-                printf("DEC Eb\n");
+                debug_print("DEC Eb\n");
                 *loc.src8--;
                 break;
             }
@@ -4515,19 +4521,19 @@ void rtick()
             {
             case 0x00:
             {
-                printf("INC Ev\n");
+                debug_print("INC Ev\n");
                 *loc.src16++;
                 break;
             }
             case 0x08:
             {
-                printf("DEC Ev\n");
+                debug_print("DEC Ev\n");
                 *loc.src16--;
                 break;
             }
             case 0x10:
             {
-                printf("CALL Ev\n");
+                debug_print("CALL Ev\n");
                 sp-=2;
                 RAM::wb(ss,sp,(ip+2)&0xFF);
                 RAM::wb(ss,sp+1,(ip+2)>>8);
@@ -4538,7 +4544,7 @@ void rtick()
             {
                 u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
                 u16 tmp1 = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
-                printf("CALL %04x:%04x\n",tmp1,tmp);
+                debug_print("CALL %04x:%04x\n",tmp1,tmp);
                 sp-=2;
                 RAM::wb(ss,sp,(ip+2)&0xFF);
                 RAM::wb(ss,sp+1,(ip+2)>>8);
@@ -4551,7 +4557,7 @@ void rtick()
             }
             case 0x20:
             {
-                printf("JMP Ev\n");
+                debug_print("JMP Ev\n");
                 ip = *loc.src16;
                 break;
             }
@@ -4559,14 +4565,14 @@ void rtick()
             {
                 u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
                 u16 tmp1 = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
-                printf("JMP %04x:%04x\n",tmp1,tmp);
+                debug_print("JMP %04x:%04x\n",tmp1,tmp);
                 ip = tmp;
                 cs = tmp1;
                 break;
             }
             case 0x30:
             {
-                printf("PUSH Ev\n");
+                debug_print("PUSH Ev\n");
                 sp-=2;
                 RAM::wb(ss,sp,*loc.src16 & 0xFF);
                 RAM::wb(ss,sp+1,*loc.src16 >> 8);
@@ -4578,7 +4584,7 @@ void rtick()
         }
         default:
         {
-            printf("Unemulated or invalid opcode %02x!\n",op);
+            debug_print("Unemulated or invalid opcode %02x!\n",op);
             ip++;
             break;
         }
@@ -4598,7 +4604,8 @@ void rtick()
             RAM::wb(ss,sp+1,(ip+2) >> 8);
             cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
             ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
-            printf("Hardware interrupt %02x triggered!\n",tmp);
+            debug_print("Hardware interrupt %02x triggered!\n",tmp);
+            hint = false;
         }
     }
     else if(!halted && i8080)
@@ -4616,7 +4623,7 @@ void rtick()
         case 0x38:
         {
             ip++;
-            printf("NOP\n");
+            debug_print("NOP\n");
             break;
         }
         case 0x01:
@@ -4624,42 +4631,42 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             cx = tmp;
             ip+=3;
-            printf("LD BC,%04x\n",tmp);
+            debug_print("LD BC,%04x\n",tmp);
             break;
         }
         case 0x02:
         {
             RAM::wb(cs,cx,al);
             ip++;
-            printf("LD (BC),A\n");
+            debug_print("LD (BC),A\n");
             break;
         }
         case 0x03:
         {
             cx++;
             ip++;
-            printf("INC BC\n");
+            debug_print("INC BC\n");
             break;
         }
         case 0x04:
         {
             ch++;
             ip++;
-            printf("INC B\n");
+            debug_print("INC B\n");
             break;
         }
         case 0x05:
         {
             ch--;
             ip++;
-            printf("DEC B\n");
+            debug_print("DEC B\n");
             break;
         }
         case 0x06:
         {
             ch = RAM::rb(cs,ip+1);
             ip+=2;
-            printf("LD B,%02x\n",ch);
+            debug_print("LD B,%02x\n",ch);
             break;
         }
         case 0x07:
@@ -4670,49 +4677,49 @@ void rtick()
             flags = (flags & 0xFFFE) | (tmp >> 7);
             al = (al & 0xFE) | tmp1;
             ip+=2;
-            printf("RLCA\n");
+            debug_print("RLCA\n");
             break;
         }
         case 0x09:
         {
             bx += cx;
             ip++;
-            printf("ADD HL,BC\n");
+            debug_print("ADD HL,BC\n");
             break;
         }
         case 0x0A:
         {
             al = RAM::rb(cs,cx);
             ip++;
-            printf("LD A,(BC)\n");
+            debug_print("LD A,(BC)\n");
             break;
         }
         case 0x0B:
         {
             cx--;
             ip++;
-            printf("DEC BC\n");
+            debug_print("DEC BC\n");
             break;
         }
         case 0x0C:
         {
             cl++;
             ip++;
-            printf("INC C\n");
+            debug_print("INC C\n");
             break;
         }
         case 0x0D:
         {
             cl--;
             ip++;
-            printf("DEC C\n");
+            debug_print("DEC C\n");
             break;
         }
         case 0x0E:
         {
             cl = RAM::rb(cs,ip+1);
             ip+=2;
-            printf("LD C,%02x\n",cl);
+            debug_print("LD C,%02x\n",cl);
             break;
         }
         case 0x0F:
@@ -4723,7 +4730,7 @@ void rtick()
             flags = (flags & 0xFFFE) | (tmp & 1);
             al = (al & 0x7F) | (tmp1 << 7);
             ip+=2;
-            printf("RRCA\n");
+            debug_print("RRCA\n");
             break;
         }
         case 0x11:
@@ -4731,42 +4738,42 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             dx = tmp;
             ip++;
-            printf("LD DE,%04x\n",tmp);
+            debug_print("LD DE,%04x\n",tmp);
             break;
         }
         case 0x12:
         {
             RAM::wb(cs,dx,al);
             ip++;
-            printf("LD (DE),A\n");
+            debug_print("LD (DE),A\n");
             break;
         }
         case 0x13:
         {
             dx++;
             ip++;
-            printf("INC DE\n");
+            debug_print("INC DE\n");
             break;
         }
         case 0x14:
         {
             dh++;
             ip++;
-            printf("INC D\n");
+            debug_print("INC D\n");
             break;
         }
         case 0x15:
         {
             dh--;
             ip++;
-            printf("DEC D\n");
+            debug_print("DEC D\n");
             break;
         }
         case 0x16:
         {
             dh = RAM::rb(cs,ip+1);
             ip+=2;
-            printf("LD D,%02x\n",dh);
+            debug_print("LD D,%02x\n",dh);
             break;
         }
         case 0x17:
@@ -4777,49 +4784,49 @@ void rtick()
             flags = (flags & 0xFE) | (tmp >> 7);
             al = (al & 0xFE) | tmp1;
             ip+=2;
-            printf("RLA\n");
+            debug_print("RLA\n");
             break;
         }
         case 0x19:
         {
             bx += dx;
             ip++;
-            printf("ADD HL,DE\n");
+            debug_print("ADD HL,DE\n");
             break;
         }
         case 0x1A:
         {
             al = RAM::rb(cs,dx);
             ip++;
-            printf("LD A,(DE)\n");
+            debug_print("LD A,(DE)\n");
             break;
         }
         case 0x1B:
         {
             dx--;
             ip++;
-            printf("DEC DE\n");
+            debug_print("DEC DE\n");
             break;
         }
         case 0x1C:
         {
             dl++;
             ip++;
-            printf("INC E\n");
+            debug_print("INC E\n");
             break;
         }
         case 0x1D:
         {
             dl--;
             ip++;
-            printf("DEC E\n");
+            debug_print("DEC E\n");
             break;
         }
         case 0x1E:
         {
             dl = RAM::rb(cs,ip+1);
             ip+=2;
-            printf("LD E,%02x\n",dl);
+            debug_print("LD E,%02x\n",dl);
             break;
         }
         case 0x1F:
@@ -4830,7 +4837,7 @@ void rtick()
             flags = (flags & 0xFE) | (tmp & 1);
             al = (al & 0x7F) | (tmp1 << 7);
             ip+=2;
-            printf("RRA\n");
+            debug_print("RRA\n");
             break;
         }
         case 0x21:
@@ -4838,7 +4845,7 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             bx = tmp;
             ip++;
-            printf("LD HL,%04x\n",tmp);
+            debug_print("LD HL,%04x\n",tmp);
             break;
         }
         case 0x22:
@@ -4847,35 +4854,35 @@ void rtick()
             RAM::wb(cs,tmp,bl);
             RAM::wb(cs,tmp+1,bh);
             ip++;
-            printf("LD (%04x),HL\n",tmp);
+            debug_print("LD (%04x),HL\n",tmp);
             break;
         }
         case 0x23:
         {
             bx++;
             ip++;
-            printf("INC HL\n");
+            debug_print("INC HL\n");
             break;
         }
         case 0x24:
         {
             bh++;
             ip++;
-            printf("INC H\n");
+            debug_print("INC H\n");
             break;
         }
         case 0x25:
         {
             bh--;
             ip++;
-            printf("DEC H\n");
+            debug_print("DEC H\n");
             break;
         }
         case 0x26:
         {
             bh = RAM::rb(cs,ip+1);
             ip+=2;
-            printf("LD H,%02x\n",bh);
+            debug_print("LD H,%02x\n",bh);
             break;
         }
         case 0x27:
@@ -4891,14 +4898,14 @@ void rtick()
             }
             else flags &= 0xFE;
             ip++;
-            printf("DAA\n");
+            debug_print("DAA\n");
             break;
         }
         case 0x29:
         {
             bx <<= 1; // x + x = 2x = x << 1
             ip++;
-            printf("ADD HL,HL\n");
+            debug_print("ADD HL,HL\n");
             break;
         }
         case 0x2A:
@@ -4907,42 +4914,42 @@ void rtick()
             u16 tmp1 = RAM::rb(cs,tmp)|(RAM::rb(cs,tmp+1)<<8);
             bx = tmp1;
             ip++;
-            printf("LD HL,(%04x)\n",tmp);
+            debug_print("LD HL,(%04x)\n",tmp);
             break;
         }
         case 0x2B:
         {
             bx--;
             ip++;
-            printf("DEC HL\n");
+            debug_print("DEC HL\n");
             break;
         }
         case 0x2C:
         {
             bl++;
             ip++;
-            printf("INC L\n");
+            debug_print("INC L\n");
             break;
         }
         case 0x2D:
         {
             bl--;
             ip++;
-            printf("DEC L\n");
+            debug_print("DEC L\n");
             break;
         }
         case 0x2E:
         {
             bl = RAM::rb(cs,ip+1);
             ip+=2;
-            printf("LD L,%02x\n",bl);
+            debug_print("LD L,%02x\n",bl);
             break;
         }
         case 0x2F:
         {
             al = ~al;
             ip++;
-            printf("CPL\n");
+            debug_print("CPL\n");
             break;
         }
         case 0x31:
@@ -4950,7 +4957,7 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             sp = tmp;
             ip+=3;
-            printf("LD SP,%04x\n",tmp);
+            debug_print("LD SP,%04x\n",tmp);
             break;
         }
         case 0x32:
@@ -4958,14 +4965,14 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             RAM::wb(cs,tmp,al);
             ip+=3;
-            printf("LD (%04x),A\n",tmp);
+            debug_print("LD (%04x),A\n",tmp);
             break;
         }
         case 0x33:
         {
             sp++;
             ip++;
-            printf("INC SP\n");
+            debug_print("INC SP\n");
             break;
         }
         case 0x34:
@@ -4974,7 +4981,7 @@ void rtick()
             RAM::wb(cs,bx,(tmp+1)&0xFF);
             RAM::wb(cs,bx+1,(tmp+1)>>8);
             ip++;
-            printf("INC (HL)\n");
+            debug_print("INC (HL)\n");
             break;
         }
         case 0x35:
@@ -4983,7 +4990,7 @@ void rtick()
             RAM::wb(cs,bx,(tmp-1)&0xFF);
             RAM::wb(cs,bx+1,(tmp-1)>>8);
             ip++;
-            printf("DEC (HL)\n");
+            debug_print("DEC (HL)\n");
             break;
         }
         case 0x36:
@@ -4991,21 +4998,21 @@ void rtick()
             u8 tmp = RAM::rb(cs,ip+1);
             RAM::wb(cs,bx,tmp);
             ip++;
-            printf("LD (HL),%02x\n",tmp);
+            debug_print("LD (HL),%02x\n",tmp);
             break;
         }
         case 0x37:
         {
             flags = (flags & 0xFE) | 1;
             ip++;
-            printf("SCF\n");
+            debug_print("SCF\n");
             break;
         }
         case 0x39:
         {
             bx += sp;
             ip++;
-            printf("ADD HL,SP\n");
+            debug_print("ADD HL,SP\n");
             break;
         }
         case 0x3A:
@@ -5013,880 +5020,880 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             al = tmp;
             ip+=3;
-            printf("LD A,(%04x)\n",tmp);
+            debug_print("LD A,(%04x)\n",tmp);
             break;
         }
         case 0x3B:
         {
             sp--;
             ip++;
-            printf("DEC SP\n");
+            debug_print("DEC SP\n");
             break;
         }
         case 0x3C:
         {
             al++;
             ip++;
-            printf("INC A\n");
+            debug_print("INC A\n");
             break;
         }
         case 0x3D:
         {
             al--;
             ip++;
-            printf("DEC A\n");
+            debug_print("DEC A\n");
             break;
         }
         case 0x3E:
         {
             al = RAM::rb(cs,ip+1);
             ip+=2;
-            printf("LD A,%02x\n",al);
+            debug_print("LD A,%02x\n",al);
             break;
         }
         case 0x3F:
         {
             flags ^= 1;
             ip++;
-            printf("CCF\n");
+            debug_print("CCF\n");
             break;
         }
         case 0x40:
         {
             ch = ch;
             ip++;
-            printf("LD B,B\n");
+            debug_print("LD B,B\n");
             break;
         }
         case 0x41:
         {
             ch = cl;
             ip++;
-            printf("LD B,C\n");
+            debug_print("LD B,C\n");
             break;
         }
         case 0x42:
         {
             ch = dh;
             ip++;
-            printf("LD B,D\n");
+            debug_print("LD B,D\n");
             break;
         }
         case 0x43:
         {
             ch = dl;
             ip++;
-            printf("LD B,E\n");
+            debug_print("LD B,E\n");
             break;
         }
         case 0x44:
         {
             ch = bh;
             ip++;
-            printf("LD B,H\n");
+            debug_print("LD B,H\n");
             break;
         }
         case 0x45:
         {
             ch = bl;
             ip++;
-            printf("LD B,L\n");
+            debug_print("LD B,L\n");
             break;
         }
         case 0x46:
         {
             ch = RAM::rb(cs,bx);
             ip++;
-            printf("LD B,(HL)\n");
+            debug_print("LD B,(HL)\n");
             break;
         }
         case 0x47:
         {
             ch = al;
             ip++;
-            printf("LD B,A\n");
+            debug_print("LD B,A\n");
             break;
         }
         case 0x48:
         {
             cl = ch;
             ip++;
-            printf("LD C,B\n");
+            debug_print("LD C,B\n");
             break;
         }
         case 0x49:
         {
             cl = cl;
             ip++;
-            printf("LD C,C\n");
+            debug_print("LD C,C\n");
             break;
         }
         case 0x4A:
         {
             cl = dh;
             ip++;
-            printf("LD C,D\n");
+            debug_print("LD C,D\n");
             break;
         }
         case 0x4B:
         {
             cl = dl;
             ip++;
-            printf("LD C,E\n");
+            debug_print("LD C,E\n");
             break;
         }
         case 0x4C:
         {
             cl = bh;
             ip++;
-            printf("LD C,H\n");
+            debug_print("LD C,H\n");
             break;
         }
         case 0x4D:
         {
             cl = bl;
             ip++;
-            printf("LD C,L\n");
+            debug_print("LD C,L\n");
             break;
         }
         case 0x4E:
         {
             cl = RAM::rb(cs,bx);
             ip++;
-            printf("LD C,(HL)\n");
+            debug_print("LD C,(HL)\n");
             break;
         }
         case 0x4F:
         {
             cl = al;
             ip++;
-            printf("LD C,A\n");
+            debug_print("LD C,A\n");
             break;
         }
         case 0x50:
         {
             dh = ch;
             ip++;
-            printf("LD D,B\n");
+            debug_print("LD D,B\n");
             break;
         }
         case 0x51:
         {
             dh = cl;
             ip++;
-            printf("LD D,C\n");
+            debug_print("LD D,C\n");
             break;
         }
         case 0x52:
         {
             dh = dh;
             ip++;
-            printf("LD D,D\n");
+            debug_print("LD D,D\n");
             break;
         }
         case 0x53:
         {
             dh = dl;
             ip++;
-            printf("LD D,E\n");
+            debug_print("LD D,E\n");
             break;
         }
         case 0x54:
         {
             dh = bh;
             ip++;
-            printf("LD D,H\n");
+            debug_print("LD D,H\n");
             break;
         }
         case 0x55:
         {
             dh = bl;
             ip++;
-            printf("LD D,L\n");
+            debug_print("LD D,L\n");
             break;
         }
         case 0x56:
         {
             dh = RAM::rb(cs,bx);
             ip++;
-            printf("LD D,(HL)\n");
+            debug_print("LD D,(HL)\n");
             break;
         }
         case 0x57:
         {
             dh = al;
             ip++;
-            printf("LD D,A\n");
+            debug_print("LD D,A\n");
             break;
         }
         case 0x58:
         {
             dl = ch;
             ip++;
-            printf("LD E,B\n");
+            debug_print("LD E,B\n");
             break;
         }
         case 0x59:
         {
             dl = cl;
             ip++;
-            printf("LD E,C\n");
+            debug_print("LD E,C\n");
             break;
         }
         case 0x5A:
         {
             dl = dh;
             ip++;
-            printf("LD E,D\n");
+            debug_print("LD E,D\n");
             break;
         }
         case 0x5B:
         {
             dl = dl;
             ip++;
-            printf("LD E,E\n");
+            debug_print("LD E,E\n");
             break;
         }
         case 0x5C:
         {
             dl = bh;
             ip++;
-            printf("LD E,H\n");
+            debug_print("LD E,H\n");
             break;
         }
         case 0x5D:
         {
             dl = bl;
             ip++;
-            printf("LD E,L\n");
+            debug_print("LD E,L\n");
             break;
         }
         case 0x5E:
         {
             dl = RAM::rb(cs,bx);
             ip++;
-            printf("LD E,(HL)\n");
+            debug_print("LD E,(HL)\n");
             break;
         }
         case 0x5F:
         {
             dl = al;
             ip++;
-            printf("LD E,A\n");
+            debug_print("LD E,A\n");
             break;
         }
         case 0x60:
         {
             bh = ch;
             ip++;
-            printf("LD H,B\n");
+            debug_print("LD H,B\n");
             break;
         }
         case 0x61:
         {
             bh = cl;
             ip++;
-            printf("LD H,C\n");
+            debug_print("LD H,C\n");
             break;
         }
         case 0x62:
         {
             bh = dh;
             ip++;
-            printf("LD H,D\n");
+            debug_print("LD H,D\n");
             break;
         }
         case 0x63:
         {
             bh = dl;
             ip++;
-            printf("LD H,E\n");
+            debug_print("LD H,E\n");
             break;
         }
         case 0x64:
         {
             bh = bh;
             ip++;
-            printf("LD H,H\n");
+            debug_print("LD H,H\n");
             break;
         }
         case 0x65:
         {
             bh = bl;
             ip++;
-            printf("LD H,L\n");
+            debug_print("LD H,L\n");
             break;
         }
         case 0x66:
         {
             bh = RAM::rb(cs,bx);
             ip++;
-            printf("LD H,(HL)\n");
+            debug_print("LD H,(HL)\n");
             break;
         }
         case 0x67:
         {
             bh = al;
             ip++;
-            printf("LD H,A\n");
+            debug_print("LD H,A\n");
             break;
         }
         case 0x68:
         {
             bl = ch;
             ip++;
-            printf("LD L,B\n");
+            debug_print("LD L,B\n");
             break;
         }
         case 0x69:
         {
             bl = cl;
             ip++;
-            printf("LD L,C\n");
+            debug_print("LD L,C\n");
             break;
         }
         case 0x6A:
         {
             bl = dh;
             ip++;
-            printf("LD L,D\n");
+            debug_print("LD L,D\n");
             break;
         }
         case 0x6B:
         {
             bl = dl;
             ip++;
-            printf("LD L,E\n");
+            debug_print("LD L,E\n");
             break;
         }
         case 0x6C:
         {
             bl = bh;
             ip++;
-            printf("LD L,H\n");
+            debug_print("LD L,H\n");
             break;
         }
         case 0x6D:
         {
             bl = bl;
             ip++;
-            printf("LD L,L\n");
+            debug_print("LD L,L\n");
             break;
         }
         case 0x6E:
         {
             bl = RAM::rb(cs,bx);
             ip++;
-            printf("LD L,(HL)\n");
+            debug_print("LD L,(HL)\n");
             break;
         }
         case 0x6F:
         {
             bl = al;
             ip++;
-            printf("LD L,A\n");
+            debug_print("LD L,A\n");
             break;
         }
         case 0x70:
         {
             RAM::wb(cs,bx,ch);
             ip++;
-            printf("LD (HL),B\n");
+            debug_print("LD (HL),B\n");
             break;
         }
         case 0x71:
         {
             RAM::wb(cs,bx,cl);
             ip++;
-            printf("LD (HL),C\n");
+            debug_print("LD (HL),C\n");
             break;
         }
         case 0x72:
         {
             RAM::wb(cs,bx,dh);
             ip++;
-            printf("LD (HL),D\n");
+            debug_print("LD (HL),D\n");
             break;
         }
         case 0x73:
         {
             RAM::wb(cs,bx,dl);
             ip++;
-            printf("LD (HL),E\n");
+            debug_print("LD (HL),E\n");
             break;
         }
         case 0x74:
         {
             RAM::wb(cs,bx,bh);
             ip++;
-            printf("LD (HL),H\n");
+            debug_print("LD (HL),H\n");
             break;
         }
         case 0x75:
         {
             RAM::wb(cs,bx,bl);
             ip++;
-            printf("LD (HL),L\n");
+            debug_print("LD (HL),L\n");
             break;
         }
         case 0x76:
         {
             ip++;
             halted = true;
-            printf("HLT\n");
+            debug_print("HLT\n");
             break;
         }
         case 0x77:
         {
             RAM::wb(cs,bx,al);
             ip++;
-            printf("LD (HL),A\n");
+            debug_print("LD (HL),A\n");
             break;
         }
         case 0x78:
         {
             al = ch;
             ip++;
-            printf("LD A,B\n");
+            debug_print("LD A,B\n");
             break;
         }
         case 0x79:
         {
             al = cl;
             ip++;
-            printf("LD A,C\n");
+            debug_print("LD A,C\n");
             break;
         }
         case 0x7A:
         {
             al = dh;
             ip++;
-            printf("LD A,D\n");
+            debug_print("LD A,D\n");
             break;
         }
         case 0x7B:
         {
             al = dl;
             ip++;
-            printf("LD A,E\n");
+            debug_print("LD A,E\n");
             break;
         }
         case 0x7C:
         {
             al = bh;
             ip++;
-            printf("LD A,H\n");
+            debug_print("LD A,H\n");
             break;
         }
         case 0x7D:
         {
             al = bl;
             ip++;
-            printf("LD A,L\n");
+            debug_print("LD A,L\n");
             break;
         }
         case 0x7E:
         {
             al = RAM::rb(cs,bx);
             ip++;
-            printf("LD A,(HL)\n");
+            debug_print("LD A,(HL)\n");
             break;
         }
         case 0x7F:
         {
             al = al;
             ip++;
-            printf("LD A,A\n");
+            debug_print("LD A,A\n");
             break;
         }
         case 0x80:
         {
             al += ch;
             ip++;
-            printf("ADD A,B\n");
+            debug_print("ADD A,B\n");
             break;
         }
         case 0x81:
         {
             al += cl;
             ip++;
-            printf("ADD A,C\n");
+            debug_print("ADD A,C\n");
             break;
         }
         case 0x82:
         {
             al += dh;
             ip++;
-            printf("ADD A,D\n");
+            debug_print("ADD A,D\n");
             break;
         }
         case 0x83:
         {
             al += dl;
             ip++;
-            printf("ADD A,E\n");
+            debug_print("ADD A,E\n");
             break;
         }
         case 0x84:
         {
             al += bh;
             ip++;
-            printf("ADD A,H\n");
+            debug_print("ADD A,H\n");
             break;
         }
         case 0x85:
         {
             al += bl;
             ip++;
-            printf("ADD A,L\n");
+            debug_print("ADD A,L\n");
             break;
         }
         case 0x86:
         {
             al += RAM::rb(cs,bx);
             ip++;
-            printf("ADD A,(HL)\n");
+            debug_print("ADD A,(HL)\n");
             break;
         }
         case 0x87:
         {
             al <<= 1;
             ip++;
-            printf("ADD A,A\n");
+            debug_print("ADD A,A\n");
             break;
         }
         case 0x88:
         {
             al += ch + (flags & 1);
             ip++;
-            printf("ADC A,B\n");
+            debug_print("ADC A,B\n");
             break;
         }
         case 0x89:
         {
             al += cl + (flags & 1);
             ip++;
-            printf("ADC A,C\n");
+            debug_print("ADC A,C\n");
             break;
         }
         case 0x8A:
         {
             al += dh + (flags & 1);
             ip++;
-            printf("ADC A,D\n");
+            debug_print("ADC A,D\n");
             break;
         }
         case 0x8B:
         {
             al += dl + (flags & 1);
             ip++;
-            printf("ADC A,E\n");
+            debug_print("ADC A,E\n");
             break;
         }
         case 0x8C:
         {
             al += bh + (flags & 1);
             ip++;
-            printf("ADC A,H\n");
+            debug_print("ADC A,H\n");
             break;
         }
         case 0x8D:
         {
             al += bl + (flags & 1);
             ip++;
-            printf("ADC A,L\n");
+            debug_print("ADC A,L\n");
             break;
         }
         case 0x8E:
         {
             al += RAM::rb(cs,bx) + (flags & 1);
             ip++;
-            printf("ADC A,(HL)\n");
+            debug_print("ADC A,(HL)\n");
             break;
         }
         case 0x8F:
         {
             al += al + (flags & 1);
             ip++;
-            printf("ADC A,A\n");
+            debug_print("ADC A,A\n");
             break;
         }
         case 0x90:
         {
             al -= ch;
             ip++;
-            printf("SUB A,B\n");
+            debug_print("SUB A,B\n");
             break;
         }
         case 0x91:
         {
             al -= cl;
             ip++;
-            printf("SUB A,C\n");
+            debug_print("SUB A,C\n");
             break;
         }
         case 0x92:
         {
             al -= dh;
             ip++;
-            printf("SUB A,D\n");
+            debug_print("SUB A,D\n");
             break;
         }
         case 0x93:
         {
             al -= dl;
             ip++;
-            printf("SUB A,E\n");
+            debug_print("SUB A,E\n");
             break;
         }
         case 0x94:
         {
             al -= bh;
             ip++;
-            printf("SUB A,H\n");
+            debug_print("SUB A,H\n");
             break;
         }
         case 0x95:
         {
             al -= bl;
             ip++;
-            printf("SUB A,L\n");
+            debug_print("SUB A,L\n");
             break;
         }
         case 0x96:
         {
             al -= RAM::rb(cs,bx);
             ip++;
-            printf("SUB A,(HL)\n");
+            debug_print("SUB A,(HL)\n");
             break;
         }
         case 0x97:
         {
             al = 0;
             ip++;
-            printf("SUB A,A\n");
+            debug_print("SUB A,A\n");
             break;
         }
         case 0x98:
         {
             al -= ch + (flags & 1);
             ip++;
-            printf("SBB A,B\n");
+            debug_print("SBB A,B\n");
             break;
         }
         case 0x99:
         {
             al -= cl + (flags & 1);
             ip++;
-            printf("SBB A,C\n");
+            debug_print("SBB A,C\n");
             break;
         }
         case 0x9A:
         {
             al -= dh + (flags & 1);
             ip++;
-            printf("SBB A,D\n");
+            debug_print("SBB A,D\n");
             break;
         }
         case 0x9B:
         {
             al -= dl + (flags & 1);
             ip++;
-            printf("SBB A,E\n");
+            debug_print("SBB A,E\n");
             break;
         }
         case 0x9C:
         {
             al -= bh + (flags & 1);
             ip++;
-            printf("SBB A,H\n");
+            debug_print("SBB A,H\n");
             break;
         }
         case 0x9D:
         {
             al -= bl + (flags & 1);
             ip++;
-            printf("SBB A,L\n");
+            debug_print("SBB A,L\n");
             break;
         }
         case 0x9E:
         {
             al -= RAM::rb(cs,bx) + (flags & 1);
             ip++;
-            printf("SBB A,(HL)\n");
+            debug_print("SBB A,(HL)\n");
             break;
         }
         case 0x9F:
         {
             al -= al + (flags & 1);
             ip++;
-            printf("SBB A,A\n");
+            debug_print("SBB A,A\n");
             break;
         }
         case 0xA0:
         {
             al &= ch;
             ip++;
-            printf("AND A,B\n");
+            debug_print("AND A,B\n");
             break;
         }
         case 0xA1:
         {
             al &= cl;
             ip++;
-            printf("AND A,C\n");
+            debug_print("AND A,C\n");
             break;
         }
         case 0xA2:
         {
             al &= dh;
             ip++;
-            printf("AND A,D\n");
+            debug_print("AND A,D\n");
             break;
         }
         case 0xA3:
         {
             al &= dl;
             ip++;
-            printf("AND A,E\n");
+            debug_print("AND A,E\n");
             break;
         }
         case 0xA4:
         {
             al &= bh;
             ip++;
-            printf("AND A,H\n");
+            debug_print("AND A,H\n");
             break;
         }
         case 0xA5:
         {
             al &= bl;
             ip++;
-            printf("AND A,L\n");
+            debug_print("AND A,L\n");
             break;
         }
         case 0xA6:
         {
             al &= RAM::rb(cs,bx);
             ip++;
-            printf("AND A,(HL)\n");
+            debug_print("AND A,(HL)\n");
             break;
         }
         case 0xA7:
         {
             ip++;
-            printf("AND A,A\n");
+            debug_print("AND A,A\n");
             break;
         }
         case 0xA8:
         {
             al ^= ch;
             ip++;
-            printf("XOR A,B\n");
+            debug_print("XOR A,B\n");
             break;
         }
         case 0xA9:
         {
             al ^= cl;
             ip++;
-            printf("XOR A,C\n");
+            debug_print("XOR A,C\n");
             break;
         }
         case 0xAA:
         {
             al ^= dh;
             ip++;
-            printf("XOR A,D\n");
+            debug_print("XOR A,D\n");
             break;
         }
         case 0xAB:
         {
             al ^= dl;
             ip++;
-            printf("XOR A,E\n");
+            debug_print("XOR A,E\n");
             break;
         }
         case 0xAC:
         {
             al ^= bh;
             ip++;
-            printf("XOR A,H\n");
+            debug_print("XOR A,H\n");
             break;
         }
         case 0xAD:
         {
             al ^= bl;
             ip++;
-            printf("XOR A,L\n");
+            debug_print("XOR A,L\n");
             break;
         }
         case 0xAE:
         {
             al ^= RAM::rb(cs,bx);
             ip++;
-            printf("XOR A,(HL)\n");
+            debug_print("XOR A,(HL)\n");
             break;
         }
         case 0xAF:
         {
             al = 0;
             ip++;
-            printf("XOR A,A\n");
+            debug_print("XOR A,A\n");
             break;
         }
         case 0xB0:
         {
             al |= ch;
             ip++;
-            printf("OR A,B\n");
+            debug_print("OR A,B\n");
             break;
         }
         case 0xB1:
         {
             al |= cl;
             ip++;
-            printf("OR A,C\n");
+            debug_print("OR A,C\n");
             break;
         }
         case 0xB2:
         {
             al |= dh;
             ip++;
-            printf("OR A,D\n");
+            debug_print("OR A,D\n");
             break;
         }
         case 0xB3:
         {
             al |= dl;
             ip++;
-            printf("OR A,E\n");
+            debug_print("OR A,E\n");
             break;
         }
         case 0xB4:
         {
             al |= bh;
             ip++;
-            printf("OR A,H\n");
+            debug_print("OR A,H\n");
             break;
         }
         case 0xB5:
         {
             al |= bl;
             ip++;
-            printf("OR A,L\n");
+            debug_print("OR A,L\n");
             break;
         }
         case 0xB6:
         {
             al |= RAM::rb(cs,bx);
             ip++;
-            printf("OR A,(HL)\n");
+            debug_print("OR A,(HL)\n");
             break;
         }
         case 0xB7:
         {
             ip++;
-            printf("OR A,A\n");
+            debug_print("OR A,A\n");
             break;
         }
         case 0xB8:
@@ -5897,7 +5904,7 @@ void rtick()
             if(tmp >= 0x80) flags |= 0x0080;
             else flags &= 0xFF7F;
             ip++;
-            printf("CMP A,B\n");
+            debug_print("CMP A,B\n");
             break;
         }
         case 0xB9:
@@ -5908,7 +5915,7 @@ void rtick()
             if(tmp >= 0x80) flags |= 0x0080;
             else flags &= 0xFF7F;
             ip++;
-            printf("CMP A,C\n");
+            debug_print("CMP A,C\n");
             break;
         }
         case 0xBA:
@@ -5919,7 +5926,7 @@ void rtick()
             if(tmp >= 0x80) flags |= 0x0080;
             else flags &= 0xFF7F;
             ip++;
-            printf("CMP A,D\n");
+            debug_print("CMP A,D\n");
             break;
         }
         case 0xBB:
@@ -5930,7 +5937,7 @@ void rtick()
             if(tmp >= 0x80) flags |= 0x0080;
             else flags &= 0xFF7F;
             ip++;
-            printf("CMP A,E\n");
+            debug_print("CMP A,E\n");
             break;
         }
         case 0xBC:
@@ -5941,7 +5948,7 @@ void rtick()
             if(tmp >= 0x80) flags |= 0x0080;
             else flags &= 0xFF7F;
             ip++;
-            printf("CMP A,H\n");
+            debug_print("CMP A,H\n");
             break;
         }
         case 0xBD:
@@ -5952,7 +5959,7 @@ void rtick()
             if(tmp >= 0x80) flags |= 0x0080;
             else flags &= 0xFF7F;
             ip++;
-            printf("CMP A,L\n");
+            debug_print("CMP A,L\n");
             break;
         }
         case 0xBE:
@@ -5963,7 +5970,7 @@ void rtick()
             if(tmp >= 0x80) flags |= 0x0080;
             else flags &= 0xFF7F;
             ip++;
-            printf("CMP A,(HL)\n");
+            debug_print("CMP A,(HL)\n");
             break;
         }
         case 0xBF:
@@ -5972,7 +5979,7 @@ void rtick()
             flags |= 0x0040;
             flags &= 0xFF7F;
             ip++;
-            printf("CMP A,A\n");
+            debug_print("CMP A,A\n");
             break;
         }
         case 0xC0:
@@ -5983,7 +5990,7 @@ void rtick()
                 sp+=2;
             }
             else ip++;
-            printf("RET NZ\n");
+            debug_print("RET NZ\n");
             break;
         }
         case 0xC8:
@@ -5994,32 +6001,32 @@ void rtick()
                 sp+=2;
             }
             else ip++;
-            printf("RET Z\n");
+            debug_print("RET Z\n");
             break;
         }
         case 0xC9:
         {
             ip = RAM::rb(cs,sp)|(RAM::rb(cs,sp+1)<<8);
             sp+=2;
-            printf("RET\n");
+            debug_print("RET\n");
             break;
         }
         }
     }
-    printf("ax=%04x\n",ax);
-    printf("bx=%04x\n",bx);
-    printf("cx=%04x\n",cx);
-    printf("dx=%04x\n",dx);
-    printf("cs=%04x\n",cs);
-    printf("ip=%04x\n",ip);
-    printf("ds=%04x\n",ds);
-    printf("es=%04x\n",es);
-    printf("ss=%04x\n",ss);
-    printf("si=%04x\n",si);
-    printf("di=%04x\n",di);
-    printf("sp=%04x\n",sp);
-    printf("bp=%04x\n",bp);
-    printf("flags=%04x\n",flags);
+    debug_print("ax=%04x\n",ax);
+    debug_print("bx=%04x\n",bx);
+    debug_print("cx=%04x\n",cx);
+    debug_print("dx=%04x\n",dx);
+    debug_print("cs=%04x\n",cs);
+    debug_print("ip=%04x\n",ip);
+    debug_print("ds=%04x\n",ds);
+    debug_print("es=%04x\n",es);
+    debug_print("ss=%04x\n",ss);
+    debug_print("si=%04x\n",si);
+    debug_print("di=%04x\n",di);
+    debug_print("sp=%04x\n",sp);
+    debug_print("bp=%04x\n",bp);
+    debug_print("flags=%04x\n",flags);
 }
 
 void tick()
@@ -6082,7 +6089,7 @@ void tick()
         case 0xF4:
         {
             ip++;
-            printf("HLT\n");
+            debug_print("HLT\n");
             halted=true;
         }
         default:

@@ -1,5 +1,6 @@
 #include <cstdio>
 #include "misc.h"
+#include "cpu.h"
 
 namespace IO_XT
 {
@@ -67,6 +68,11 @@ void tick()
                 if(chan[i].enabled)
                 {
                     chan[i].gate_out = true;
+                    if(chan[i].gate_out == true && i == 0)
+                    {
+                        CPU::hint = true;
+                        CPU::hintnum = 0;
+                    }
                     chan[i].counter--;
                     if(chan[i].counter==1) chan[i].gate_out = false;
                     if(chan[i].counter==0)
