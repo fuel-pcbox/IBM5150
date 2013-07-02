@@ -22,8 +22,20 @@ void savestate_save()
     fwrite(&CPU::flags,2,1,fp);
     fclose(fp);
     fp = fopen("save/mda.dump","wb");
-    fwrite(&MDA::hdisp,2,1,fp);
-    fwrite(&MDA::vdisp,2,1,fp);
-    fwrite(&MDA::maxscan,2,1,fp);
-    fwrite(&MDA::dispmode,2,1,fp);
+    fwrite(&MDA::hdisp,1,1,fp);
+    fwrite(&MDA::vdisp,1,1,fp);
+    fwrite(&MDA::maxscan,1,1,fp);
+    fwrite(&MDA::dispmode,1,1,fp);
+    fclose(fp);
+    fp = fopen("save/cga.dump","wb");
+    fwrite(&CGA::hdisp,1,1,fp);
+    fwrite(&CGA::vdisp,1,1,fp);
+    fwrite(&CGA::maxscan,1,1,fp);
+    fwrite(&CGA::dispmode,1,1,fp);
+    fclose(fp);
+    fp = fopen("save/pic.dump","wb");
+    fwrite(&PIC::pic[0].intrmask,1,1,fp);
+    fwrite(&PIC::pic[0].offset,1,1,fp);
+    fwrite(&PIC::pic[0].enabled,sizeof(bool),1,fp);
+    fclose(fp);
 }

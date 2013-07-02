@@ -21,35 +21,40 @@ enum
 
 int main(int ac, char** av)
 {
-    if(ac < 4)
+    if(ac < 2)
     {
-        printf("Usage:\n\tibm5150 biosFile configFile mda.cfg\n");
+        printf("Usage:\n\tibm5150 configfile\n");
         return 1;
     }
 
     PIC::pic[0].init1 = false;
     PIC::pic[0].init2 = false;
     PIC::pic[0].enabled = false;
+    PIC::pic[0].intrmask = 0xFF;
     DMA_XT::chan[0].access_flip_flop = false;
 
-    FILE* bios = fopen(av[1],"rb");
+    char* isa1 = new char[10];
+    char* biosrom = new char[256];
+    char* mdarom = new char[256];
+
+    FILE* config = fopen(av[1],"r");
+    fscanf(config,"isa1=%s\n",isa1);
+    fscanf(config,"biosrom=%s\n",biosrom);
+    fscanf(config,"mdarom=%s\n",mdarom);
+    fclose(config);
+    
+    FILE* bios = fopen(biosrom,"rb");
     fseek(bios,0,SEEK_END);
     long size = ftell(bios);
     fseek(bios,0,SEEK_SET);
     fread(RAM::RAM + (0x100000 - size),1,size,bios);
-
-    FILE* mda = fopen(av[2],"rb");
+    
+    FILE* mda = fopen(mdarom,"rb");
     fread(MDA::ROM,1,0x2000,mda);
     fseek(mda,0,SEEK_SET);
     fread(CGA::ROM,1,0x2000,mda);
     fclose(mda);
     fclose(bios);
-
-    char* isa1 = new char[10];
-
-    FILE* config = fopen(av[3],"r");
-    fscanf(config,"isa1=%s\n",isa1);
-    fclose(config);
 
     std::string isa1slot = isa1;
     delete[] isa1;
@@ -101,17 +106,49 @@ int main(int ac, char** av)
         fread(&CPU::flags,2,1,fp);
         fclose(fp);
     }
+    
+    fp = fopen("save/mda.dump","rb");
+    if(fp != NULL)
+    {
+        fread(&MDA::hdisp,1,1,fp);
+        fread(&MDA::vdisp,1,1,fp);
+        fread(&MDA::maxscan,1,1,fp);
+        fread(&MDA::dispmode,1,1,fp); 
+        fclose(fp);
+    }
+    
+    fp = fopen("save/cga.dump","rb");
+    if(fp != NULL)
+    {
+        fread(&CGA::hdisp,1,1,fp);
+        fread(&CGA::vdisp,1,1,fp);
+        fread(&CGA::maxscan,1,1,fp);
+        fread(&CGA::dispmode,1,1,fp); 
+        fclose(fp);
+    }
+    
+    fp = fopen("save/pic.dump","rb");
+    if(fp != NULL)
+    {
+        fread(&PIC::pic[0].intrmask,1,1,fp);
+        fread(&PIC::pic[0].offset,1,1,fp);
+        fread(&PIC::pic[0].enabled,sizeof(bool),1,fp);
+        fclose(fp);
+    }
+    
+    bool debugsaved = false;
 
     while(INTERFACE::quitflag == false)
     {
         CPU::tick();
         
-        if(CPU::ip == 0xE169)
+        /*if(CPU::ip == 0xE256 && !debugsaved)
         {
+            debugsaved = true;
             savestate_save();
-        }
+        }*/
         
-        if(i==5)
+        if(i==3)
         {
             i=0;
             PIT::tick();

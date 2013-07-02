@@ -11,7 +11,7 @@ u8 rb(u16 addr)
     int i;
     for(i = 0; i<handlers.size(); i++)
     {
-        if(addr>=handlers[i].start && addr<=handlers[i].end) return handlers[i].rb(addr-handlers[i].start);
+        if(addr>=handlers[i].start && addr<=handlers[i].end && handlers[i].rb != NULL) return handlers[i].rb(addr-handlers[i].start);
     }
     return 0;
 }
@@ -23,7 +23,7 @@ void wb(u16 addr, u8 value)
     {
         for(i = 0; i<handlers.size(); i++)
         {
-            if(addr>=handlers[i].start && addr<=handlers[i].end) handlers[i].wb(addr-handlers[i].start,value);
+            if(addr>=handlers[i].start && addr<=handlers[i].end && handlers[i].wb != NULL) handlers[i].wb(addr-handlers[i].start,value);
         }
         printf("Calling callback!\n");
     }
@@ -53,6 +53,8 @@ void tick()
                     {
                         chan[i].counter = chan[i].reload;
                         chan[i].gate_out = true;
+                        CPU::hint = true;
+                        CPU::hintnum = 0;
                     }
                 }
             }
@@ -68,16 +70,60 @@ void tick()
                 if(chan[i].enabled)
                 {
                     chan[i].gate_out = true;
-                    if(chan[i].gate_out == true && i == 0)
-                    {
-                        CPU::hint = true;
-                        CPU::hintnum = 0;
-                    }
                     chan[i].counter--;
                     if(chan[i].counter==1) chan[i].gate_out = false;
                     if(chan[i].counter==0)
                     {
                         chan[i].gate_out = true;
+                        chan[i].counter = chan[i].reload;
+                    }
+                }
+            }
+            break;
+        }
+        case 3:
+        {
+            if(i == 2)
+            {
+            }
+            else
+            {
+                if(chan[i].enabled)
+                {
+                    if(chan[i].counter != 0 && chan[i].counter != 1)
+                    {
+                        if(chan[i].flip_flop == false)
+                        {
+                            chan[i].gate_out ^= 1;
+                            if(chan[i].gate_out == true)
+                            {
+                                CPU::hint = true;
+                                CPU::hintnum = 0;
+                            } 
+                        }
+                        chan[i].flip_flop = true;
+                    }
+                    chan[i].counter--;
+                    chan[i].counter--;
+                    if(chan[i].counter==1)
+                    {
+                        chan[i].flip_flop = false;
+                        chan[i].gate_out ^= 1;
+                        if(chan[i].gate_out == true)
+                        {
+                            CPU::hint = true;
+                            CPU::hintnum = 0;
+                        }
+                    }
+                    if(chan[i].counter==0)
+                    {
+                        chan[i].flip_flop = true;
+                        chan[i].gate_out ^= 1;
+                        if(chan[i].gate_out == true)
+                        {
+                            CPU::hint = true;
+                            CPU::hintnum = 0;
+                        }
                         chan[i].counter = chan[i].reload;
                     }
                 }
@@ -109,6 +155,19 @@ void wb(u16 addr, u8 data)
 {
     switch(addr)
     {
+    case 0:
+    {
+        switch(chan[0].accessmode)
+        {
+        case 1:
+        {
+            chan[0].reload = (chan[0].reload & 0xFF00) | data;
+            chan[0].enabled = true;
+            break;
+        }
+        }
+        break;
+    }
     case 1:
     {
         switch(chan[1].accessmode)
@@ -160,6 +219,8 @@ iohandler pit = {0x0040,0x0043,rb,wb};
 namespace PIC
 {
 
+pic_t pic[1];
+
 void pic1_w(u16 addr, u8 value)
 {
     switch(addr)
@@ -186,12 +247,32 @@ void pic1_w(u16 addr, u8 value)
         {
             pic[0].icw3 = 0;
         }
+        else
+        {
+            pic[0].intrmask = value;
+        }
         break;
     }
     }
 }
+u8 pic1_r(u16 addr)
+{
+    switch(addr)
+    {
+        case 0:
+        {
+            return 0;
+            break;
+        }
+        case 1:
+        {
+            return pic[0].intrmask;
+            break;
+        }
+    }
+}
 
-iohandler pic1 = {0x0020,0x0021,NULL,pic1_w};
+iohandler pic1 = {0x0020,0x0021,pic1_r,pic1_w};
 
 } //namespace PIC
 

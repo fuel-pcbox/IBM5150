@@ -41,6 +41,7 @@ struct
     bool enabled;
     u16 counter;
     u16 reload;
+    bool flip_flop;
 } chan[3];
 
 void tick();
@@ -53,7 +54,7 @@ extern iohandler pit;
 
 namespace PIC
 {
-struct
+struct pic_t
 {
     u8 icw1,icw3,icw4;
 
@@ -67,9 +68,12 @@ struct
     u8 ocw2,ocw3;
 
     u8 offset;
-} pic[1]; //The [1] is there to ease future AT implementation.
+};
+
+extern pic_t pic[1]; //The [1] is there to ease future AT implementation.
 
 void pic1_w(u16 addr, u8 value);
+u8 pic1_r(u16 addr);
 
 extern iohandler pic1;
 

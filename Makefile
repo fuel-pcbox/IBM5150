@@ -6,7 +6,7 @@ all:
 	$(CC) $(CFLAGS) src/*.cpp -o ibm5150 $(LIBS)
 	
 debug:
-	$(CC) $(CFLAGS) src/*.cpp -o ibm5150 $(LIBS) -DDEBUG 
+	$(CC) $(CFLAGS) src/*.cpp -o ibm5150 $(LIBS) -DDEBUG
 
 clean:
 	rm ibm5150

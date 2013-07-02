@@ -1020,7 +1020,7 @@ bool i8080 = false; //This is for the NEC V20.
 #ifndef DEBUG
 #define debug_print(...)
 #else
-#define debug_print(...) debug_print(...)
+#define debug_print(...) printf(__VA_ARGS__)
 #endif
 
 void rtick()
@@ -3457,9 +3457,9 @@ void rtick()
         }
         case 0xAC:
         {
-            al = RAM::rb(es,di);
-            if(!(flags&0x0400)) di++;
-            else di--;
+            al = RAM::rb(ds,si);
+            if(!(flags&0x0400)) si++;
+            else si--;
             ip++;
             debug_print("LODSB\n");
             break;
@@ -3726,9 +3726,9 @@ void rtick()
         {
             u8 modrm = RAM::rb(cs,ip+1);
             locs loc = decodemodrm(seg,modrm,true,false);
-            u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+            u16 tmp = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
             *loc.src16 = tmp;
-            ip+=4;
+            ip+=6;
             debug_print("MOV Ev, %04x modrm=%02x\n",tmp,modrm);
             break;
         }
@@ -4506,7 +4506,10 @@ void rtick()
             case 0x08:
             {
                 debug_print("DEC Eb\n");
-                *loc.src8--;
+                *loc.src8 = *loc.src8 - 1;
+                u8 tmp = *loc.src8;
+                if(tmp == 0) flags |= 0x0040;
+                else flags &= 0xFFBF;
                 break;
             }
             }
@@ -4606,6 +4609,7 @@ void rtick()
             ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
             debug_print("Hardware interrupt %02x triggered!\n",tmp);
             hint = false;
+            halted = false;
         }
     }
     else if(!halted && i8080)
@@ -6042,6 +6046,7 @@ void tick()
             ip++;
             seg = SEG_ES;
             rep = 0;
+            debug_print("ES: ");
             break;
         }
         case 0x2E:
@@ -6107,8 +6112,8 @@ void tick()
                 rep = 4;
             }
         }
-        rtick();
     }
+    rtick();
 }
 
 bool halted = false;
