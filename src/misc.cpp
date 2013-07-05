@@ -51,7 +51,7 @@ void tick()
                     chan[i].counter--;
                     if(chan[i].counter==0)
                     {
-                        chan[i].counter = chan[i].reload;
+                        //chan[i].counter = chan[i].reload;
                         chan[i].gate_out = true;
                         CPU::hint = true;
                         CPU::hintnum = 0;
