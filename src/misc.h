@@ -104,6 +104,10 @@ extern u8 porta;
 extern u8 portb;
 extern u8 portc;
 extern bool dipsw1set;
+extern bool keyboardclk;
+extern bool keyboardena;
+
+extern std::vector<u8> keyboardshift;
 
 u8 rb(u16 addr);
 void wb(u16 addr, u8 data);

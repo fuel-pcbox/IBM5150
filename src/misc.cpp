@@ -554,19 +554,27 @@ u8 porta;
 u8 portb;
 u8 portc;
 bool dipsw1set;
+bool keyboardclk;
+bool keyboardena;
+
+std::vector<u8> keyboardshift; //This is a vector so that input doesn't get lost.
+
 u8 rb(u16 addr)
 {
     switch(addr)
     {
         case 0:
         {
-            //TODO: currently hardcoded for 3 memory banks, an MDA display, and no floppy drives.
-            return 0x3C;
+            u8 ret = keyboardshift.at(keyboardshift.size()-1);
+            keyboardshift.pop_back();
+            return ret;
             break;
         }
         case 2:
         {
-            return 0x00;
+            //TODO: currently hardcoded for 3 memory banks, an MDA display, and no floppy drives.
+            if(!dipsw1set) return 0x0C;
+            else return 0x00;
             break;
         }
     }
@@ -580,7 +588,9 @@ void wb(u16 addr, u8 data)
         if(control & 2) return;
         if(!(control & 4))
         {
+            keyboardena = (data & 4) ? true : false;
             dipsw1set = (data & 8) ? true : false;
+            keyboardclk = (data & 0x40) ? true : false;    
         }
         break;
     }

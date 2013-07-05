@@ -1,6 +1,6 @@
 #include "interface.h"
 
-#include "savestate.h"
+#include "savestate.h"   
 
 namespace INTERFACE
 {
@@ -26,7 +26,7 @@ int handle_events()
         {
             switch(e.key.keysym.sym)
             {
-            case SDLK_SCROLLLOCK:
+            case SDLK_SCROLLOCK:
             {
                 emulatingflag ^= 1; //Toggle the emulating flag.
                 break;
@@ -34,6 +34,12 @@ int handle_events()
             case SDLK_s:
             {
                 if(!emulatingflag) savestate_save();
+                else
+                {
+                    CPU::hint = true;
+                    CPU::hintnum = 1;
+                    PPI::keyboardshift.push_back(0x1F);
+                }
                 break;
             }
             }
