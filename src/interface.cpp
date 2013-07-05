@@ -44,6 +44,15 @@ int handle_events()
             }
             }
         }
+        if(e.type == SDL_KEYUP)
+        {
+            if(emulatingflag)
+            {
+                CPU::hint = true;
+                CPU::hintnum = 1;
+                PPI::keyboardshift.push_back(0xF0);
+            }
+        }
     }
 }
 
