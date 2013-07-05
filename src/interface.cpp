@@ -6,6 +6,7 @@ namespace INTERFACE
 {
 
 bool quitflag = false;
+bool emulatingflag = true;
 Surface* screen = NULL;
 
 extern inline int init(int width, int height);
@@ -25,9 +26,14 @@ int handle_events()
         {
             switch(e.key.keysym.sym)
             {
+            case SDLK_SCROLLLOCK:
+            {
+                emulatingflag ^= 1; //Toggle the emulating flag.
+                break;
+            }
             case SDLK_s:
             {
-                savestate_save();
+                if(!emulatingflag) savestate_save();
                 break;
             }
             }

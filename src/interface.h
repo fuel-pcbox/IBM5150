@@ -25,6 +25,7 @@ namespace INTERFACE
 {
 
 extern bool quitflag;
+extern bool emulatingflag;
 
 #ifdef USE_SDL
 typedef SDL_Surface Surface;
