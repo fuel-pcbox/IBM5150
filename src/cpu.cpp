@@ -594,28 +594,28 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
     }
     case 0x84:
     {
-        u16 tmp1 = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
+        u16 tmp1 = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
         switch(seg)
         {
         case SEG_DEFAULT:
         case SEG_DS:
         {
-            res.src8 = &RAM::RAM[RAM::getaddr(ds,si)];
+            res.src8 = &RAM::RAM[RAM::getaddr(ds,si+tmp1)];
             break;
         }
         case SEG_CS:
         {
-            res.src8 = &RAM::RAM[RAM::getaddr(cs,si)];
+            res.src8 = &RAM::RAM[RAM::getaddr(cs,si+tmp1)];
             break;
         }
         case SEG_ES:
         {
-            res.src8 = &RAM::RAM[RAM::getaddr(es,si)];
+            res.src8 = &RAM::RAM[RAM::getaddr(es,si+tmp1)];
             break;
         }
         case SEG_SS:
         {
-            res.src8 = &RAM::RAM[RAM::getaddr(ss,si)];
+            res.src8 = &RAM::RAM[RAM::getaddr(ss,si+tmp1)];
             break;
         }
         }
@@ -1007,6 +1007,7 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
     }
     if(modrm < 0xC0)
     {
+        if((modrm & 0xC7) == 0x06) ip+=2;
         if(modrm >= 0x40 && modrm < 0x80) ip++;
         else if(modrm >= 0x80) ip+=2;
     }
@@ -1811,6 +1812,8 @@ void rtick()
             u16 tmp1 = ax - tmp;
             if(tmp1 == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
+            if(tmp1 & 0x8000) flags |= 0x0001;
+            else flags &= 0xFFFE;
             ip+=3;
             debug_print("CMP AX,%04x\n",tmp);
             break;
@@ -2751,7 +2754,7 @@ void rtick()
                 break;
             }
             }
-            ip+=3;
+            ip+=4;
             break;
         }
         case 0x83:
@@ -3066,7 +3069,7 @@ void rtick()
         case 0x9D:
         {
             flags = RAM::rb(ss,sp)|(RAM::rb(ss,sp+1)<<8);
-            sp-=2;
+            sp+=2;
             ip++;
             debug_print("POPF\n");
             break;
@@ -3107,7 +3110,7 @@ void rtick()
             u16 tmp = RAM::rb(cs,ip+1)|(RAM::rb(cs,ip+2)<<8);
             RAM::wb(ds,tmp,al);
             ip+=3;
-            debug_print("MOV BYTE PTR DS:%04x\n, AL",tmp);
+            debug_print("MOV BYTE PTR DS:%04x, AL\n",tmp);
             break;
         }
         case 0xA3:
@@ -3116,7 +3119,7 @@ void rtick()
             RAM::wb(ds,tmp,al);
             RAM::wb(ds,tmp+1,ah);
             ip+=3;
-            debug_print("MOV WORD PTR DS:%04x\n, AX",tmp);
+            debug_print("MOV WORD PTR DS:%04x, AX\n",tmp);
             break;
         }
         case 0xA4:
@@ -3726,9 +3729,9 @@ void rtick()
         {
             u8 modrm = RAM::rb(cs,ip+1);
             locs loc = decodemodrm(seg,modrm,true,false);
-            u16 tmp = RAM::rb(cs,ip+4)|(RAM::rb(cs,ip+5)<<8);
+            u16 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
             *loc.src16 = tmp;
-            ip+=6;
+            ip+=4;
             debug_print("MOV Ev, %04x modrm=%02x\n",tmp,modrm);
             break;
         }
@@ -3806,7 +3809,7 @@ void rtick()
             sp-=2;
             RAM::wb(ss,sp,(ip+1) & 0xFF);
             RAM::wb(ss,sp+1,(ip+1) >> 8);
-            cs = RAM::rb(0,15)|(RAM::rb(0,14)<<8);
+            cs = RAM::rb(0,14)|(RAM::rb(0,15)<<8);
             ip = RAM::rb(0,12)|(RAM::rb(0,13)<<8);
             debug_print("INT 3\n");
             break;
@@ -3824,7 +3827,7 @@ void rtick()
             sp-=2;
             RAM::wb(ss,sp,(ip+2) & 0xFF);
             RAM::wb(ss,sp+1,(ip+2) >> 8);
-            cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
+            cs = RAM::rb(0,(tmp<<2)+2)|(RAM::rb(0,(tmp<<2)+3)<<8);
             ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
             debug_print("INT %02x\n",tmp);
             break;
@@ -3841,7 +3844,7 @@ void rtick()
             sp-=2;
             RAM::wb(ss,sp,(ip+1) & 0xFF);
             RAM::wb(ss,sp+1,(ip+1) >> 8);
-            cs = RAM::rb(0,19)|(RAM::rb(0,18)<<8);
+            cs = RAM::rb(0,18)|(RAM::rb(0,19)<<8);
             ip = RAM::rb(0,16)|(RAM::rb(0,17)<<8);
             debug_print("INTO\n");
             break;
@@ -4592,7 +4595,8 @@ void rtick()
             break;
         }
         }
-        if(hint)
+        #define intr  ((~PIC::pic[0].intrmask) & (1 << hintnum))
+        if(hint && (flags & 0x0200) && intr)
         {
             u8 tmp = hintnum + PIC::pic[0].offset;
             sp-=2;
@@ -4603,14 +4607,15 @@ void rtick()
             RAM::wb(ss,sp,cs & 0xFF);
             RAM::wb(ss,sp+1,cs >> 8);
             sp-=2;
-            RAM::wb(ss,sp,(ip+2) & 0xFF);
-            RAM::wb(ss,sp+1,(ip+2) >> 8);
-            cs = RAM::rb(0,(tmp<<2)+3)|(RAM::rb(0,(tmp<<2)+2)<<8);
+            RAM::wb(ss,sp,(ip) & 0xFF);
+            RAM::wb(ss,sp+1,(ip) >> 8);
+            cs = RAM::rb(0,(tmp<<2)+2)|(RAM::rb(0,(tmp<<2)+3)<<8);
             ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
-            debug_print("Hardware interrupt %02x triggered!\n",tmp);
+            debug_print("Hardware interrupt %02x triggered!\n",hintnum);
             hint = false;
             halted = false;
         }
+        #undef intr
     }
     else if(!halted && i8080)
     {

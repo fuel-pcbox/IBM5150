@@ -30,8 +30,8 @@ int main(int ac, char** av)
     PIC::pic[0].init1 = false;
     PIC::pic[0].init2 = false;
     PIC::pic[0].enabled = false;
-    PIC::pic[0].intrmask = 0xFF;
     DMA_XT::chan[0].access_flip_flop = false;
+    CPU::cr0 = 0;
 
     char* isa1 = new char[10];
     char* biosrom = new char[256];
@@ -140,15 +140,7 @@ int main(int ac, char** av)
 
     while(INTERFACE::quitflag == false)
     {
-        CPU::tick();
-        
-        /*if(CPU::ip == 0xE256 && !debugsaved)
-        {
-            debugsaved = true;
-            savestate_save();
-        }*/
-        
-        if(i==3)
+        if(i==5)
         {
             i=0;
             PIT::tick();
@@ -160,7 +152,18 @@ int main(int ac, char** av)
 
         //TODO: remove SDL_* prefix
         INTERFACE::handle_events();
-        i++;
+        
+        CPU::tick();
+        
+        if(CPU::ip == 0xF065 && !debugsaved)
+        {
+            debugsaved = true;
+            savestate_save();
+        }
+        
+        if(CPU::hint == true) CPU::hint = false;
+        
+        i++; 
     }
 
     INTERFACE::quit();

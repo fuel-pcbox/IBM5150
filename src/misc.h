@@ -106,6 +106,7 @@ extern u8 portc;
 extern bool dipsw1set;
 extern bool keyboardclk;
 extern bool keyboardena;
+extern bool keyboardena2;
 
 extern std::vector<u8> keyboardshift;
 

@@ -46,11 +46,18 @@ int handle_events()
         }
         if(e.type == SDL_KEYUP)
         {
-            if(emulatingflag)
+            switch(e.key.keysym.sym)
             {
-                CPU::hint = true;
-                CPU::hintnum = 1;
-                PPI::keyboardshift.push_back(0xF0);
+                case SDLK_s:
+                {
+                    if(emulatingflag)
+                    {
+                        CPU::hint = true;
+                        CPU::hintnum = 1;
+                        PPI::keyboardshift.push_back(0x9F);
+                    }
+                    break;
+                }
             }
         }
     }

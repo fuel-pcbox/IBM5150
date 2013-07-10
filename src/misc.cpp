@@ -23,7 +23,7 @@ void wb(u16 addr, u8 value)
     {
         for(i = 0; i<handlers.size(); i++)
         {
-            if(addr>=handlers[i].start && addr<=handlers[i].end && handlers[i].wb != NULL) handlers[i].wb(addr-handlers[i].start,value);
+            if(addr>=handlers[i].start && addr<=handlers[i].end && handlers[i].wb != NULL){ handlers[i].wb(addr-handlers[i].start,value); return;}
         }
         printf("Calling callback!\n");
     }
@@ -48,7 +48,6 @@ void tick()
             {
                 if(chan[i].enabled)
                 {
-                    chan[i].counter--;
                     if(chan[i].counter==0)
                     {
                         //chan[i].counter = chan[i].reload;
@@ -56,6 +55,7 @@ void tick()
                         CPU::hint = true;
                         CPU::hintnum = 0;
                     }
+                    chan[i].counter--;
                 }
             }
             break;
@@ -165,6 +165,18 @@ void wb(u16 addr, u8 data)
             chan[0].enabled = true;
             break;
         }
+        case 3:
+        {
+            if(!chan[0].flip_flop)
+            {
+                chan[0].reload = (chan[0].reload & 0xFF00) | data;
+            }
+            else
+            {
+                chan[0].reload = (data << 8) | (chan[0].reload & 0x00FF);
+            }
+            break;
+        }
         }
         break;
     }
@@ -190,6 +202,7 @@ void wb(u16 addr, u8 data)
             chan[0].accessmode = (data >> 4) & 3;
             chan[0].mode = (data >> 1) & 7;
             chan[0].enabled = false;
+            chan[0].flip_flop = false;
             break;
         }
         case 1:
@@ -246,6 +259,7 @@ void pic1_w(u16 addr, u8 value)
         else if(pic[0].init2 == true)
         {
             pic[0].icw3 = 0;
+            pic[0].init2 = false;
         }
         else
         {
@@ -556,6 +570,7 @@ u8 portc;
 bool dipsw1set;
 bool keyboardclk;
 bool keyboardena;
+bool keyboardena2;
 
 std::vector<u8> keyboardshift; //This is a vector so that input doesn't get lost.
 
@@ -565,14 +580,17 @@ u8 rb(u16 addr)
     {
         case 0:
         {
-            u8 ret = keyboardshift.at(keyboardshift.size()-1);
-            keyboardshift.pop_back();
-            return ret;
+            if((keyboardshift.size() != 0))
+            {
+                u8 ret = keyboardshift.at(keyboardshift.size()-1);
+                return ret;
+            }
+            return 0x00;
             break;
         }
         case 2:
         {
-            //TODO: currently hardcoded for 3 memory banks, an MDA display, and no floppy drives.
+            //TODO: currently hardcoded. 
             if(!dipsw1set) return 0x0C;
             else return 0x00;
             break;
@@ -591,6 +609,7 @@ void wb(u16 addr, u8 data)
             keyboardena = (data & 4) ? true : false;
             dipsw1set = (data & 8) ? true : false;
             keyboardclk = (data & 0x40) ? true : false;    
+            keyboardena2 = (data & 0x80) ? true : false;
         }
         break;
     }
