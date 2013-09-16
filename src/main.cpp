@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <chrono>
+#include <thread>
 
 #include "interface.h"
 #include "misc.h"
@@ -137,13 +139,18 @@ int main(int ac, char** av)
     }
     
     bool debugsaved = false;
+    
+    std::thread pitthread([]()
+    {
+        PIT::tick();
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+    });
 
     while(INTERFACE::quitflag == false)
-    {
-        if(i==5)
+    { 
+        if(i==100)
         {
-            i=0;
-            PIT::tick();
+            i = 0;
             if(isa1slot == "mda") MDA::tick_frame();
             if(isa1slot == "cga") CGA::tick_frame();
             INTERFACE::update_screen();
@@ -155,16 +162,12 @@ int main(int ac, char** av)
         
         CPU::tick();
         
-        if(CPU::ip == 0xF065 && !debugsaved)
-        {
-            debugsaved = true;
-            savestate_save();
-        }
-        
         if(CPU::hint == true) CPU::hint = false;
         
         i++; 
     }
+    
+    pitthread.join();
 
     INTERFACE::quit();
 

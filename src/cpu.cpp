@@ -11,7 +11,7 @@ u16 cs = 0xF000;
 u16 ip = 0xFFF0;
 u16 flags = 0xF002;
 
-int type = intel8086;
+int type = intel386;
 
 locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
 {
@@ -1008,7 +1008,7 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
     if(modrm < 0xC0)
     {
         if((modrm & 0xC7) == 0x06) ip+=2;
-        if(modrm >= 0x40 && modrm < 0x80) ip++;
+        if(modrm & 0x40) ip++;
         else if(modrm >= 0x80) ip+=2;
     }
     return res;
@@ -1044,7 +1044,7 @@ void rtick()
             {
                 if(tmp & (1 << i)) v ^= 1;
             }
-            if(!v) flags |= 0x0004;
+            if(v) flags |= 0x0004;
             else flags &= 0xFFFB;
             ip+=2;
             debug_print("ADD Eb,Gb modrm=%02x\n",modrm);
@@ -1058,6 +1058,13 @@ void rtick()
             u16 tmp = *loc.src16;
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
+            u16 v = 0;
+            for(int i = 0; i<16; i++)
+            {
+                if(tmp & (1 << i)) v ^= 1;
+            }
+            if(!v) flags |= 0x0004;
+            else flags &= 0xFFFB;
             ip+=2;
             debug_print("ADD Ev,Gv modrm=%02x\n",modrm);
             break;
@@ -1070,8 +1077,15 @@ void rtick()
             u8 tmp = *loc.dst8;
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
+            u16 v = 0;
+            for(int i = 0; i<8; i++)
+            {
+                if(tmp & (1 << i)) v ^= 1;
+            }
+            if(!v) flags |= 0x0004;
+            else flags &= 0xFFFB;
             ip+=2;
-            debug_print("ADD Eb,Gb modrm=%02x\n",modrm);
+            debug_print("ADD Gb,Eb modrm=%02x\n",modrm);
             break;
         }
         case 0x03:
@@ -1082,6 +1096,13 @@ void rtick()
             u16 tmp = *loc.dst16;
             if(tmp == 0) flags |= 0x0040;
             else flags &= 0xFFBF;
+            u16 v = 0;
+            for(int i = 0; i<16; i++)
+            {
+                if(tmp & (1 << i)) v ^= 1;
+            }
+            if(!v) flags |= 0x0004;
+            else flags &= 0xFFFB;
             ip+=2;
             debug_print("ADD Ev,Gv modrm=%02x\n",modrm);
             break;
@@ -1287,9 +1308,41 @@ void rtick()
                 u8 op2 = RAM::rb(cs,ip+1);
                 switch(op2)
                 {
+                case 0x00:
+                {
+                    u8 modrm = RAM::rb(cs,ip+2);
+                    locs loc = decodemodrm(seg,modrm,true,false);
+                    switch(modrm&0x38)
+                    {
+                        case 0x10:
+                        {
+                            u16 tmp = *loc.src16;
+                            debug_print("LLDT Ev\n");
+                            break;
+                        }
+                    }
+                    ip+=3;
+                    break;
+                }
+                case 0x01:
+                {
+                    u8 modrm = RAM::rb(cs,ip+2);
+                    locs loc = decodemodrm(seg,modrm,true,false);
+                    switch(modrm&0x38)
+                    {
+                        case 0x20:
+                        {
+                            *loc.src16 = cr0 & 0xFFFF;
+                            debug_print("SMSW Ev\n");
+                            break;
+                        }
+                    }
+                    ip+=3;
+                    break;
+                }
                 case 0x02:
                 {
-                    u8 modrm = RAM::rb(cs,ip+1);
+                    u8 modrm = RAM::rb(cs,ip+2);
                     locs loc = decodemodrm(seg,modrm,true,false);
                     *loc.dst16 = *loc.src16 & 0xFF00;
                     flags |= 0x0040;
@@ -1316,6 +1369,22 @@ void rtick()
                 {
                     cr0 &= 0xFFFFFFF7;
                     debug_print("CLTS\n");
+                    break;
+                }
+                case 0x84:
+                {
+                    if(type>=intel386)
+                    {
+                        u8 tmp = RAM::rb(cs,ip+2)|(RAM::rb(cs,ip+3)<<8);
+                        debug_print("JZ %04x\n",tmp);
+                        if((flags&0x0040)) ip += (s16)tmp;
+                        ip+=4;
+                    }
+                    break;
+                }
+                default:
+                {
+                    debug_print("Undefined 0F two-byte opcode %02x\n!",op2);
                     break;
                 }
                 }
@@ -6122,7 +6191,7 @@ void tick()
 }
 
 bool halted = false;
-u32 cr0;
+u32 cr0 = 0x0010;
 
 bool hint = false; //Hardware interrupts.
 u8 hintnum = 0;

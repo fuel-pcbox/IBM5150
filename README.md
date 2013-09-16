@@ -42,12 +42,12 @@ It's got basic text and graphics capabilities.
 8088
 ----
 
-Only accurate on an opcode-level. No regards to actual execution times. This will have to wait until the 8086/8088 microcode is dumped.
+Only accurate on an opcode-level.
 
 80286
 -----
 
-VERY rudimentary. Not really needed right now anyway.
+VERY rudimentary.
 
 PIT
 ---

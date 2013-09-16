@@ -90,7 +90,7 @@ void tick();
 extern bool halted;
 extern u32 cr0;
 
-struct
+extern struct
 {
     u32 base;
     u16 limit;
