@@ -11,6 +11,8 @@ u16 cs = 0xF000;
 u16 ip = 0xFFF0;
 u16 flags = 0xF002;
 
+tablereg gdtr, ldtr;
+
 int type = intel386;
 
 locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
@@ -2368,6 +2370,15 @@ void rtick()
                 if((flags&0x0080)) ip += (s8)tmp;
                 ip+=2;
             }
+			else
+			{
+				u16 tmp = RAM::rb(cs,ip+1) | (RAM::rb(cs,ip+2)<<8);
+				debug_print("PUSH %04x\n",tmp);
+				sp -= 2;
+				RAM::wb(ss,sp,tmp&0xFF);
+				RAM::wb(ss,sp+1,tmp>>8);
+				ip+=3;
+			}
             break;
         }
         case 0x69:
@@ -2379,6 +2390,16 @@ void rtick()
                 if(!(flags&0x0080)) ip += (s8)tmp;
                 ip+=2;
             }
+			else
+			{
+				u8 modrm = RAM::rb(cs,ip+1);
+				locs loc = decodemodrm(seg,op2,true,false);
+				s16 tmp = RAM::rb(cs,ip+2) | (RAM::rb(cs,ip+3)<<8);
+				*loc.dst16 = (s16)(*loc.src16 * tmp);
+                debug_print("IMUL Ev,%04x\n",tmp);
+				ip+=4;
+                break;
+			}
             break;
         }
         case 0x6A:
@@ -2390,6 +2411,13 @@ void rtick()
                 if((flags&0x0004)) ip += (s8)tmp;
                 ip+=2;
             }
+			else
+			{
+				u8 tmp = RAM::rb(cs,ip+1)
+				debug_print("PUSH %02x\n",tmp);
+				sp -= 1;
+				RAM::wb(ss,sp,tmp);
+			}
             break;
         }
         case 0x6B:
@@ -2401,6 +2429,16 @@ void rtick()
                 if(!(flags&0x0004)) ip += (s8)tmp;
                 ip+=2;
             }
+			else
+			{
+				u8 modrm = RAM::rb(cs,ip+1);
+				locs loc = decodemodrm(seg,op2,true,false);
+				s8 tmp = RAM::rb(cs,ip+2);
+				*loc.dst16 = (s16)(*loc.src16 * (s16)tmp);
+                debug_print("IMUL Ev,%02x\n",tmp);
+				ip+=3;
+                break;
+			}
             break;
         }
         case 0x6C:
@@ -2546,7 +2584,7 @@ void rtick()
                     IO_XT::wb(dx+1,RAM::rb(ds,si+1));
                     if(!(flags & 0x0400)) si+=2;
                     else si-=2;
-                    debug_print("OUTSw\n");
+                    debug_print("OUTSW\n");
                     break;
                 }
                 default:
@@ -2558,7 +2596,7 @@ void rtick()
                         if(!(flags & 0x0400)) si+=2;
                         else si-=2;
                     }
-                    debug_print("REP OUTSw\n");
+                    debug_print("REP OUTSW\n");
                     break;
                 }
                 break;
@@ -3743,6 +3781,150 @@ void rtick()
             di = (RAM::rb(cs,ip+2)<<8)|RAM::rb(cs,ip+1);
             debug_print("MOV DI,%04x\n",di);
             ip+=3;
+            break;
+        }
+		case 0xC1:
+        {
+			if(type >= necv20)
+			{
+            u8 op2 = RAM::rb(cs,ip+1);
+			u8 op3 = RAM::rb(cs,ip+2)'
+            locs loc = decodemodrm(seg,op2,true,false);
+            switch(op2&0x38)
+            {
+            case 0x00:
+            {
+                debug_print("ROL Eb,%02x modrm=%02x\n",op3,op2);
+                *loc.src8 = (*loc.src8 << op3) | (*loc.src8 >> (8 - op3));
+                break;
+            }
+            case 0x08:
+            {
+                debug_print("ROR Eb,$02x modrm=%02x\n",op3,op2);
+                *loc.src8 = (*loc.src8 >> op3) | (*loc.src8 << (8 - op3));
+                break;
+            }
+            case 0x10:
+            {
+                debug_print("RCL Eb,%02x modrm=%02x\n",op3,op2);
+                u8 tmp = *loc.src8;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src8 = (*loc.src8 << op3) | (tmp1 << (op3 - 1));
+                flags = (flags & 0xFFFE) | (tmp >> (16 - op3));
+                break;
+            }
+            case 0x18:
+            {
+                debug_print("RCR Eb,%02x modrm=%02x\n",op3,op2);
+                u8 tmp = *loc.src8 & 1;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src8 = (*loc.src8 >> op3) | tmp1 << (op3 - 1);
+                flags = (flags & 0xFFFE) | tmp;
+                break;
+            }
+            case 0x20:
+            {
+                debug_print("SHL Ev,%02x modrm=%02x\n",pp3,op2);
+                u8 tmp = *loc.src8 >> (16 - op3);
+                *loc.src8 <<= op3;
+                flags = (flags & 0xFFFE) | tmp;
+                if(*loc.src8 == 0) flags |= 0x0040;
+                else flags &= 0xFFBF;
+                break;
+            }
+            case 0x28:
+            {
+                debug_print("SHR Eb,%02x modrm=%02x\n",op3,op2);
+                *loc.src8 >>= op3;
+                break;
+            }
+            case 0x30:
+            {
+                debug_print("SAL Eb,%02x modrm=%02x\n",op3,op2);
+                *loc.src8 <<= op3;
+                break;
+            }
+            case 0x38:
+            {
+                debug_print("SAR Eb,%02x modrm=%02x\n",op3,op2);
+                *loc.src8 = (*loc.src8 & (1 << (8 - op3))) | (*loc.src8 >> op3);
+                break;
+            }
+            }
+            ip+=3;
+			}
+            break;
+        }
+        case 0xC1:
+        {
+			if(type >= necv20)
+			{
+            u8 op2 = RAM::rb(cs,ip+1);
+			u8 op3 = RAM::rb(cs,ip+2)'
+            locs loc = decodemodrm(seg,op2,true,false);
+            switch(op2&0x38)
+            {
+            case 0x00:
+            {
+                debug_print("ROL Ev,%02x modrm=%02x\n",op3,op2);
+                *loc.src16 = (*loc.src16 << op3) | (*loc.src16 >> (16 - op3));
+                break;
+            }
+            case 0x08:
+            {
+                debug_print("ROR Ev,$02x modrm=%02x\n",op3,op2);
+                *loc.src16 = (*loc.src16 >> op3) | (*loc.src16 << (16 - op3));
+                break;
+            }
+            case 0x10:
+            {
+                debug_print("RCL Ev,%02x modrm=%02x\n",op3,op2);
+                u8 tmp = *loc.src16;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src16 = (*loc.src16 << op3) | (tmp1 << (op3 - 1));
+                flags = (flags & 0xFFFE) | (tmp >> (16 - op3));
+                break;
+            }
+            case 0x18:
+            {
+                debug_print("RCR Ev,%02x modrm=%02x\n",op3,op2);
+                u8 tmp = *loc.src16 & 1;
+                u8 tmp1 = flags & 0x0001;
+                *loc.src16 = (*loc.src16 >> op3) | tmp1 << (op3 - 1);
+                flags = (flags & 0xFFFE) | tmp;
+                break;
+            }
+            case 0x20:
+            {
+                debug_print("SHL Ev,%02x modrm=%02x\n",op3,op2);
+                u16 tmp = *loc.src16 >> (16 - op3);
+                *loc.src16 <<= op3;
+                flags = (flags & 0xFFFE) | tmp;
+                if(*loc.src16 == 0) flags |= 0x0040;
+                else flags &= 0xFFBF;
+                break;
+            }
+            case 0x28:
+            {
+                debug_print("SHR Ev,%02x modrm=%02x\n",op3,op2);
+                *loc.src16 >>= op3;
+                break;
+            }
+            case 0x30:
+            {
+                debug_print("SAL Ev,%02x modrm=%02x\n",op3,op2);
+                *loc.src16 <<= op3;
+                break;
+            }
+            case 0x38:
+            {
+                debug_print("SAR Ev,%02x modrm=%02x\n",op3,op2);
+                *loc.src16 = (*loc.src16 & (1 << (16 - op3))) | (*loc.src16 >> op3);
+                break;
+            }
+            }
+            ip+=3;
+			}
             break;
         }
         case 0xC2:

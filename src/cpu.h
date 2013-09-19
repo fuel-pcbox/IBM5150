@@ -90,7 +90,7 @@ void tick();
 extern bool halted;
 extern u32 cr0;
 
-extern struct
+extern struct tablereg
 {
     u32 base;
     u16 limit;
