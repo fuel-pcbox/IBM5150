@@ -94,7 +94,7 @@ extern struct tablereg
 {
     u32 base;
     u16 limit;
-} gdtr, ldtr;
+} gdtr, ldtr, idtr;
 
 extern bool hint; //Hardware interrupts.
 extern u8 hintnum;

@@ -9,9 +9,9 @@ u16 sp,bp,si,di;
 u16 tr;
 u16 cs = 0xF000;
 u16 ip = 0xFFF0;
-u16 flags = 0xF002;
+u16 flags = 0x0002;
 
-tablereg gdtr, ldtr;
+tablereg gdtr, ldtr, idtr;
 
 int type = intel386;
 
@@ -1016,6 +1016,33 @@ locs decodemodrm(int seg, u8 modrm, bool word, bool segarg)
     return res;
 }
 
+void interrupt(u8 num, u8 offset)
+{
+	if(!(cr0 & 1))
+	{
+		sp-=2;
+		RAM::wb(ss,sp,flags & 0xFF);
+		RAM::wb(ss,sp+1,flags >> 8);
+		flags &= 0xFCFF;
+		sp-=2;
+		RAM::wb(ss,sp,cs & 0xFF);
+		RAM::wb(ss,sp+1,cs >> 8);
+		sp-=2;
+		RAM::wb(ss,sp,(ip+offset) & 0xFF);
+		RAM::wb(ss,sp+1,(ip+offset) >> 8);
+		cs = RAM::rb(0,(num<<2)+2)|(RAM::rb(0,(num<<2)+3)<<8);
+		ip = RAM::rb(0,(num<<2))|(RAM::rb(0,(num<<2)+1)<<8);
+	}
+	else
+	{
+		u32 tmp = idtr.base + (num << 3);
+		u16 selector = RAM::RAM[tmp+2] | (RAM::RAM[tmp+3] << 8);
+		u16 offset = RAM::RAM[tmp] | (RAM::RAM[tmp+1] << 8);
+		cs = selector;
+		ip = offset;
+	}
+}
+
 int seg = SEG_DEFAULT;
 int rep = 0; //0 is no rep. 1 is repe. 2 is repne.
 bool i8080 = false; //This is for the NEC V20.
@@ -1316,12 +1343,34 @@ void rtick()
                     locs loc = decodemodrm(seg,modrm,true,false);
                     switch(modrm&0x38)
                     {
+						case 0x00:
+						{
+							*loc.src16 = ldtr.limit;
+							*(loc.src16 + 1) = ldtr.base & 0xFFFF;
+							*(loc.src16 + 2) = ldtr.base >> 16;
+							debug_print("SLDT Ev\n");
+							break;
+						}
+						case 0x08:
+						{
+							*loc.src16 = tr;
+							debug_print("STR Ev\n");
+							break;
+						}
                         case 0x10:
                         {
                             u16 tmp = *loc.src16;
                             debug_print("LLDT Ev\n");
+							ldtr.limit = RAM::rb(ds,tmp) | (RAM::rb(ds,tmp+1) << 8);
+							ldtr.base = RAM::rb(ds,tmp+2) | (RAM::rb(ds,tmp+3) << 8) | (RAM::rb(ds,tmp+4) << 16) | (RAM::rb(ds,tmp+5) << 24);
                             break;
                         }
+						case 0x18:
+						{
+							tr = *loc.src16;
+							debug_print("STR Ev\n");
+							break;
+						}
                     }
                     ip+=3;
                     break;
@@ -1332,10 +1381,48 @@ void rtick()
                     locs loc = decodemodrm(seg,modrm,true,false);
                     switch(modrm&0x38)
                     {
+						case 0x00:
+						{
+							*loc.src16 = gdtr.limit;
+							*(loc.src16 + 1) = gdtr.base & 0xFFFF;
+							*(loc.src16 + 2) = gdtr.base >> 16;
+							debug_print("SGDT Ev\n");
+							break;
+						}
+						case 0x08:
+						{
+							*loc.src16 = idtr.limit;
+							*(loc.src16 + 1) = idtr.base & 0xFFFF;
+							*(loc.src16 + 2) = idtr.base >> 16;
+							debug_print("SIDT Ev\n");
+							break;
+						}
+						case 0x10:
+                        {
+                            u16 tmp = *loc.src16;
+                            debug_print("LGDT Ev\n");
+							gdtr.limit = RAM::rb(ds,tmp) | (RAM::rb(ds,tmp+1) << 8);
+							gdtr.base = RAM::rb(ds,tmp+2) | (RAM::rb(ds,tmp+3) << 8) | (RAM::rb(ds,tmp+4) << 16) | (RAM::rb(ds,tmp+5) << 24);
+                            break;
+                        }
+						case 0x18:
+                        {
+                            u16 tmp = *loc.src16;
+                            debug_print("LIDT Ev\n");
+							idtr.limit = RAM::rb(ds,tmp) | (RAM::rb(ds,tmp+1) << 8);
+							idtr.base = RAM::rb(ds,tmp+2) | (RAM::rb(ds,tmp+3) << 8) | (RAM::rb(ds,tmp+4) << 16) | (RAM::rb(ds,tmp+5) << 24);
+                            break;
+                        }
                         case 0x20:
                         {
                             *loc.src16 = cr0 & 0xFFFF;
                             debug_print("SMSW Ev\n");
+                            break;
+                        }
+						case 0x30:
+                        {
+                            cr0 = (cr0 & 0xFFFF0000) | *loc.src16;
+                            debug_print("LMSW Ev\n");
                             break;
                         }
                     }
@@ -1349,6 +1436,7 @@ void rtick()
                     *loc.dst16 = *loc.src16 & 0xFF00;
                     flags |= 0x0040;
                     debug_print("LAR Ev,Gv\n");
+					ip+=3;
                     break;
                 }
                 case 0x05:
@@ -1371,6 +1459,7 @@ void rtick()
                 {
                     cr0 &= 0xFFFFFFF7;
                     debug_print("CLTS\n");
+					ip+=2;
                     break;
                 }
                 case 0x84:
@@ -2277,19 +2366,9 @@ void rtick()
                 locs loc = decodemodrm(seg,modrm,true,false);
                 if((*loc.dst16) < (*loc.src16) || (*loc.dst16) > (*(loc.src16 + 2)))
                 {
-                    sp-=2;
-                    RAM::wb(ss,sp,flags & 0xFF);
-                    RAM::wb(ss,sp+1,flags >> 8);
-                    flags &= 0xFCFF;
-                    sp-=2;
-                    RAM::wb(ss,sp,cs & 0xFF);
-                    RAM::wb(ss,sp+1,cs >> 8);
-                    sp-=2;
-                    RAM::wb(ss,sp,(ip+1) & 0xFF);
-                    RAM::wb(ss,sp+1,(ip+1) >> 8);
-                    cs = RAM::rb(0,23)|(RAM::rb(0,22)<<8);
-                    ip = RAM::rb(0,20)|(RAM::rb(0,21)<<8);
+                    interrupt(5,6);
                 }
+				else ip+=6;
             }
             break;
         }
@@ -4050,53 +4129,21 @@ void rtick()
         }
         case 0xCC:
         {
-            sp-=2;
-            RAM::wb(ss,sp,flags & 0xFF);
-            RAM::wb(ss,sp+1,flags >> 8);
-            flags &= 0xFCFF;
-            sp-=2;
-            RAM::wb(ss,sp,cs & 0xFF);
-            RAM::wb(ss,sp+1,cs >> 8);
-            sp-=2;
-            RAM::wb(ss,sp,(ip+1) & 0xFF);
-            RAM::wb(ss,sp+1,(ip+1) >> 8);
-            cs = RAM::rb(0,14)|(RAM::rb(0,15)<<8);
-            ip = RAM::rb(0,12)|(RAM::rb(0,13)<<8);
+			interrupt(3,1);
             debug_print("INT 3\n");
             break;
         }
         case 0xCD:
         {
             u8 tmp = RAM::rb(cs,ip+1);
-            sp-=2;
-            RAM::wb(ss,sp,flags & 0xFF);
-            RAM::wb(ss,sp+1,flags >> 8);
-            flags &= 0xFCFF;
-            sp-=2;
-            RAM::wb(ss,sp,cs & 0xFF);
-            RAM::wb(ss,sp+1,cs >> 8);
-            sp-=2;
-            RAM::wb(ss,sp,(ip+2) & 0xFF);
-            RAM::wb(ss,sp+1,(ip+2) >> 8);
-            cs = RAM::rb(0,(tmp<<2)+2)|(RAM::rb(0,(tmp<<2)+3)<<8);
-            ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
+            interrupt(tmp,2);
             debug_print("INT %02x\n",tmp);
             break;
         }
         case 0xCE:
         {
-            sp-=2;
-            RAM::wb(ss,sp,flags & 0xFF);
-            RAM::wb(ss,sp+1,flags >> 8);
-            flags &= 0xFCFF;
-            sp-=2;
-            RAM::wb(ss,sp,cs & 0xFF);
-            RAM::wb(ss,sp+1,cs >> 8);
-            sp-=2;
-            RAM::wb(ss,sp,(ip+1) & 0xFF);
-            RAM::wb(ss,sp+1,(ip+1) >> 8);
-            cs = RAM::rb(0,18)|(RAM::rb(0,19)<<8);
-            ip = RAM::rb(0,16)|(RAM::rb(0,17)<<8);
+            if(flags & 0x0800) interrupt(4,1);
+			else ip++;
             debug_print("INTO\n");
             break;
         }
@@ -4842,7 +4889,7 @@ void rtick()
         default:
         {
             debug_print("Unemulated or invalid opcode %02x!\n",op);
-            ip++;
+            interrupt(6,1);
             break;
         }
         }
@@ -4850,18 +4897,7 @@ void rtick()
         if(hint && (flags & 0x0200) && intr)
         {
             u8 tmp = hintnum + PIC::pic[0].offset;
-            sp-=2;
-            RAM::wb(ss,sp,flags & 0xFF);
-            RAM::wb(ss,sp+1,flags >> 8);
-            flags &= 0xFCFF;
-            sp-=2;
-            RAM::wb(ss,sp,cs & 0xFF);
-            RAM::wb(ss,sp+1,cs >> 8);
-            sp-=2;
-            RAM::wb(ss,sp,(ip) & 0xFF);
-            RAM::wb(ss,sp+1,(ip) >> 8);
-            cs = RAM::rb(0,(tmp<<2)+2)|(RAM::rb(0,(tmp<<2)+3)<<8);
-            ip = RAM::rb(0,(tmp<<2))|(RAM::rb(0,(tmp<<2)+1)<<8);
+            interrupt(tmp,0);
             debug_print("Hardware interrupt %02x triggered!\n",hintnum);
             hint = false;
             halted = false;
