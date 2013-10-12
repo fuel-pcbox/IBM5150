@@ -561,6 +561,44 @@ iohandler handler = {0x0080, 0x0083, page_r, page_w};
 iohandler handler2 = {0x0000,0x0007, dma1_r, dma1_w};
 } //namespace DMA_XT
 
+namespace FDC
+{
+
+u8 fifo_res[16];
+
+u8 fifo_exec[8];
+
+u8 fifo_exec_pointer = 0;
+u8 fifo_res_end = 0;
+u8 fifo_res_pointer = 0;
+
+u8 fifo_r(u16 addr)
+{
+    u8 res = fifo_res[0];
+    return res;
+}
+
+void fifo_w(u16 addr,u8 data)
+{
+    if(fifo_exec_pointer == 7) return;
+    fifo_exec[fifo_exec_pointer] = data;
+    fifo_exec_pointer++;
+    switch(fifo_exec[0])
+    {
+        case 0x10:
+        {
+            fifo_res[0] = 0x90;
+            fifo_res_pointer = 0;
+            fifo_res_end = 0;
+            break;
+        }
+    }
+}
+
+iohandler handler = {0x03F5,0x03F5, fifo_r, fifo_w};
+
+}
+
 namespace PPI
 {
 u8 control;

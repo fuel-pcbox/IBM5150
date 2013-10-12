@@ -97,6 +97,11 @@ u8 page_r(u16 addr);
 extern iohandler handler, handler2;
 } //namespace DMA_XT
 
+namespace FDC
+{
+extern iohandler handler;
+} 
+
 namespace PPI
 {
 extern u8 control;
